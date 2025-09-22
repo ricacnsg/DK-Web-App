@@ -8,6 +8,7 @@
     <link href="/bootstrap5/css/bootstrap.min.css" rel="stylesheet">
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
     <title>Daven's Kitchenette</title>
+</head>
     <style>
         body {
             font-family: 'Montserrat', sans-serif;
@@ -62,8 +63,59 @@
                 rgba(255, 255, 255, 0.6)
             ), url('/assets/image/crop_davens_ambiance_1.jpg');
         }
+      
+          .responsive-text {
+        font-size: clamp(16px, 2vw, 32px);
+    }
 
-        /* Menu Section */
+    .menu-section{
+        background-color: #efc858;
+        font-size: 20px; 
+        font-weight: 900;
+        color: #282525;
+        padding: 10px;
+    }
+
+    .text-shadow-angled {
+        text-shadow: 2px 2px 0 #a17e15;
+    }
+
+    .what-popular{
+        font-size: clamp(1rem, 2vw, 3rem);
+        text-shadow: 2px 2px 0 #c19a27;
+        margin-top: -20px;
+        margin-left: 10px;
+        font-weight: 700;
+    }
+
+    .menu-text{
+        font-size: clamp(2rem, 8vw, 6rem);
+        font-weight: 800;
+    }
+
+    .menu-button {
+        border-color: #ffffff;
+        color: #ffffff;
+        font-size: clamp(1rem, 3vw, 2.5rem);
+        margin-top: 10px;
+    }
+
+    .menu-button:hover {
+        color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    .card-design{
+        background-color: #ffffff;
+        border-color: black;
+        margin-top: 10px;
+    }
+
+    .menu-name{
+        font-size: clamp(1rem, 3vw, 2.5rem)
+    }
+
+        /* Hero Section */
         .menu-heading {
             font-weight: 600;
             color: #282525;
@@ -178,6 +230,8 @@
     <!-- Home Section -->
     <div id="home">
         <div class="container-fluid home-stick"></div>
+        <span class="d-block text-center catchy-intro responsive-text">SERVING PULUTAN, SILOG, <br> COFFEE AND MORE...<br>
+        <span class="fs-5 responsive-text"> ————— Since 2020 ————— </span>
         <span class="d-block text-center catchy-intro">
             SERVING PULUTAN, SILOG, <br> COFFEE AND MORE...<br>
             <span class="fs-4"> ————————— Since 2020 —————————— </span>
@@ -185,7 +239,7 @@
         <div class="container-fluid home-stick"></div>
     </div>
 
-    <!-- Menu Section -->
+    <!-- Hero Section -->
     <div id="menu" class="menu-section">
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start menu-text-col">
@@ -204,6 +258,77 @@
             <img src="/assets/image/friesimg.png" alt="Fries" class="fries-img">
         </div>
     </div>
+      
+    <!-- Menu Section -->
+    <div class="container-fluid menu-section">
+        <div class="row">
+            <!-- LEFT MENU BUTTONS -->
+            <div class="col-12 col-md-4">
+                <h1 class="fw-bold text-shadow-angled menu-text">Our Menu</h1>
+                <p class="fw-bold what-popular">What's Popular?</p>
+
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Bento Silog
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Burger & Sandwiches
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Flavored Wings & Rice
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Rice Meal
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Pulutan Express
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    Drinks
+                </button>
+                <br class="d-none d-md-block">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                    View All Menu
+                </button>
+            </div>
+
+            <!-- RIGHT CARDS -->
+            <div class="col-12 col-md-8">
+                <div class="row g-3 m-5">
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="card card-design border-3 text-center menu-name h-100">
+                            <div class="card-body">
+                                <img src="/assets/image/tapasilog.png" class="img-fluid rounded">
+                            </div>
+                            <div class="card-footer">
+                                <p class="fw-bold m-0">Tapa Silog</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="card card-design border-3 h-100">
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <p>Another Item</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4">
+                        <div class="card card-design border-3 h-100">
+                            <div class="card-body d-flex align-items-center justify-content-center">
+                                <p>Another Item</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- About Section -->
     <div id="about"></div>
@@ -212,6 +337,11 @@
     <div id="feedback"></div>
 
     <!-- Contact Us Section -->
-    <div id="contact"></div>
+    <div id="contact">
+
+    </div>
+
+
+   
 </body>
 </html>
