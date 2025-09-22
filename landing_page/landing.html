@@ -9,61 +9,62 @@
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
     <title>Daven's Kitchenette</title>
 </head>
-<style>
-    body{
-        font-family: 'Montserrat', sans-serif;
-    }
-    .container-fluid{
-        padding: 30px;
-        background-color: #04276c;
-    }
-    .davens-header {
-    color: #efc858;
-    font-size: 45px;
-    margin-bottom: 0;
-    font-family: 'Montserrat', sans-serif;
-    }
-    .davens-logo {
-        transform: rotate(15deg);
-    }
-    @media (max-width: 768px) {
-    .container-fluid {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-    }
-    .davens-header {
-        font-size: 28px;
-    }
-    .davens-logo {
-        width: 50px !important;
-        height: 40px !important;
-        left: 118px !important;
-        top: -10px !important;
-    }
-    nav.navbar {
-        width: 100%;
-        margin-top: 10px;
-    }
-    }
-    .nav-link:hover {
-        color: #efc858;
-    }
-    .home-stick {
-        padding: 7px; 
-        background-color:#282525;
-    }
-    .catchy-intro{
-        font-weight: 900;
-        text-shadow: 2px 2px 4px #efc858;
-        color: #282525;
-        padding: 10px;
-        background-image: linear-gradient(
-              rgba(255, 255, 255, 0.6),  /* white with transparency */
-              rgba(255, 255, 255, 0.6)
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .container-fluid {
+            padding: 50px;
+            background-color: #04276c;
+        }
+        .davens-header {
+            color: #efc858;
+            font-size: 45px;
+            margin-bottom: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .davens-logo {
+            transform: rotate(15deg);
+        }
+        @media (max-width: 768px) {
+            .container-fluid {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .davens-header {
+                font-size: 28px;
+            }
+            .davens-logo {
+                width: 50px !important;
+                height: 40px !important;
+                left: 118px !important;
+                top: -10px !important;
+            }
+            nav.navbar {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        .nav-link:hover {
+            color: #efc858;
+        }
+        .home-stick {
+            padding: 10px; 
+            background-color:#282525;
+        }
+        .catchy-intro {
+            font-size: 40px; 
+            font-weight: 900;
+            text-shadow: 2px 2px 4px #efc858;
+            color: #282525;
+            padding: 100px;
+            background-image: linear-gradient(
+                rgba(255, 255, 255, 0.6),
+                rgba(255, 255, 255, 0.6)
             ), url('/assets/image/crop_davens_ambiance_1.jpg');
-    }
-
-    .responsive-text {
+        }
+      
+          .responsive-text {
         font-size: clamp(16px, 2vw, 32px);
     }
 
@@ -114,11 +115,89 @@
         font-size: clamp(1rem, 3vw, 2.5rem)
     }
 
-</style>
+        /* Hero Section */
+        .menu-heading {
+            font-weight: 600;
+            color: #282525;
+            font-size: 40px;
+            line-height: 1.4;
+        }
+        .menu-section {
+            background-color: #fff7d9;
+            padding: 85px 100px;
+            position: relative;
+            overflow: visible;
+            min-height: 400px;
+        }
+        .fries-wrapper {
+            position: absolute;
+            top: -25px;
+            right: 10%;
+            max-width: 850px;
+            width: 60vw;
+            z-index: 2;
+        }
+        .menu-oval {
+            background-color: #efc858;
+            width: 70%;
+            padding-top: 35%;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+        .fries-img {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: auto;
+        }
+        @media (max-width: 768px) {
+            .fries-wrapper {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 20px auto 0 auto;
+                width: 95%;
+                max-width: 420px;
+            }
+        }
+        .menu-divider {
+            width: 320px;
+            height: 7px;
+            background-color: #efc858;
+            margin: 15px 0;
+        }
+        .menu-btn {
+            background-color:#04276c;
+            border:none;
+            border-radius:30px;
+            margin-left: 50px; 
+            font-weight:700;
+            padding:20px 35px;
+            color: #efc858;
+            font-size: 30px;
+            transition: 0.3s;
+        }
+        .menu-btn:hover {
+            background-color: #efc858;
+            color: #04276c;
+        }
+        .menu-text-col {
+            padding-left:250px;
+        }
+        @media (max-width: 768px) {
+            .menu-text-col {
+                padding-left: 0;
+            }
+        }
+    </style>
+</head>
 <body>
     <!-- Header -->
     <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap">
-        <!-- Title and Logo Group -->
         <div class="position-relative d-inline-block" style="min-width:320px;">
             <div>
                 <span class="davens-header fw-bold" style="line-height:1; display:block; position:relative;">
@@ -133,25 +212,16 @@
                 <span class="davens-header fw-bold" style="line-height:1; display:block;">Kitchenette</span>
             </div>
         </div>
-        <!-- Navigation bar -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto gap-3">
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold" style="font-size: 20px;" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold" style="font-size: 20px;" href="#about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold" style="font-size: 20px;" href="#feedback">Feedback</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold" style="font-size: 20px;" href="#contact">Contact Us</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link fw-bold" style="font-size: 20px;" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" style="font-size: 20px;" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" style="font-size: 20px;" href="#feedback">Feedback</a></li>
+                    <li class="nav-item"><a class="nav-link fw-bold" style="font-size: 20px;" href="#contact">Contact Us</a></li>
                 </ul>
             </div>
         </nav>
@@ -162,33 +232,34 @@
         <div class="container-fluid home-stick"></div>
         <span class="d-block text-center catchy-intro responsive-text">SERVING PULUTAN, SILOG, <br> COFFEE AND MORE...<br>
         <span class="fs-5 responsive-text"> ————— Since 2020 ————— </span>
+        <span class="d-block text-center catchy-intro">
+            SERVING PULUTAN, SILOG, <br> COFFEE AND MORE...<br>
+            <span class="fs-4"> ————————— Since 2020 —————————— </span>
         </span>
-        
         <div class="container-fluid home-stick"></div>
     </div>
 
+    <!-- Hero Section -->
+    <div id="menu" class="menu-section">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start menu-text-col">
+                <h2 class="menu-heading">
+                    Savor the delicious <br>
+                    meals without<br>
+                    breaking the bank!
+                </h2>
+                <div class="menu-divider"></div>
+                <a href="#menu" class="btn menu-btn">SEE MENU</a>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+        <div class="fries-wrapper">
+            <div class="menu-oval"></div>
+            <img src="/assets/image/friesimg.png" alt="Fries" class="fries-img">
+        </div>
+    </div>
+      
     <!-- Menu Section -->
-    <div id="menu">
-
-    </div>
-
-    <!-- About Section -->
-    <div id="about">
-
-    </div>
-
-    <!-- Feedback Section -->
-    <div id="feedback">
-
-    </div>
-
-    <!-- Contact Us Section -->
-    <div id="contact">
-
-    </div>
-
-
-    <!-- Menu -->
     <div class="container-fluid menu-section">
         <div class="row">
             <!-- LEFT MENU BUTTONS -->
@@ -259,7 +330,18 @@
         </div>
     </div>
 
+    <!-- About Section -->
+    <div id="about"></div>
+
+    <!-- Feedback Section -->
+    <div id="feedback"></div>
+
+    <!-- Contact Us Section -->
+    <div id="contact">
+
+    </div>
 
 
+   
 </body>
 </html>
