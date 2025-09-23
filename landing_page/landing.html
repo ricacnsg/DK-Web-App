@@ -80,11 +80,9 @@
             }
         }
 
-
-    .menu-section{
+    .menu-part{
         background-color: #efc858;
         font-size: 20px; 
-        font-weight: 900;
         color: #282525;
         padding: 10px;
     }
@@ -109,8 +107,14 @@
     .menu-button {
         border-color: #ffffff;
         color: #ffffff;
-        font-size: clamp(1rem, 3vw, 2.5rem);
-        margin-top: 10px;
+        font-size: clamp(1rem, 3vw, 1.5rem);
+        margin-top: 5px;
+    }
+
+    @media (min-width: 992px) {
+        .menu-button {
+            margin-left: 50px;
+        }
     }
 
     .menu-button:hover {
@@ -124,8 +128,20 @@
         margin-top: 10px;
     }
 
-    .menu-name{
-        font-size: clamp(1rem, 3vw, 2.5rem)
+    .card-design img {
+        max-height: 200px;
+        object-fit: cover;
+    }
+
+    .menuitem-name{
+        font-size: clamp(1.8rem, 3vw, 1.8rem);
+        margin-bottom: -32px;
+        font-weight: 900;
+    }
+
+    .menuitem-description{
+        font-size: clamp(1rem, 3vw, 1rem);
+        margin-bottom: -5px;
     }
     
     /* Hero Section */
@@ -135,6 +151,22 @@
         position: relative;
         overflow: visible;
         min-height: 400px;
+    }
+
+    .menuitem-price{
+        font-size: clamp(1.3rem, 3vw, 1.3rem);
+        margin-bottom: -50px;
+        font-weight: 900;
+    }
+
+    .menu-description{
+        font-size: clamp(1rem, 2.5vw, 1rem);
+        margin-top: 20px;
+        margin-bottom: -60px;
+        margin-left: 20px;
+        margin-right: 20px;
+        color: #ffffff;
+        text-align: justify;
     }
 
     .hero-heading {
@@ -292,14 +324,14 @@
 
       
     <!-- Menu Section -->
-    <div class="container-fluid menu-section">
+    <div class="container-fluid menu-part" id="menu">
         <div class="row">
             <!-- LEFT MENU BUTTONS -->
             <div class="col-12 col-md-4">
                 <h1 class="fw-bold text-shadow-angled menu-text">Our Menu</h1>
                 <p class="fw-bold what-popular">What's Popular?</p>
 
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="bentosilog">
                     Bento Silog
                 </button>
                 <br class="d-none d-md-block">
@@ -319,41 +351,161 @@
                     Pulutan Express
                 </button>
                 <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
+                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="beverages">
                     Drinks
                 </button>
                 <br class="d-none d-md-block">
                 <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
                     View All Menu
                 </button>
+
+                <p class="menu-description">Our menu is carefully crafted to satisfy every craving. From hearty classics and savory specialties to refreshing sides and delightful beverages, there’s something here for everyone. Each dish is prepared fresh, made with quality ingredients, and served with care. Whether you’re in the mood for a light snack, a full meal, or a sweet treat to end the day, you’ll always find something to love at Daven’s Kitchenette.</p>
             </div>
 
             <!-- RIGHT CARDS -->
             <div class="col-12 col-md-8">
                 <div class="row g-3 m-5">
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="card card-design border-3 text-center menu-name h-100">
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
                             <div class="card-body">
                                 <img src="/assets/image/tapasilog.png" class="img-fluid rounded">
-                            </div>
-                            <div class="card-footer">
-                                <p class="fw-bold m-0">Tapa Silog</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="card card-design border-3 h-100">
-                            <div class="card-body d-flex align-items-center justify-content-center">
-                                <p>Another Item</p>
+                                <p class="menuitem-name">Tapasilog</p>
+                                <br>
+                                <p class="menuitem-description">Tapa, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 109.00</p>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-12 col-sm-6 col-md-4">
-                        <div class="card card-design border-3 h-100">
-                            <div class="card-body d-flex align-items-center justify-content-center">
-                                <p>Another Item</p>
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/chickensilog.png" class="img-fluid rounded">
+                                <p class="menuitem-name">Chicken Silog</p>
+                                <br>
+                                <p class="menuitem-description">Fried Chicken, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 109.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/spamsilog.png" class="img-fluid rounded">
+                                <p class="menuitem-name">Spam Silog</p>
+                                <br>
+                                <p class="menuitem-description">Spam, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 89.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 m-5">
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/tapasilog.png" class="img-fluid rounded">
+                                <p class="menuitem-name">Tapasilog</p>
+                                <br>
+                                <p class="menuitem-description">Tapa, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 109.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/chickensilog.png" class="img-fluid rounded">
+                                <p class="menuitem-name">Chicken Silog</p>
+                                <br>
+                                <p class="menuitem-description">Fried Chicken, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 109.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6 col-md-4" data-category="bentosilog">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/spamsilog.png" class="img-fluid rounded">
+                                <p class="menuitem-name">Spam Silog</p>
+                                <br>
+                                <p class="menuitem-description">Spam, Fried Rice, Fried Egg</p>
+                                <p class="menuitem-price">Php 89.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/coke.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Capuccino</p>
+                                <br>
+                                <p class="menuitem-description">Cappucino</p>
+                                <p class="menuitem-price">Php 109.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/sprite.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Matcha Latte</p>
+                                <br>
+                                <p class="menuitem-description">Matcha Latte</p>
+                                <p class="menuitem-price">Php 109.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/royal.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Spanish Latte</p>
+                                <br>
+                                <p class="menuitem-description">Royal</p>
+                                <p class="menuitem-price">Php 30.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/coke.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Milktea</p>
+                                <br>
+                                <p class="menuitem-description">Coke</p>
+                                <p class="menuitem-price">Php 30.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/sprite.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Gulaman</p>
+                                <br>
+                                <p class="menuitem-description">Sprite</p>
+                                <p class="menuitem-price">Php 30.00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-md-4" data-category="beverages">
+                        <div class="card card-design border-3 text-center menu-name h-100 m-4 rounded-5">
+                            <div class="card-body">
+                                <img src="/assets/image/royal.jpg" class="img-fluid rounded">
+                                <p class="menuitem-name">Lemonade</p>
+                                <br>
+                                <p class="menuitem-description">Royal</p>
+                                <p class="menuitem-price">Php 30.00</p>
                             </div>
                         </div>
                     </div>
@@ -372,6 +524,31 @@
     <div id="contact">
 
     </div>
+
+    <script>
+    function filterMenu(filter) {
+        document.querySelectorAll("[data-category]").forEach(item => {
+            if (filter === "all" || item.getAttribute("data-category") === filter) {
+                item.style.display = "block"; // show
+            } else {
+                item.style.display = "none"; // hide
+            }
+        });
+    }
+
+    // Attach event listeners
+    document.querySelectorAll(".menu-button").forEach(button => {
+        button.addEventListener("click", () => {
+            const filter = button.getAttribute("data-filter");
+            filterMenu(filter);
+        });
+    });
+
+    // Default filter on page load
+    window.addEventListener("DOMContentLoaded", () => {
+        filterMenu("bentosilog"); // auto-show only Bento Silog items
+    });
+</script>
 
 
    
