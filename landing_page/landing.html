@@ -4,230 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/assets/image/davens_logo.png">
+    <!-- Link for Montserrat font from Google -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS and JS -->
     <link href="/bootstrap5/css/bootstrap.min.css" rel="stylesheet">
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
+
+    <!-- Link to CSS file -->
+     <link rel="stylesheet" href="/landing_page/landing.css">
+
     <title>Daven's Kitchenette</title>
 </head>
-    <style>
-        body {
-            font-family: 'Montserrat', sans-serif;
-        }
-        .container-fluid {
-            padding: 50px;
-            background-color: #04276c;
-        }
-        .davens-header {
-            color: #efc858;
-            font-size: 45px;
-            margin-bottom: 0;
-            font-family: 'Montserrat', sans-serif;
-        }
-        .davens-logo {
-            transform: rotate(15deg);
-        }
-        @media (max-width: 768px) {
-            .container-fluid {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-            }
-            .davens-header {
-                font-size: 28px;
-            }
-            .davens-logo {
-                width: 50px !important;
-                height: 40px !important;
-                left: 118px !important;
-                top: -10px !important;
-            }
-            nav.navbar {
-                width: 100%;
-                margin-top: 10px;
-            }
-        }
-        .nav-link:hover {
-            color: #efc858;
-        }
-        .home-stick {
-            padding: 10px; 
-            background-color:#282525;
-        }
-        .catchy-intro {
-            font-size: 40px; 
-            font-weight: 900;
-            text-shadow: 2px 2px 4px #efc858;
-            color: #282525;
-            padding: 100px;
-            background-image: linear-gradient(
-                rgba(255, 255, 255, 0.6),
-                rgba(255, 255, 255, 0.6)
-            ), url('/assets/image/crop_davens_ambiance_1.jpg');
-        }
-      
-          .responsive-text {
-        font-size: clamp(1rem, 4vw, 3rem);
-    }
-
-    .menu-part{
-        background-color: #efc858;
-        font-size: 20px; 
-        color: #282525;
-        padding: 10px;
-    }
-
-    .text-shadow-angled {
-        text-shadow: 2px 2px 0 #a17e15;
-    }
-
-    .what-popular{
-        font-size: clamp(1rem, 2vw, 3rem);
-        text-shadow: 2px 2px 0 #c19a27;
-        margin-top: -20px;
-        margin-left: 10px;
-        font-weight: 700;
-    }
-
-    .menu-text{
-        font-size: clamp(2rem, 8vw, 6rem);
-        font-weight: 800;
-    }
-
-    .menu-button {
-        border-color: #ffffff;
-        color: #ffffff;
-        font-size: clamp(1rem, 3vw, 1.5rem);
-        margin-top: 5px;
-    }
-
-    @media (min-width: 992px) {
-        .menu-button {
-            margin-left: 50px;
-        }
-    }
-
-    .menu-button:hover {
-        color: #0056b3;
-        border-color: #0056b3;
-    }
-
-    .card-design{
-        background-color: #ffffff;
-        border-color: black;
-        margin-top: 10px;
-    }
-
-    .card-design img {
-        max-height: 200px;
-        object-fit: cover;
-    }
-
-    .menuitem-name{
-        font-size: clamp(1.8rem, 3vw, 1.8rem);
-        margin-bottom: -32px;
-        font-weight: 900;
-    }
-
-    .menuitem-description{
-        font-size: clamp(1rem, 3vw, 1rem);
-        margin-bottom: -5px;
-    }
-
-    .menuitem-price{
-        font-size: clamp(1.3rem, 3vw, 1.3rem);
-        margin-bottom: -50px;
-        font-weight: 900;
-    }
-
-    .menu-description{
-        font-size: clamp(1rem, 2.5vw, 1rem);
-        margin-top: 20px;
-        margin-bottom: -60px;
-        margin-left: 20px;
-        margin-right: 20px;
-        color: #ffffff;
-        text-align: justify;
-    }
-
-
-        /* Hero Section */
-        .menu-heading {
-            font-weight: 600;
-            color: #282525;
-            font-size: 40px;
-            line-height: 1.4;
-        }
-        .menu-section {
-            background-color: #fff7d9;
-            padding: 85px 100px;
-            position: relative;
-            overflow: visible;
-            min-height: 400px;
-        }
-        .fries-wrapper {
-            position: absolute;
-            top: -25px;
-            right: 10%;
-            max-width: 850px;
-            width: 60vw;
-            z-index: 2;
-        }
-        .menu-oval {
-            background-color: #efc858;
-            width: 70%;
-            padding-top: 35%;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-        }
-        .fries-img {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: auto;
-        }
-        @media (max-width: 768px) {
-            .fries-wrapper {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin: 20px auto 0 auto;
-                width: 95%;
-                max-width: 420px;
-            }
-        }
-        .menu-divider {
-            width: 320px;
-            height: 7px;
-            background-color: #efc858;
-            margin: 15px 0;
-        }
-        .menu-btn {
-            background-color:#04276c;
-            border:none;
-            border-radius:30px;
-            margin-left: 50px; 
-            font-weight:700;
-            padding:20px 35px;
-            color: #efc858;
-            font-size: 30px;
-            transition: 0.3s;
-        }
-        .menu-btn:hover {
-            background-color: #efc858;
-            color: #04276c;
-        }
-        .menu-text-col {
-            padding-left:250px;
-        }
-        @media (max-width: 768px) {
-            .menu-text-col {
-                padding-left: 0;
-            }
-        }
-    </style>
 </head>
 <body>
     <!-- Header -->
@@ -271,24 +59,34 @@
     </div>
 
     <!-- Hero Section -->
-    <div id="menu" class="menu-section">
+    <div id="hero" class="hero-section">
+    <div class="container">
         <div class="row align-items-center">
-            <div class="col-md-6 text-center text-md-start menu-text-col">
-                <h2 class="menu-heading">
-                    Savor the delicious <br>
-                    meals without<br>
-                    breaking the bank!
-                </h2>
-                <div class="menu-divider"></div>
-                <a href="#menu" class="btn menu-btn">SEE MENU</a>
-            </div>
-            <div class="col-md-6"></div>
+        
+        <!-- Text Column -->
+        <div class="col-12 col-md-6 text-center text-md-start">
+            <h2 class="hero-heading">
+            Savor the delicious <br>
+            meals without<br>
+            breaking the bank!
+            </h2>
+            <div class="hero-divider mx-auto mx-md-0"></div>
+            <a href="#menu" class="btn hero-btn">SEE MENU</a>
         </div>
-        <div class="fries-wrapper">
-            <div class="menu-oval"></div>
+
+        <!-- Image Column -->
+        <div class="col-12 col-md-6 d-flex justify-content-center position-relative">
+            <div class="fries-wrapper">
+            <div class="hero-oval"></div>
             <img src="/assets/image/friesimg.png" alt="Fries" class="fries-img">
+            </div>
+        </div>
+
         </div>
     </div>
+    </div>
+
+
       
     <!-- Menu Section -->
     <div class="container-fluid menu-part" id="menu">
@@ -482,10 +280,14 @@
     </div>
 
     <!-- About Section -->
-    <div id="about"></div>
+    <div id="about">
+
+    </div>
 
     <!-- Feedback Section -->
-    <div id="feedback"></div>
+    <div id="feedback">
+        
+    </div>
 
     <!-- Contact Us Section -->
     <div id="contact">
