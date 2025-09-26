@@ -70,6 +70,7 @@ body {
   }
 }
 
+/* Menu Section */
 .menu-part {
   background-color: #efc858;
   font-size: 20px;
@@ -78,7 +79,7 @@ body {
 }
 
 .text-shadow-angled {
-  text-shadow: 3px 3px 0 #a17e15;
+  text-shadow: 2px 2px 0 #a17e15;
 }
 
 .what-popular {
@@ -211,6 +212,7 @@ body {
   width: 80%;
   max-width: 420px;
   z-index: 2;
+  right: 3%;
 }
 
 .hero-oval {
@@ -230,7 +232,6 @@ body {
   z-index: 2;
   width: 100%;
   height: auto;
-  overflow: hidden;
 }
 
 /* Tablet */
@@ -250,4 +251,76 @@ body {
     max-width: 850px;
     transform: translateY(-50%); /* center vertically */
   }
+}
+/* About Section */
+.about-section {
+  background-color: #04276c;
+  height: auto;
+  width: auto;
+  position: relative; /*Ensure absolute children are positioned relative to this*/
+}
+
+/* Responsive BG Logos */
+.bg-logo1, .bg-logo2, .bg-logo3 {
+  position: absolute;
+  opacity: 0.2;
+  transform: rotate(-12deg);
+  max-width: 30vw; /* Responsive width */
+  height: auto;
+  pointer-events: none;
+}
+
+.bg-logo1 {
+  left: 1vw;
+  bottom: 30vh;
+}
+
+.bg-logo2 {
+  right: 5vw;
+  bottom: 30vh;
+}
+
+.bg-logo3 {
+  left: 50%;
+  top: 15vh;
+  transform: translateX(-50%) rotate(-12deg);
+}
+
+.about-text {
+  color: #fff7d5;
+  font-size: 2.5rem;
+  text-align: justify;
+  margin-bottom: 20px;
+}
+
+.about-text1 {
+  color: #fff7d5;
+  font-weight: 700;
+  font-size: large;
+}
+
+.about-text2 {
+  color: #fff7d5;
+  font-weight: 500;
+  padding-top: 20px;
+  text-align: justify;
+  margin-bottom: 60px;
+}
+
+.about-text, .about-text1,
+ .about-text2 {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+
+.ambiance1, .ambiance2, .ambiance3, .ambiance4 , .ambiance5 {
+  z-index: 2;
+  position: relative;
+}
+
+.about-carousel{
+  width: 90%;
+  height: 90%;
+  margin-left: 10%;
+  margin-top: -70px;
 }
