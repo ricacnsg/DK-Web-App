@@ -1,0 +1,253 @@
+body {
+  font-family: "Montserrat", sans-serif;
+}
+
+.container-fluid {
+  padding: 50px;
+  background-color: #04276c;
+}
+.davens-header {
+  color: #efc858;
+  font-size: 45px;
+  margin-bottom: 0;
+  font-family: "Montserrat", sans-serif;
+}
+.davens-logo {
+  transform: rotate(15deg);
+}
+@media (max-width: 768px) {
+  .container-fluid {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .davens-header {
+    font-size: 28px;
+  }
+  .davens-logo {
+    width: 50px !important;
+    height: 40px !important;
+    left: 118px !important;
+    top: -10px !important;
+  }
+  nav.navbar {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+.nav-link:hover {
+  color: #efc858;
+}
+
+.home-stick {
+  padding: 10px;
+  background-color: #282525;
+}
+
+.catchy-intro {
+  font-size: 40px;
+  font-weight: 900;
+  text-shadow: 2px 2px 4px #efc858;
+  color: #282525;
+  padding: 80px 20px; /* smaller padding para di siksik sa phone */
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.6),
+      rgba(255, 255, 255, 0.6)
+    ),
+    url("/assets/image/crop_davens_ambiance_1.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.responsive-text {
+  font-size: clamp(20px, 5vw, 50px); /* min 20, fluid 5vw, max 50 */
+}
+
+@media (max-width: 768px) {
+  .catchy-intro {
+    font-size: 28px;
+    padding: 50px 15px;
+  }
+}
+
+.menu-part {
+  background-color: #efc858;
+  font-size: 20px;
+  color: #282525;
+  padding: 10px;
+}
+
+.text-shadow-angled {
+  text-shadow: 3px 3px 0 #a17e15;
+}
+
+.what-popular {
+  font-size: clamp(1rem, 2vw, 3rem);
+  text-shadow: 2px 2px 0 #c19a27;
+  margin-top: -20px;
+  margin-left: 10px;
+  font-weight: 700;
+}
+
+.menu-text {
+  font-size: clamp(2rem, 8vw, 6rem);
+  font-weight: 800;
+}
+
+.menu-button {
+  border-color: #ffffff;
+  color: #ffffff;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  margin-top: 5px;
+}
+
+@media (min-width: 992px) {
+  .menu-button {
+    margin-left: 50px;
+  }
+}
+
+.menu-button:hover {
+  color: #0056b3;
+  border-color: #0056b3;
+}
+
+.card-design {
+  background-color: #ffffff;
+  border-color: black;
+  margin-top: 10px;
+  padding: 15px;
+}
+
+.card-design img {
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.menuitem-name {
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  margin-bottom: -32px;
+  font-weight: 900;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  min-height: 2.5em;
+  line-height: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menuitem-description {
+  font-size: clamp(.8rem, 3vw, 1rem);
+  margin-bottom: -5px;
+}
+
+/* Hero Section */
+.hero-section {
+  background-color: #fff7d9;
+  padding: 60px 15px;
+  position: relative;
+  overflow: visible;
+  min-height: 400px;
+}
+
+.menuitem-price {
+  font-size: clamp(1.3rem, 3vw, 1.3rem);
+  margin-bottom: -50px;
+  font-weight: 900;
+}
+
+.menu-description {
+  font-size: clamp(1rem, 2.5vw, 1rem);
+  margin-top: 20px;
+  margin-bottom: -60px;
+  margin-left: 20px;
+  margin-right: 20px;
+  color: #ffffff;
+  text-align: justify;
+}
+
+.hero-heading {
+  font-weight: 650;
+  color: #282525;
+  font-size: clamp(1.8rem, 2.5vw, 3rem);
+  line-height: 1.4;
+}
+
+.hero-divider {
+  width: 60%;
+  max-width: 320px;
+  height: 7px;
+  background-color: #efc858;
+  margin: 15px 0;
+}
+
+.hero-btn {
+  background-color: #04276c;
+  border: none;
+  border-radius: 30px;
+  font-weight: 700;
+  padding: 15px 30px;
+  color: #efc858;
+  font-size: 1.2rem;
+  transition: 0.3s;
+}
+
+.hero-btn:hover {
+  background-color: #efc858;
+  color: #04276c;
+}
+
+.hero-btn:focus,
+.hero-btn:active {
+  background-color: #04276c !important;
+  color: #efc858 !important;
+  box-shadow: none !important;
+}
+
+.fries-wrapper {
+  position: relative;
+  width: 80%;
+  max-width: 420px;
+  z-index: 2;
+}
+
+.hero-oval {
+  background-color: #efc858;
+  width: 70%;
+  padding-top: 35%;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.fries-img {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .fries-wrapper {
+    width: 70%;
+    max-width: 500px;
+  }
+}
+
+/* Desktop pop-out effect */
+@media (min-width: 992px) {
+  .fries-wrapper {
+    position: absolute;
+    top: 50%; /* instead of -25px */
+    width: 60vw;
+    max-width: 850px;
+    transform: translateY(-50%); /* center vertically */
+  }
+}
