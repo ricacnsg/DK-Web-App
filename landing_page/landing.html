@@ -669,8 +669,79 @@
     </div>
 
     <!-- Feedback Section -->
-    <div id="feedback">
-        
+    <div id="feedback" class="testimonial-background">
+    <section class="testimonial-section container">
+    <h2 class="testimonial-title">Testimonials</h2>
+    <div class="testimonial-divider"></div>
+    <h3 class="testimonial-subtitle">What they're saying about us</h3>
+    
+
+    <div class="testimonial-container">
+      <!-- Slide 1 -->
+      <div class="testimonial-slide active">
+        <div class="testimonial-box">
+          <p>The food at Daven's Kitchenette is absolutely amazing! Their Tapasilog is my go-to breakfast, and the coffee is always perfect. Highly recommended!</p>
+          <div class="testimonial-profile">
+            <img src="/assets/image/davens_staff.jpg" alt="Juan Dela Cruz">
+            <div class="testimonial-profile-info">
+              <h4>Juan Dela Cruz</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="testimonial-slide">
+        <div class="testimonial-box">
+          <p>I love their Flavored Wings! The Garlic Parmesan is my favorite. Great value for money and the service is always friendly and fast.</p>
+          <div class="testimonial-profile">
+            <img src="/assets/image/davens_staff.jpg" alt="Maria Santos">
+            <div class="testimonial-profile-info">
+              <h4>John</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="testimonial-slide">
+        <div class="testimonial-box">
+          <p>Perfect spot for pulutan with friends! Their Pork Sisig and Lechon Kawali are the best in town. Affordable prices and generous servings.</p>
+          <div class="testimonial-profile">
+            <img src="/assets/image/davens_staff.jpg" alt="Robert Johnson">
+            <div class="testimonial-profile-info">
+              <h4>Fang</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4 -->
+      <div class="testimonial-slide">
+        <div class="testimonial-box">
+          <p>Daven's Kitchenette has become our family's favorite weekend treat. The kids love the burgers while we enjoy their rice meals. Cozy ambiance too!</p>
+          <div class="testimonial-profile">
+            <img src="/assets/image/davens_staff.jpg">
+            <div class="testimonial-profile-info">
+              <h4>Geo</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slider Controls -->
+    <div class="slider-controls">
+      <button class="prev-btn">‹</button>
+      <div class="dots">
+        <span class="dot active" data-slide="0"></span>
+        <span class="dot" data-slide="1"></span>
+        <span class="dot" data-slide="2"></span>
+        <span class="dot" data-slide="3"></span>
+      </div>
+      <button class="next-btn">›</button>
+    </div>
+  </section>
     </div>
 
     <!-- Contact Us Section -->
@@ -701,6 +772,59 @@
     window.addEventListener("DOMContentLoaded", () => {
         filterMenu("bentosilog"); // auto-show only Bento Silog items
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+  const slides = document.querySelectorAll('.testimonial-slide');
+  const dots = document.querySelectorAll('.dot');
+  const prevBtn = document.querySelector('.prev-btn');
+  const nextBtn = document.querySelector('.next-btn');
+  let currentSlide = 0;
+  let slideInterval;
+
+  function showSlide(n) {
+    slides.forEach(slide => slide.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    slides[n].classList.add('active');
+    dots[n].classList.add('active');
+    currentSlide = n;
+  }
+
+  function nextSlide() {
+    let next = (currentSlide + 1) % slides.length;
+    showSlide(next);
+  }
+
+  function prevSlide() {
+    let prev = (currentSlide - 1 + slides.length) % slides.length;
+    showSlide(prev);
+  }
+
+  function startSlideShow() {
+    slideInterval = setInterval(nextSlide, 5000);
+  }
+
+  function stopSlideShow() {
+    clearInterval(slideInterval);
+  }
+
+  nextBtn.addEventListener('click', () => { stopSlideShow(); nextSlide(); startSlideShow(); });
+  prevBtn.addEventListener('click', () => { stopSlideShow(); prevSlide(); startSlideShow(); });
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', function() {
+      stopSlideShow();
+      showSlide(parseInt(this.getAttribute('data-slide')));
+      startSlideShow();
+    });
+  });
+
+  const testimonialSection = document.querySelector('.testimonial-section');
+  testimonialSection.addEventListener('mouseenter', stopSlideShow);
+  testimonialSection.addEventListener('mouseleave', startSlideShow);
+
+  startSlideShow();
+});
+
 </script>
 
 
