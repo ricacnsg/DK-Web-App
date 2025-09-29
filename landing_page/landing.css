@@ -1,5 +1,7 @@
-body {
+html, body {
   font-family: "Montserrat", sans-serif;
+  overflow-x: hidden;
+  width: 100vw;
 }
 
 .container-fluid {
@@ -647,7 +649,7 @@ body {
 .footer {
   position: relative;
   overflow: hidden;
-  background: url("assets/image/footer-bg.png") no-repeat center center;
+  background: url("/assets/image/footer-bg.png") no-repeat center center;
   background-size: cover;
   font-family: 'Montserrat', sans-serif;
   color: #fdb913;
@@ -662,7 +664,7 @@ body {
   width: 100%;
   height: 100%;
   background: #0b2c6b; /* navy */
-  opacity: 0.95; /* 95% solid navy */
+  opacity: 0.85; /* 85% solid navy */
   z-index: 0;
 }
 
