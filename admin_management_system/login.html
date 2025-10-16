@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="login.css">
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Log In Page</title>
+</head>
+
+<body>
+    <div class="container-fluid g-0">
+        <div class="row">
+            <div class="col col-md-7 wrapper">
+                <div class="left-panel">
+                    <div class="mx-auto m-5">
+                        <h1 class="fw-bolder text-center title">Run The Business</h1>
+                        <h6 class="text-center subtitle">Sign In your Account</h6>
+                        <div class="d-flex justify-content-center">
+                            <div class="m-4 col-12 col-sm-8 col-md-6">
+                                <form id="staffLogin">
+                                    <div class="m-3">
+                                        <label for="accountUsername" class="fs-6 fw-bolder">Username</label>
+                                        <input type="text" 
+                                        class="rounded-pill border-0 form-control form-control-lg w-100 m-1"
+                                        placeholder="Enter your Email"
+                                        name="staff_username" required>
+                                    </div>
+                                    <div class="m-3">
+                                        <label for="password" class="fs-6 fw-bolder">Password</label>
+                                        <input type="password" 
+                                        class="rounded-pill border-0 form-control form-control-lg w-100 text-muted m-1" 
+                                        placeholder="Enter your Password"
+                                        name="staff_password" required>
+                                    </div>
+                                    <br>
+                                    <button type="submit" class="m-3 btn btn-lg rounded-pill sign-in-btn"><b>Sign In<b></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="login.js"></script>
+
+</body>
+</html>
+
+<!-- To Do
+    Frontend:
+    - finish the frontend with resposiveness
+
+    Backend:
+    - encrypt password
+    - if walang nilagay na credentials or kulang, may lalabas din dapat na error message - DONE
+    - if mali ang username or password, magrereset dapat form
+    - create a session para sa admin kapag naglogin (sessions = login memory + page access control)
+-->
