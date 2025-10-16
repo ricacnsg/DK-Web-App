@@ -6,7 +6,7 @@ document.getElementById("staffLogin").addEventListener("submit", function (e) {
 
   const formData = new FormData(this);
 
-  fetch("connect.php", {
+  fetch("../controllers/login.php", {
     method: "POST",
     body: formData,
   })
