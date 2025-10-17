@@ -1,14 +1,5 @@
 <?php
-$servername = "localhost";
-$username = "root"; // default for XAMPP
-$password = ""; // default blank
-$dbname = "dk_database";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}
+require_once '../database/connect.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $user = $_POST["staff_username"];

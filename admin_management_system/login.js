@@ -15,7 +15,6 @@ document.getElementById("staffLogin").addEventListener("submit", function (e) {
       console.log("Response from PHP:", data);
 
       if (data.trim() === "success") {
-        alert("Login successful!");
         setTimeout(() => {
           window.location.href = "dashboard.html";
         }, 1000);
