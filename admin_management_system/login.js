@@ -24,8 +24,21 @@ document.getElementById("staffLogin").addEventListener("submit", function (e) {
             text: "Invalid username or password.",
             icon: "warning"
         });;
+        document.getElementById("staffLogin").reset();
       }
     })
     .catch((err) => console.error(err));
 });
+
+const passwordInput = document.getElementById('password');
+  const togglePassword = document.getElementById('togglePassword');
+  const eyeIcon = document.getElementById('hide');
+
+  togglePassword.addEventListener('click', function () {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    
+    eyeIcon.classList.toggle('fa-eye');
+    eyeIcon.classList.toggle('fa-eye-slash');
+  });
 
