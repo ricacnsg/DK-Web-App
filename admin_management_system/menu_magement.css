@@ -577,3 +577,144 @@ body {
         .nav-item {
             cursor: pointer;
         }
+
+        /* Staff Account Management */
+.staff-management-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.content-wrapper {
+    display: flex;
+    gap: 30px;
+}
+
+.staff-list {
+    flex: 2;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.add-staff-form {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.search-filter {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.search-input, .filter-select, .add-staff-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* --- Staff Table --- */
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.staff-table th {
+    text-align: left;
+    font-weight: bold;
+    font-size: 16px;
+    color: #000;
+    padding: 10px 0;
+    border-bottom: 3px solid #d4cfcb; /* soft underline */
+}
+
+.staff-table th:last-child {
+    width: 80px; /* keeps third column narrow */
+}
+
+.staff-table td {
+    padding: 12px 0;
+    color: #333;
+    border-bottom: 1px solid #e0ddd9;
+}
+
+.staff-table tr:last-child td {
+    border-bottom: none;
+}
+
+
+.edit-btn, .delete-btn, .save-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #002060;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #ffc107;
+}
+
+.save-btn {
+    background-color: #002060;
+    color: white;
+    width: 100%;
+    border-radius: 25px;
+    font-weight: bold;
+}
+/* --- Staff Search + Filter Styling --- */
+.search-filter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.search-input,
+.filter-select {
+    background-color: #f5f1ec; /* soft beige background */
+    border: none;
+    border-radius: 30px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: #6b6b6b;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: #b0a9a3;
+}
+
+.filter-select {
+    cursor: pointer;
+    appearance: none; /* hide native arrow */
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23808080' height='14' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l3 3 3-3z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px;
+    padding-right: 40px;
+}
+
+/* Hover and focus effects */
+.search-input:hover,
+.filter-select:hover,
+.search-input:focus,
+.filter-select:focus {
+    background-color: #f0ebe6;
+}
+
+
+        
