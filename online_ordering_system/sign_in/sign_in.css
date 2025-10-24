@@ -1,0 +1,200 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-color: #fff7d5;
+}
+
+.container-fluid {
+    padding: 0;
+    margin: 0;
+}
+
+.block {
+    background-color: #efc858;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    color: white;
+    text-align: center;
+    height: clamp(140px, 20vh, 220px);
+    position: relative;
+}
+
+.davens-header {
+    color: white;
+    font-size: clamp(2.6rem, 3vw, 2.6rem);
+    margin-top: 40px;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+}
+
+.davens-logo {
+    transform: rotate(15deg);
+    position: relative;
+    left: 10px;
+}
+
+.wave {
+    position: relative;
+    line-height: 0;
+    margin-top: -2px;
+}
+
+.wave svg {
+    display: block;
+    width: 100%;
+    height: 90px;
+}
+
+.lower-block {
+    width: 45%;
+    margin: 0 auto;
+}
+
+.lower-header {
+    padding-top: 30px;
+    padding-bottom: 50px;
+    margin-top: -60px;
+    text-align: center;
+}
+
+.sign-in {
+    color: #8d8980;
+    font-size: clamp(2.8rem, 3vw, 4rem);
+    font-weight: 700;
+    margin-top: 30px;
+    margin-left: 0;
+}
+
+.subhead {
+    color: #8d8980;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-top: -15px;
+    margin-left: 0;
+    white-space: nowrap;
+}
+
+.input-container {
+  position: relative;
+  display: inline-block; 
+}
+
+.input-container .icon {
+  position: absolute;
+  left: 10px; 
+  top: 38%;
+  transform: translateY(-50%);
+  color: #aaa; /* Icon color */
+}
+
+.input-container input {
+  padding-left: 35px; 
+  width: 300px; 
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  border-color: rgb(104, 100, 94);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 38%;
+  transform: translateY(-50%);
+  color: #8d8980;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color:#8d8980;
+    font-size: 18px;
+}
+
+.form-block {
+    margin-top: -40px;
+}
+
+.my-button {
+    background-color: #efc858;
+    color: black;
+    border-color: black;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 10px 30px;
+    border-radius: 30px;
+    width: auto;
+}
+
+.redirect {
+    color: #8d8980;;
+}
+
+@media (max-width: 800px), (max-height: 500px) {
+  .main-text h1 {
+    font-size: 2.8rem; /* Bigger title */
+  }
+
+  .subhead {
+    font-size: 1.5rem; /* Bigger "Welcome Back" */
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 300px;        /* Wider input boxes */
+    height: 50px;        /* Taller input boxes */
+    font-size: 18px;     /* Larger text */
+  }
+
+  .my-button {
+    font-size: 20px;     /* Larger button text */
+    padding: 12px 40px;  /* Bigger button */
+    border-radius: 35px;
+  }
+
+  .login-container {
+    transform: scale(1.5); /* Slight overall zoom for small screens */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1366px) {
+  .lower-block {
+    padding-top: 2rem;
+  }
+
+  .sign-in {
+    font-size: 3rem;
+  }
+
+  .subhead {
+    font-size: 1.4rem;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="email"] {
+    width: 380px;
+    height: 55px;
+    font-size: 18px;
+  }
+
+  .my-button {
+    font-size: 20px;
+    padding: 12px 40px;
+  }
+
+  .redirect,
+  .link-opacity-25-hover {
+    font-size: 0.95rem;
+  }
+
+  .logo img {
+    width: 140px; /* Adjust logo size */
+    height: auto;
+  }
+}
