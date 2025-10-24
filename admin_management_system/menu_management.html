@@ -116,11 +116,69 @@
                 <h1>Order History</h1>
             </div>
 
-            <!-- STAFF ACCOUNT MANAGEMENT PAGE -->
-            <div id="staff" class="page">
-                <!-- add content here -->
-                <h1>Staff Account Management</h1>
+          <!-- STAFF ACCOUNT MANAGEMENT PAGE -->
+<div id="staff" class="page">
+    <div class="staff-management-container">
+        <div class="header">
+            <h1>Staff Account Management</h1>
+            <div class="user-profile">
+                <div class="user-avatar">JD</div>
+                <div class="user-info">
+                    <h3>Jane Doe</h3>
+                    <p>Admin</p>
+                </div>
             </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Staff List -->
+            <div class="staff-list">
+                <div class="search-filter">
+                    <input type="text" placeholder="Search Staff" class="search-input">
+                    <select class="filter-select">
+                        <option>All Staff</option>
+                        <option>Admin</option>
+                        <option>Kitchen Staff</option>
+                    </select>
+                </div>
+
+                <table class="staff-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Staff rows will appear here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Staff Form -->
+            <div class="add-staff-form">
+                <h2>Add Staff Account</h2>
+                <label>Full Name</label>
+                <input type="text" placeholder="Enter full name">
+
+                <label>Contact Number</label>
+                <input type="text" placeholder="Enter contact number">
+
+                <label>Role</label>
+                <input type="text" placeholder="Enter role">
+
+                <label>Username</label>
+                <input type="text" placeholder="Enter username">
+
+                <label>Password</label>
+                <input type="password" placeholder="Enter password">
+
+                <button class="save-btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
 
         </div>
     </div>
