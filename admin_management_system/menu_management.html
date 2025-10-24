@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daven's Kitchenette - Menu Management</title>
+    <link rel="stylesheet" href="menu_magement.css">
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="assets/image/davens_logo.png" alt="Logo" class="logo-image">
+                <div>
+                    <div>Daven's</div>
+                    <div>Kitchenette</div>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <!-- Sidebar Navigation Items -->
+                <div class="nav-item" data-page="dashboard">Dashboard</div>
+                <div class="nav-item active" data-page="menu">Menu Management</div>
+                <div class="nav-item" data-page="inventory">Inventory Management</div>
+                <div class="nav-item" data-page="orders">Order History</div>
+                <div class="nav-item" data-page="staff">Staff Account Management</div>
+            </div>
+
+            <button class="logout-btn">LOG OUT</button>
+        </div>
+
+
+        <div class="main-content">
+
+            <!-- DASHBOARD PAGE -->
+            <div id="dashboard" class="page">
+                <!-- add content here -->
+                <h1>Dashboard</h1>
+            </div>
+
+            <!-- MENU MANAGEMENT PAGE -->
+            <div id="menu" class="page active-page">
+                <div class="header">
+                    <h1>Manage Your Menu</h1>
+                    <div class="user-profile">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-info">
+                            <h3>Geoffrey</h3>
+                            <p>Admin</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Section -->
+                <div class="category-section">
+                    <div class="category-label">Category</div>
+                    <div class="category-carousel">
+                        <button class="carousel-btn">&lt;</button>
+
+                        <div class="category-item active" data-category="bento">
+                            <div class="category-icon">
+                                <img src="assets/image/bento.png" alt="BentoSilog" class="icon-image">
+                            </div>
+                            <div class="category-name">BentoSilog</div>
+                        </div>
+
+                        <div class="category-item" data-category="wings">
+                            <div class="category-icon">
+                                <img src="assets/image/wings.png" alt="Flavoured Wings" class="icon-image">
+                            </div>
+                            <div class="category-name">Flavoured Wings w/ Rice</div>
+                        </div>
+
+                        <div class="category-item" data-category="rice">
+                            <div class="category-icon">
+                                <img src="assets/image/rice.png" alt="Rice Meal" class="icon-image">
+                            </div>
+                            <div class="category-name">Rice Meal</div>
+                        </div>
+
+                        <div class="category-item" data-category="burger">
+                            <div class="category-icon">
+                                <img src="assets/image/burger.png" alt="Burger & Sandwiches" class="icon-image">
+                            </div>
+                            <div class="category-name">Burger & Sandwiches</div>
+                        </div>
+
+                        <div class="category-item" data-category="phlutan">
+                            <div class="category-icon">
+                                <img src="assets/image/fries.png" alt="Phlutan Express" class="icon-image">
+                            </div>
+                            <div class="category-name">Phlutan Express</div>
+                        </div>
+
+                        <div class="category-item" data-category="beverages">
+                            <div class="category-icon">
+                                <img src="assets/image/coffee.png" alt="Beverages" class="icon-image">
+                            </div>
+                            <div class="category-name">Beverages</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INVENTORY MANAGEMENT PAGE -->
+            <div id="inventory" class="page">
+                <!-- add content here -->
+                <h1>Inventory Management</h1>
+            </div>
+
+            <!-- ORDER HISTORY PAGE -->
+            <div id="orders" class="page">
+                <!-- add content here -->
+                <h1>Order History</h1>
+            </div>
+
+            <!-- STAFF ACCOUNT MANAGEMENT PAGE -->
+            <div id="staff" class="page">
+                <!-- add content here -->
+                <h1>Staff Account Management</h1>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="menu_management.js"></script>
+</body>
+</html>
