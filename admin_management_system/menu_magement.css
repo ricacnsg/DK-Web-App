@@ -1,17 +1,21 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+html body {
+    font-family: 'Montserrat', sans-serif;
     background-color: #f5f5f5;
+    width: 100%;
+    height: 100%;
 }
 
-.container {
+.container-fluid {
     display: flex;
     min-height: 100vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 /* Sidebar */
@@ -129,6 +133,222 @@ body {
     font-size: 12px;
     color: #666;
     margin: 0;
+}
+
+/* Dashboard */
+
+:root {
+  --color-dark-blue: #04276c;
+  --color-yellow: #f2d067;
+  --color-white: #FFFFFF;
+  --color-title-dark: #333333;
+  --color-metric-dark: #333333;
+  --color-success: #38A169;
+  --color-danger: #E53E3E;
+  --color-subtitle-gray: #6B7280;
+  --color-sidebar-active-bg: #f2d067;
+  --color-profile-circle: #A0D468;
+}
+
+body {
+  background-color: var(--color-yellow);
+  color: var(--color-title-dark);
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 30px;
+  background-color: var(--color-yellow);
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.main-header h1 {
+  font-size: 2.2rem;
+  color: var(--color-dark-blue);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-info {
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.profile-info span {
+  font-weight: 700;
+  color: var(--color-dark-blue);
+  display: block;
+  line-height: 1.2;
+}
+
+.profile-info small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-subtitle-gray);
+  margin-top: -3px;
+  font-weight: 600;
+}
+
+.profile-circle {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: var(--color-profile-circle);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.tabs {
+  display: flex;
+  background-color: var(--color-white);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-subtitle-gray);
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 0.9rem;
+}
+
+.tab-btn.active {
+  background-color: var(--color-dark-blue);
+  color: var(--color-white);
+  font-weight: 700;
+}
+
+.print-summary-btn {
+  background-color: var(--color-dark-blue);
+  color: var(--color-white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background-color: var(--color-white);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.card-title-icon-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex-grow: 1;
+}
+
+.card-title-icon-wrapper h2 {
+  font-size: 1rem;
+  color: var(--color-title-dark);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card-title-icon-wrapper i {
+  font-size: 1.5rem;
+  color: var(--color-dark-blue);
+}
+
+.metric-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-metric-dark);
+  line-height: 1.1;
+  margin-bottom: 5px;
+}
+
+.metric-subtext {
+  font-size: 0.85rem;
+  color: var(--color-subtitle-gray);
+  font-weight: 600;
+}
+
+.metric-subtext.success {
+  color: var(--color-success);
+}
+
+.metric-subtext.danger {
+  color: var(--color-danger);
+}
+
+.chart-section {
+  background-color: var(--color-white);
+  border-radius: 15px;
+  padding: 25px;
+  margin-top: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  height: 350px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 /* Category Section */
