@@ -56,7 +56,7 @@ html, body {
       rgba(255, 255, 255, 0.6),
       rgba(255, 255, 255, 0.6)
     ),
-    url("/assets/image/crop_davens_ambiance_1.jpg");
+    url("../assets/image/crop_davens_ambiance_1.jpg");
   background-size: cover;
   background-position: center;
 }
@@ -649,7 +649,7 @@ html, body {
 .footer {
   position: relative;
   overflow: hidden;
-  background: url("/assets/image/footer-bg.png") no-repeat center center;
+  background: url("../assets/image/footer-bg.png") no-repeat center center;
   background-size: cover;
   font-family: 'Montserrat', sans-serif;
   color: #fdb913;

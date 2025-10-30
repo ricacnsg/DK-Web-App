@@ -1,0 +1,46 @@
+html body {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    padding: 0;
+    margin: 0;
+    background-color: #f2d067;
+}
+
+.head_div {
+    background-color: #062970;
+    color: #f2d067;
+}
+
+.logo {
+    transform: rotate(15deg);
+    margin-left: 14vh;
+    margin-bottom: -9vh;
+}
+
+.myprofile {
+    color: #282525;
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.container .card, .card-body {
+    border-radius: 15px;
+    background-color: #fff7d5;
+    border: 2px solid #282525;
+}
+
+.card-body{
+    border: none;
+}
+
+.card-body input {
+    border: 2px solid #282525;
+}
+
+.btn1, .btn2 {
+    background-color: #f2d067;
+    color: #282525;
+    border: none;
+    padding: 10px 17px;
+    border-radius: 30px;
+}
