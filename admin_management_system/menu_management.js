@@ -3,15 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const pages = document.querySelectorAll('.page');
     const menuSearchInput = document.getElementById('menuSearchInput');
     const menuSorter = document.getElementById('menuSorter');
-    // Menu Search and Sort Listeners
-    if (menuSearchInput) {
-        // When searching, re-render the current category
-        menuSearchInput.addEventListener('input', () => renderMenuItems(activeCategory));
-    }
-    if (menuSorter) { 
-        // When sorting, re-render the current category
-        menuSorter.addEventListener('change', () => renderMenuItems(activeCategory));
-    }
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    // Create overlay element
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
     // Menu Management elements
     const menuGrid = document.getElementById('menuGrid');
     const addNewItemCard = document.getElementById('addNewItemCard');
@@ -46,9 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variable to track the currently active category
     let activeCategory = 'bento'; 
 
-    
-    // PAGE NAVIGATION LOGIC (Sidebar)
+    // API base URL
+    const API_BASE = '../controllers/menu_management.php';
 
+    // PAGE NAVIGATION LOGIC (Sidebar)
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             navItems.forEach(i => i.classList.remove('active'));
@@ -65,9 +65,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentActiveItem = document.querySelector('.category-item.active');
                 const initialCategory = currentActiveItem ? currentActiveItem.dataset.category : 'bento';
                 activeCategory = initialCategory;
-                renderMenuItems(initialCategory);
+                loadMenuItems(initialCategory);
             }
         });
+    });
+
+    function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    
+    // Prevent body scroll when sidebar is open
+    if (sidebar.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+    }
+    
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking on nav items (on mobile)
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 900) {
+                toggleSidebar();
+            }
+        });
+    });
+
+    // Close sidebar when clicking logout (on mobile)
+    document.querySelector('.logout-btn').addEventListener('click', () => {
+        if (window.innerWidth <= 900) {
+            toggleSidebar();
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
     });
 
     // DASHBOARD TAB LOGIC
@@ -122,8 +162,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(modalId).classList.remove('active');
         itemToManageId = null;
         currentIngredients = [];
+        // Reset form
+        menuItemForm.reset();
+        itemImagePreview.style.display = 'none';
+        imagePlaceholderIcon.style.display = 'block';
     };
-    window.closeModal = closeModal; 
+    window.closeModal = closeModal;
+
+    // Load menu items from server
+    const loadMenuItems = async (category) => {
+        try {
+            const response = await fetch(`${API_BASE}?category=${category}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                menuItems = result.data;
+                renderMenuItems(category);
+            } else {
+                console.error('Failed to load menu items:', result.message);
+                showNotification('Failed to load menu items');
+            }
+        } catch (error) {
+            console.error('Error loading menu items:', error);
+            showNotification('Error loading menu items');
+        }
+    };
 
     const createMenuCard = (item) => {
         const card = document.createElement('div');
@@ -131,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.dataset.itemId = item.id;
         
         card.innerHTML = `
-            <img src="${item.img && item.img !== 'assets/image/placeholder.jpg' ? item.img : 'assets/image/placeholder.jpg'}" alt="${item.name}" class="menu-image">
+            <img src="${item.img}" alt="${item.name}" class="menu-image">
             <div class="menu-name">${item.name}</div>
             <div class="menu-description">${item.desc}</div>
             <div class="menu-price">₱${item.price.toFixed(2)}</div>
@@ -142,74 +205,56 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         return card;
     };
-// Helper function for sorting items=
-const sortMenuItems = (items, sortBy) => {
-    const sortedItems = items.slice(); 
 
-    switch (sortBy) {
+    // Helper function for sorting items
+    const sortMenuItems = (items, sortBy) => {
+        const sortedItems = items.slice(); 
+
+        switch (sortBy) {
+            case 'name_asc':
+                return sortedItems.sort((a, b) => a.name.localeCompare(b.name));
+            case 'name_desc':
+                return sortedItems.sort((a, b) => b.name.localeCompare(a.name));
+            case 'price_asc':
+                return sortedItems.sort((a, b) => a.price - b.price);
+            case 'price_desc':
+                return sortedItems.sort((a, b) => b.price - a.price);
+            default:
+                return sortedItems.sort((a, b) => a.name.localeCompare(b.name));
+        }
+    };
+
+    const renderMenuItems = (category) => {
+        document.querySelectorAll('.menu-card:not(.add-item)').forEach(card => card.remove());
         
-        // 1. Name (Z-A): ASCENDING
-        // Uses the standard localeCompare for Z-A
-        case 'name_asc':
-            return sortedItems.sort((a, b) => a.name.localeCompare(b.name));
-            
-        // 2. Name (A-Z): DESCENDING
-        // Reverses the comparison by swapping a and b
-        case 'name_desc':
-            return sortedItems.sort((a, b) => b.name.localeCompare(a.name));
-            
-        // 3. Price (Hign to Low)ss ASCENDING
-        // a - b: If a is cheaper, the result is negative, a comes first.
-        case 'price_asc':
-            return sortedItems.sort((a, b) => a.price - b.price);
-            
-        // 4. Price (Low to High): DESCENDING
-        // b - a: If b is more expensive, the result is positive, b comes first.
-        case 'price_desc':
-            return sortedItems.sort((a, b) => b.price - a.price);
-            
-        default:
-            // Default sort to Name (A-Z)
-            return sortedItems.sort((a, b) => a.name.localeCompare(b.name));
-    }
-};
+        const searchTerm = menuSearchInput ? menuSearchInput.value.toLowerCase() : '';
+        const sortBy = menuSorter ? menuSorter.value : 'name_asc'; 
+        
+        activeCategory = category;
+
+        let filteredItems = menuItems.filter(item => item.category === category);
+
+        if (searchTerm) {
+            filteredItems = filteredItems.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) || 
+                item.desc.toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        filteredItems = sortMenuItems(filteredItems, sortBy);
+
+        filteredItems.forEach(item => {
+            const card = createMenuCard(item);
+            menuGrid.appendChild(card); // now adds after the Add button
+        });
 
 
-const renderMenuItems = (category) => {
-    document.querySelectorAll('.menu-card:not(.add-item)').forEach(card => card.remove());
-    
-    // Read search and sort values
-    const searchTerm = menuSearchInput ? menuSearchInput.value.toLowerCase() : '';
-    const sortBy = menuSorter ? menuSorter.value : 'name_asc'; 
-    
-    activeCategory = category;
-
-    // Filter by Category first
-    let filteredItems = menuItems.filter(item => item.category === category);
-
-    // Apply Search Term Filter
-    if (searchTerm) {
-        filteredItems = filteredItems.filter(item => 
-            item.name.toLowerCase().includes(searchTerm) || 
-            item.desc.toLowerCase().includes(searchTerm)
-        );
-    }
-    
-    // Apply Sorting 
-    filteredItems = sortMenuItems(filteredItems, sortBy);
-
-    filteredItems.forEach(item => {
-        const card = createMenuCard(item);
-        menuGrid.insertBefore(card, addNewItemCard.nextSibling);
-    });
-
-    attachCardListeners();
-};
+        attachCardListeners();
+    };
 
     // CATEGORY CAROUSEL LOGIC
     const scrollAmount = 300;
 
-    // Function to handle smooth scrolling with fallback
     const scrollCategories = (direction) => {
         const newScrollLeft = categoryListWrapper.scrollLeft + (direction * scrollAmount);
         categoryListWrapper.scrollTo({
@@ -226,7 +271,6 @@ const renderMenuItems = (category) => {
         scrollCategories(1);
     });
 
-
     // Handle Category Filter
     document.querySelectorAll('.category-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -235,19 +279,14 @@ const renderMenuItems = (category) => {
             clickedItem.classList.add('active');
             
             const category = clickedItem.dataset.category;
-            
-            // This call also updates the activeCategory state inside renderMenuItems
-            renderMenuItems(category); 
+            loadMenuItems(category);
 
-            // Update Add New Card text
             const categoryName = clickedItem.querySelector('.category-name').textContent.split(' ')[0];
             addNewItemCard.querySelector('.add-text').textContent = `Add ${categoryName} Item`;
         });
     });
 
-
     // INGREDIENTS MANAGEMENT LOGIC
-
     const renderIngredients = () => {
         ingredientsList.innerHTML = '';
         currentIngredients.forEach((ingredient, index) => {
@@ -260,7 +299,6 @@ const renderMenuItems = (category) => {
             ingredientsList.appendChild(item);
         });
 
-        // Attach listener for remove buttons
         ingredientsList.querySelectorAll('.remove-ingredient-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const index = parseInt(e.currentTarget.dataset.index);
@@ -279,21 +317,18 @@ const renderMenuItems = (category) => {
         }
     });
 
-
     // Handle Open Add Modal
     addNewItemCard.addEventListener('click', () => {
         modalTitle.textContent = 'Add Menu Item';
         menuItemForm.reset();
         itemToManageId = null;
-        currentIngredients = []; // Reset ingredients for new item
+        currentIngredients = [];
         renderIngredients(); 
         
         itemImagePreview.style.display = 'none';
         imagePlaceholderIcon.style.display = 'block';
         addEditModal.classList.add('active');
 
-        // Set the category dropdown to the currently active category
- 
         document.getElementById('itemCategory').value = activeCategory;
     });
 
@@ -320,17 +355,14 @@ const renderMenuItems = (category) => {
 
         modalTitle.textContent = 'Edit Menu Item';
         
-        // Pre-fill form
         document.getElementById('itemName').value = item.name;
         document.getElementById('itemDescription').value = item.desc;
         document.getElementById('itemPrice').value = item.price;
         document.getElementById('itemCategory').value = item.category;
         
-        // Pre-fill ingredients
         currentIngredients = [...item.ingredients];
         renderIngredients();
 
-        // Handle image preview
         if (item.img && item.img !== 'assets/image/placeholder.jpg') {
             itemImagePreview.src = item.img;
             itemImagePreview.style.display = 'block';
@@ -354,67 +386,124 @@ const renderMenuItems = (category) => {
     };
 
     // Handle Image Upload Change
-    imageUpload.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                itemImagePreview.src = e.target.result;
-                itemImagePreview.style.display = 'block';
-                imagePlaceholderIcon.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showNotification('Please select a valid image file');
+                    return;
+                }
 
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('Image size should be less than 5MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    itemImagePreview.src = e.target.result;
+                    itemImagePreview.style.display = 'block';
+                    imagePlaceholderIcon.style.display = 'none';
+                };
+                reader.onerror = () => {
+                    showNotification('Error reading image file');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
     // Handle Add/Edit Form Submission
-    menuItemForm.addEventListener('submit', (e) => {
+    menuItemForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const isEditing = itemToManageId !== null;
-        const formValues = {
+        const formData = {
             name: document.getElementById('itemName').value,
-            desc: document.getElementById('itemDescription').value,
+            description: document.getElementById('itemDescription').value,
             price: parseFloat(document.getElementById('itemPrice').value),
             category: document.getElementById('itemCategory').value,
-            ingredients: currentIngredients, // Save the ingredients list
-            img: itemImagePreview.src, // Simple client-side storage for demo
+            ingredients: currentIngredients,
+            imageData: itemImagePreview.style.display !== 'none' ? itemImagePreview.src : ''
         };
 
-        if (isEditing) {
-            // EDIT Logic
-            menuItems = menuItems.map(item => item.id === itemToManageId ? {...item, ...formValues} : item);
-            showNotification(`Item "${formValues.name}" successfully updated!`);
-        } else {
-            // ADD Logic
-            const newId = menuItems.length > 0 ? Math.max(...menuItems.map(i => i.id)) + 1 : 1;
-            const newItem = {...formValues, id: newId};
-            menuItems.push(newItem);
-            showNotification(`Item "${formValues.name}" successfully added!`);
-        }
+        try {
+            let response;
+            if (isEditing) {
+                formData.id = itemToManageId;
+                response = await fetch(API_BASE, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+            } else {
+                response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+            }
 
-        // Call renderMenuItems with the category the item was saved into.
-        renderMenuItems(formValues.category);
-        
-        closeModal('addEditModal');
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification(`Item "${formData.name}" successfully ${isEditing ? 'updated' : 'added'}!`);
+                closeModal('addEditModal');
+                loadMenuItems(formData.category);
+            } else {
+                showNotification(`Failed to ${isEditing ? 'update' : 'add'} item: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error saving menu item:', error);
+            showNotification('Error saving menu item');
+        }
     });
 
     // Handle Delete Confirmation
-    deleteConfirmBtn.addEventListener('click', () => {
+    deleteConfirmBtn.addEventListener('click', async () => {
         if (itemToDeleteId !== null) {
             const deletedItem = menuItems.find(item => item.id === itemToDeleteId);
-            menuItems = menuItems.filter(item => item.id !== itemToDeleteId);
             
-            // Use the category of the deleted item to update the view
-            renderMenuItems(deletedItem.category); 
-            
-            showNotification(`Item "${deletedItem.name}" successfully deleted!`);
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: itemToDeleteId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification(`Item "${deletedItem.name}" successfully deleted!`);
+                    closeModal('deleteModal');
+                    loadMenuItems(deletedItem.category);
+                } else {
+                    showNotification(`Failed to delete item: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error deleting menu item:', error);
+                showNotification('Error deleting menu item');
+            }
         }
-        closeModal('deleteModal');
     });
-    
+
+    // Menu Search and Sort Listeners
+    if (menuSearchInput) {
+        menuSearchInput.addEventListener('input', () => renderMenuItems(activeCategory));
+    }
+    if (menuSorter) { 
+        menuSorter.addEventListener('change', () => renderMenuItems(activeCategory));
+    }
+
+    // Initialize menu when page loads
     if (document.getElementById('menu').classList.contains('active-page')) {
-        renderMenuItems('bento');
+        loadMenuItems('bento');
     }
 });
