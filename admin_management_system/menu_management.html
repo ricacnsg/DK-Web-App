@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daven's Kitchenette - Management System</title>
-    <link rel="stylesheet" href="menu_magement.css" />
+    <link rel="stylesheet" href="menu_management.css" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" crossorigin="anonymous" />
 </head>
@@ -12,7 +12,7 @@
     <div class="container-fluid">
         <div class="sidebar">
             <div class="logo">
-                <img src="\assets\image\davens_logo.png" alt="Logo" class="logo-image" />
+                <img src="assets/image/davens_logo.png" alt="Logo" class="logo-image" />
                 <div>
                     <div>Daven's</div>
                     <div>Kitchenette</div>
@@ -34,6 +34,8 @@
             <button class="sidebar-toggle" id="sidebarToggle">
                 <i class="fas fa-bars"></i>
             </button>
+            
+            <!-- Dashboard Page -->
             <div id="dashboard" class="page active-page">
                 <header class="main-header">
                     <h1>Dashboard</h1>
@@ -116,7 +118,8 @@
                         </div>
                         <p class="metric-subtext">Last 7 days performance</p>
                         <div class="chart-placeholder line-chart">
-                            </div>
+                            Chart will be displayed here
+                        </div>
                     </div>
 
                     <div class="card chart-section top-menu-card full-width-card">
@@ -125,188 +128,286 @@
                         </div>
                         <p class="metric-subtext">Most ordered this week</p>
                         <div class="chart-placeholder bar-chart">
-                            </div>
+                            Chart will be displayed here
+                        </div>
                     </div>
                 </section>
             </div>
 
+            <!-- Menu Management Page -->
             <div id="menu" class="page">
-    <div class="header">
-        <h1>Manage Your Menu</h1>
-        <div class="user-profile">
-            <div class="user-avatar">JD</div>
-            <div class="user-info">
-                <h3>Geoffrey</h3>
-                <p>Admin</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="category-section">
-        <div class="category-label">Category</div>
-        <div class="category-carousel" id="categoryCarousel">
-            <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
-
-            <div class="category-list-wrapper">
-                <div class="category-item active" data-category="bento">
-                    <div class="category-icon">
-                        <img src="/assets/image/bento.webp" alt="BentoSilog" class="icon-image" />
-                    </div>
-                    <div class="category-name">BentoSilog</div>
-                </div>
-
-                <div class="category-item" data-category="wings">
-                    <div class="category-icon">
-                        <img src="/assets/image/Fried Legs.png" alt="Flavoured Wings" class="icon-image" />
-                    </div>
-                    <div class="category-name">Flavoured Wings w/ Rice</div>
-                </div>
-
-                <div class="category-item" data-category="rice">
-                    <div class="category-icon">
-                        <img src="/assets/image/rice.png" alt="Rice Meal" class="icon-image" />
-                    </div>
-                    <div class="category-name">Rice Meal</div>
-                </div>
-                
-                <div class="category-item" data-category="burger">
-                    <div class="category-icon">
-                        <img src="/assets/image/Burgers.png" alt="Burger & Sandwiches" class="icon-image" />
-                    </div>
-                    <div class="category-name">Burger & Sandwiches</div>
-                </div>
-
-                <div class="category-item" data-category="pulutan">
-                    <div class="category-icon">
-                        <img src="/assets/image/puluntan.png" alt="Pulutan Express" class="icon-image" />
-                    </div>
-                    <div class="category-name">Pulutan Express</div>
-                </div>
-
-                <div class="category-item" data-category="beverages">
-                    <div class="category-icon">
-                        <img src="/assets/image/beverages.png" alt="Beverages" class="icon-image" />
-                    </div>
-                    <div class="category-name">Beverages</div>
-                </div>
-            </div>
-
-            <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
-        </div>
-    </div>
-
-    <div class="menu-controls">
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="menuSearchInput" class="search-input" placeholder="Search menu item name or description...">
-        </div>
-        
-        <div class="filter-dropdown">
-            <label for="menuSorter">Sort By:</label>
-            <select id="menuSorter" class="filter-select">
-                <option value="name_asc">Name (Z-A)</option>
-                <option value="name_desc">Name (A-Z)</option>
-                <option value="price_asc">Price (High to Low)</option>
-                <option value="price_desc">Price (Low to High)</option>
-            </select>
-        </div>
-    </div>
-    <div class="menu-grid category-section" id="menuGrid">
-        <div class="menu-card add-item" id="addNewItemCard">
-            <i class="fas fa-plus add-icon"></i>
-            <div class="add-text">Add BentoSilog Item</div>
-        </div>
-        
-        </div>
-        <div id="addEditModal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('addEditModal')"><i class="fas fa-times"></i></button>
-            <div class="modal-header">
-                <h2 id="modalTitle">Add Menu Item</h2>
-                <div class="modal-image-placeholder">
-                    <img id="itemImagePreview" src="" alt="Menu Item Image" style="display: none;">
-                    <i id="imagePlaceholderIcon" class="fas fa-camera"></i>
-                    <button class="image-upload-btn" onclick="document.getElementById('imageUpload').click()">
-                        <i class="fas fa-upload"></i>
-                    </button>
-                </div>
-                <input type="file" id="imageUpload" class="file-input" accept="image/*">
-            </div>
-            
-            <form id="menuItemForm">
-                <div class="form-group">
-                    <label for="itemName">Item Name</label>
-                    <input type="text" id="itemName" placeholder="e.g., SPAM SILOG" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="itemDescription">Description</label>
-                    <textarea id="itemDescription" placeholder="Short description of the dish..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="itemPrice">Price (₱)</label>
-                    <input type="number" id="itemPrice" placeholder="e.g., 109.00" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="itemCategory">Category</label>
-                    <select id="itemCategory">
-                        <option value="bento">BentoSilog</option>
-                        <option value="wings">Flavoured Wings w/ Rice</option>
-                        <option value="rice">Rice Meal</option>
-                        <option value="burger">Burger & Sandwiches</option>
-                        <option value="pulutan">Pulutan Express</option>
-                        <option value="beverages">Beverages</option>
-
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Ingredients</label>
-                    <div class="ingredients-list" id="ingredientsList">
+                <div class="header">
+                    <h1>Manage Your Menu</h1>
+                    <div class="user-profile">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-info">
+                            <h3>Geoffrey</h3>
+                            <p>Admin</p>
                         </div>
-                    <div class="add-ingredient-wrapper">
-                        <input type="text" id="newIngredientInput" placeholder="Add ingredient name" onkeydown="if(event.key === 'Enter'){event.preventDefault(); document.getElementById('addIngredientBtn').click();}">
-                        <button type="button" id="addIngredientBtn" class="add-ingredient-btn"><i class="fas fa-plus"></i> Add</button>
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button type="submit" class="btn-submit">SAVE</button>
-                    <button type="button" class="btn-cancel" onclick="closeModal('addEditModal')">CANCEL</button>
+
+                <div class="category-section">
+                    <div class="category-label">Category</div>
+                    <div class="category-carousel" id="categoryCarousel">
+                        <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+
+                        <div class="category-list-wrapper">
+                            <div class="category-item active" data-category="bento">
+                                <div class="category-icon">
+                                    <img src="assets/image/bento.png" alt="BentoSilog" class="icon-image" />
+                                </div>
+                                <div class="category-name">BentoSilog</div>
+                            </div>
+
+                            <div class="category-item" data-category="wings">
+                                <div class="category-icon">
+                                    <img src="assets/image/wings.png" alt="Flavoured Wings" class="icon-image" />
+                                </div>
+                                <div class="category-name">Flavoured Wings w/ Rice</div>
+                            </div>
+
+                            <div class="category-item" data-category="rice">
+                                <div class="category-icon">
+                                    <img src="assets/image/rice.png" alt="Rice Meal" class="icon-image" />
+                                </div>
+                                <div class="category-name">Rice Meal</div>
+                            </div>
+                            
+                            <div class="category-item" data-category="burger">
+                                <div class="category-icon">
+                                    <img src="assets/image/burger.png" alt="Burger & Sandwiches" class="icon-image" />
+                                </div>
+                                <div class="category-name">Burger & Sandwiches</div>
+                            </div>
+
+                            <div class="category-item" data-category="pulutan">
+                                <div class="category-icon">
+                                    <img src="assets/image/fries.png" alt="Pulutan Express" class="icon-image" />
+                                </div>
+                                <div class="category-name">Pulutan Express</div>
+                            </div>
+
+                            <div class="category-item" data-category="beverages">
+                                <div class="category-icon">
+                                    <img src="assets/image/coffee.png" alt="Beverages" class="icon-image" />
+                                </div>
+                                <div class="category-name">Beverages</div>
+                            </div>
+                        </div>
+
+                        <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
                 </div>
-            </form>
-        </div>
-    </div>
 
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Delete Item</h2>
-                <i class="fas fa-exclamation-triangle delete-icon" style="color: #f0ad4e; font-size: 48px;"></i>
+                <div class="menu-controls">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="menuSearchInput" class="search-input" placeholder="Search menu item name or description...">
+                    </div>
+                    
+                    <div class="filter-dropdown">
+                        <label for="menuSorter">Sort By:</label>
+                        <select id="menuSorter" class="filter-select">
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="price_asc">Price (Low to High)</option>
+                            <option value="price_desc">Price (High to Low)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="menu-grid category-section" id="menuGrid">
+                    <div class="menu-card add-item" id="addNewItemCard">
+                        <i class="fas fa-plus add-icon"></i>
+                        <div class="add-text">Add BentoSilog Item</div>
+                    </div>
+                    <!-- Menu items will be dynamically added here -->
+                </div>
+                
+                <!-- Add/Edit Modal -->
+                <div id="addEditModal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn" onclick="closeModal('addEditModal')"><i class="fas fa-times"></i></button>
+                        <div class="modal-header">
+                            <h2 id="modalTitle">Add Menu Item</h2>
+                            <div class="modal-image-placeholder">
+                                <img id="itemImagePreview" src="" alt="Menu Item Image" style="display: none;">
+                                <i id="imagePlaceholderIcon" class="fas fa-camera"></i>
+                                <button class="image-upload-btn" onclick="document.getElementById('imageUpload').click()">
+                                    <i class="fas fa-upload"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="imageUpload" class="file-input" accept="image/*">
+                        </div>
+                        
+                        <form id="menuItemForm">
+                            <div class="form-group">
+                                <label for="itemName">Item Name</label>
+                                <input type="text" id="itemName" placeholder="e.g., SPAM SILOG" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="itemDescription">Description</label>
+                                <textarea id="itemDescription" placeholder="Short description of the dish..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="itemPrice">Price (₱)</label>
+                                <input type="number" id="itemPrice" placeholder="e.g., 109.00" step="0.01" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="itemCategory">Category</label>
+                                <select id="itemCategory">
+                                    <option value="bento">BentoSilog</option>
+                                    <option value="wings">Flavoured Wings w/ Rice</option>
+                                    <option value="rice">Rice Meal</option>
+                                    <option value="burger">Burger & Sandwiches</option>
+                                    <option value="pulutan">Pulutan Express</option>
+                                    <option value="beverages">Beverages</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Ingredients</label>
+                                <div class="ingredients-list" id="ingredientsList">
+                                    <!-- Ingredients will be added here dynamically -->
+                                </div>
+                                <div class="add-ingredient-wrapper">
+                                    <input type="text" id="newIngredientInput" placeholder="Add ingredient name">
+                                    <button type="button" id="addIngredientBtn" class="add-ingredient-btn"><i class="fas fa-plus"></i> Add</button>
+                                </div>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="submit" class="btn-submit">SAVE</button>
+                                <button type="button" class="btn-cancel" onclick="closeModal('addEditModal')">CANCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Delete Modal -->
+                <div id="deleteModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Delete Item</h2>
+                            <i class="fas fa-exclamation-triangle delete-icon" style="color: #f0ad4e; font-size: 48px;"></i>
+                        </div>
+                        <p style="text-align: center; font-size: 16px; margin-bottom: 30px;">Do you really want to delete **<span id="deleteItemName"></span>**?</p>
+                        <div class="modal-actions">
+                            <button id="deleteConfirmBtn" class="btn-remove">DELETE</button>
+                            <button type="button" class="btn-cancel" onclick="closeModal('deleteModal')">CANCEL</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="notification" class="notification">
+                    Item successfully saved!
+                </div>
             </div>
-            <p style="text-align: center; font-size: 16px; margin-bottom: 30px;">Do you really want to delete **<span id="deleteItemName"></span>**?</p>
-            <div class="modal-actions">
-                <button id="deleteConfirmBtn" class="btn-remove">DELETE</button>
-                <button type="button" class="btn-cancel" onclick="closeModal('deleteModal')">CANCEL</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="notification" class="notification">
-        Item successfully saved!
-    </div>
-</div>
+
+            <!-- Inventory Management Page -->
             <div id="inventory" class="page">
-                <div class="header"><h1>Inventory Management</h1></div>
-                <p>Content for Inventory Management...</p>
+                <div class="inventory-container">
+                    <h1>Manage your Inventory</h1>
+                    
+                    <div class="button-container">
+                        <button class="add-btn" onclick="openInventoryModal()">
+                            <i class="fas fa-plus"></i>
+                            ADD NEW ITEM
+                        </button>
+
+                        <div class="filter-container">
+                            <select class="filter-select" id="categoryFilter" onchange="filterInventoryItems()">
+                                <option value="">Filter By Category</option>
+                                <option value="Bento Silog">Bento Silog</option>
+                                <option value="Flavoured with Wings&Rice">Flavoured with Wings&Rice</option>
+                                <option value="Ricemeal">Ricemeal</option>
+                                <option value="Burger & Sandwiches">Burger & Sandwiches</option>
+                                <option value="Pulutan Express">Pulutan Express</option>
+                                <option value="Beverages">Beverages</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <div class="table-header">
+                            <div>Name</div>
+                            <div>Stocks</div>
+                            <div>Category</div>
+                            <div>Reorder Level</div>
+                            <div>Unit Cost</div>
+                            <div></div>
+                        </div>
+                        <div id="itemsContainer">
+                            <div class="empty-state">
+                                No items yet. Click "ADD NEW ITEM" to add your first inventory item.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Modal -->
+                <div id="inventoryModal" class="modal">
+                    <div class="modal-content">
+                        <h2 class="modal-header" id="inventoryModalTitle">Add Item</h2>
+                        <form id="inventoryForm">
+                            <div class="form-group">
+                                <label>Item Name</label>
+                                <input type="text" id="inventoryItemName" placeholder="Enter item name" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stocks</label>
+                                    <input type="number" id="inventoryItemStocks" placeholder="How many stocks?" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Reorder Level</label>
+                                    <input type="number" id="inventoryItemReorder" placeholder="Enter reorder level" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Unit Cost</label>
+                                <input type="number" id="inventoryItemCost" step="0.01" placeholder="What is the unit cost?" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="inventoryItemCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Bento Silog">Bento Silog</option>
+                                    <option value="Flavoured with Wings&Rice">Flavoured with Wings&Rice</option>
+                                    <option value="Ricemeal">Ricemeal</option>
+                                    <option value="Burger & Sandwiches">Burger & Sandwiches</option>
+                                    <option value="Pulutan Express">Pulutan Express</option>
+                                    <option value="Beverages">Beverages</option>
+                                </select>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="submit" class="btn-submit">ADD</button>
+                                <button type="button" class="btn-cancel" onclick="closeInventoryModal()">CANCEL</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
+            <!-- Order History Page -->
             <div id="orders" class="page">
-                <div class="header"><h1>Order History</h1></div>
+                <div class="header">
+                    <h1>Order History</h1>
+                    <div class="user-profile">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-info">
+                            <h3>Geoffrey</h3>
+                            <p>Admin</p>
+                        </div>
+                    </div>
+                </div>
                 <p>Content for Order History...</p>
             </div>
 
+            <!-- Staff Management Page -->
             <div id="staff" class="page">
                 <div class="staff-management-container">
                     <div class="header">
@@ -382,9 +483,6 @@
             </div>
         </div>
     </div>
-
-    
-
 
     <script src="menu_management.js"></script>
 </body>
