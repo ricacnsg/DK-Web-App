@@ -1120,13 +1120,6 @@ html, body {
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #f4c430 0%, #e8b923 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
