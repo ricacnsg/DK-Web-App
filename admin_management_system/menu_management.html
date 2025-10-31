@@ -1,230 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daven's Kitchenette - Menu Management</title>
+    <title>Daven's Kitchenette - Management System</title>
     <link rel="stylesheet" href="menu_magement.css" />
-    <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Montserrat"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css"
-      crossorigin="anonymous"
-    />
-  </head>
-  <body>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body>
     <div class="container-fluid">
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="logo">
-          <img
-            src="assets/image/davens_logo.png"
-            alt="Logo"
-            class="logo-image"
-          />
-          <div>
-            <div>Daven's</div>
-            <div>Kitchenette</div>
-          </div>
+        <div class="sidebar">
+            <div class="logo">
+                <img src="\assets\image\davens_logo.png" alt="Logo" class="logo-image" />
+                <div>
+                    <div>Daven's</div>
+                    <div>Kitchenette</div>
+                </div>
+            </div>
+
+            <div class="nav-menu">
+                <div class="nav-item active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</div>
+                <div class="nav-item" data-page="menu"><i class="fas fa-utensils"></i> Menu Management</div>
+                <div class="nav-item" data-page="inventory"><i class="fas fa-boxes"></i> Inventory Management</div>
+                <div class="nav-item" data-page="orders"><i class="fas fa-history"></i> Order History</div>
+                <div class="nav-item" data-page="staff"><i class="fas fa-user-friends"></i> Staff Account Management</div>
+            </div>
+
+            <button class="logout-btn">LOG OUT</button>
         </div>
 
-        <div class="nav-menu">
-          <!-- Sidebar Navigation Items -->
-          <div class="nav-item active" data-page="dashboard">Dashboard</div>
-          <div class="nav-item" data-page="menu">Menu Management</div>
-          <div class="nav-item" data-page="inventory">Inventory Management</div>
-          <div class="nav-item" data-page="orders">Order History</div>
-          <div class="nav-item" data-page="staff">Staff Account Management</div>
-        </div>
-
-        <button class="logout-btn">LOG OUT</button>
-      </div>
-
-      <div class="main-content">
-        <!-- DASHBOARD PAGE -->
-        <div id="dashboard" class="page active-page">
-          <header class="main-header">
-            <h1>Dashboard</h1>
-            <div class="user-profile">
-              <div class="user-avatar">JD</div>
-              <div class="user-info">
-                <h3>Geoffrey</h3>
-                <p>Admin</p>
-              </div>
-            </div>
-          </header>
-
-          <div class="toolbar">
-            <div class="tabs">
-              <button class="tab-btn active" data-tab="today">Today</button>
-              <button class="tab-btn" data-tab="weekly">Weekly</button>
-              <button class="tab-btn" data-tab="monthly">Monthly</button>
-            </div>
-            <button class="print-summary-btn">
-              <i class="fa-solid fa-print"></i> Print Summary
+        <div class="main-content">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
             </button>
-          </div>
+            <div id="dashboard" class="page active-page">
+                <header class="main-header">
+                    <h1>Dashboard</h1>
+                    <div class="user-profile">
+                        <div class="user-avatar">JD</div>
+                        <div class="user-info">
+                            <h3>Geoffrey</h3>
+                            <p>Admin</p>
+                        </div>
+                    </div>
+                </header>
 
-          <section class="dashboard-cards">
-            <div class="card revenue-card">
-              <div class="card-title-icon-wrapper">
-                <h2>Total Revenue</h2>
-                <i class="fa-solid fa-peso-sign"></i>
-              </div>
-              <div class="card-metric-wrapper">
-                <p class="metric-value"></p>
-                <p class="metric-change success-change">
-                  <i class="fa-solid fa-arrow-up"></i>
-                </p>
-              </div>
+                <div class="toolbar">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="today">Today</button>
+                        <button class="tab-btn" data-tab="weekly">Weekly</button>
+                        <button class="tab-btn" data-tab="monthly">Monthly</button>
+                    </div>
+                    <button class="print-summary-btn">
+                        <i class="fa-solid fa-print"></i> Print Summary
+                    </button>
+                </div>
+
+                <section class="dashboard-cards">
+                    <div class="card revenue-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Total Revenue</h2>
+                            <i class="fa-solid fa-peso-sign"></i>
+                        </div>
+                        <div class="card-metric-wrapper">
+                            <p class="metric-value">₱25,000</p>
+                            <p class="metric-subtext success">
+                                <i class="fa-solid fa-arrow-up"></i> +12% vs last month
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="card today-revenue-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Today's Revenue</h2>
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div class="card-metric-wrapper">
+                            <p class="metric-value">₱3,250</p>
+                            <p class="metric-subtext success">
+                                <i class="fa-solid fa-arrow-up"></i> +5% vs yesterday
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card avg-order-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Avg Order Value</h2>
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <div class="card-metric-wrapper">
+                            <p class="metric-value">₱185</p>
+                            <p class="metric-subtext danger">
+                                <i class="fa-solid fa-arrow-down"></i> -2% vs last week
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card active-staff-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Active Staff</h2>
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div class="card-metric-wrapper staff-metric-wrapper">
+                            <p class="metric-value staff-count">8/10</p>
+                            <p class="metric-subtext">
+                                <span class="status-available"><i class="fa-solid fa-circle-check"></i> All shifts covered</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="card chart-section full-width-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Weekly Revenue and Orders</h2>
+                        </div>
+                        <p class="metric-subtext">Last 7 days performance</p>
+                        <div class="chart-placeholder line-chart">
+                            </div>
+                    </div>
+
+                    <div class="card chart-section top-menu-card full-width-card">
+                        <div class="card-title-icon-wrapper">
+                            <h2>Top Menu</h2>
+                        </div>
+                        <p class="metric-subtext">Most ordered this week</p>
+                        <div class="chart-placeholder bar-chart">
+                            </div>
+                    </div>
+                </section>
             </div>
 
-            <div class="card revenue-card">
-              <div class="card-title-icon-wrapper">
-                <h2>Today's Revenue</h2>
-                <i class="fa-solid fa-chart-line"></i>
-              </div>
-              <div class="card-metric-wrapper">
-                <p class="metric-value"></p>
-                <p class="metric-change success-change">
-                  <i class="fa-solid fa-arrow-up"></i>
-                </p>
-              </div>
-            </div>
-
-            <div class="card avg-order-card">
-              <div class="card-title-icon-wrapper">
-                <h2>Avg Order Value</h2>
-              </div>
-              <div class="card-metric-wrapper">
-                <p class="metric-value"></p>
-                <p class="metric-change success-change">
-                  <i class="fa-solid fa-arrow-up"></i>
-                </p>
-              </div>
-            </div>
-
-            <div class="card active-staff-card">
-              <div class="card-title-icon-wrapper">
-                <h2>Active Staff</h2>
-                <i class="fa-solid fa-user-group"></i>
-              </div>
-              <div class="card-metric-wrapper staff-metric-wrapper">
-                <p class="metric-value staff-count"></p>
-                <p class="staff-status">
-                  <i class="fa-solid fa-circle-check"></i>
-                </p>
-              </div>
-            </div>
-
-            <div class="card full-width-card chart-card">
-              <h2>Weekly Revenue and Orders</h2>
-              <p class="chart-subtitle">Last 7 days performance</p>
-              <div class="chart-placeholder line-chart"></div>
-            </div>
-
-            <div class="card top-menu-card full-width-card">
-              <h2>Top Menu</h2>
-              <p class="chart-subtitle">Most ordered this week</p>
-              <div class="chart-placeholder bar-chart"></div>
-            </div>
-          </section>
-        </div>
-
-        <!-- MENU MANAGEMENT PAGE -->
-        <div id="menu" class="page">
-          <div class="header">
-            <h1>Manage Your Menu</h1>
-            <div class="user-profile">
-              <div class="user-avatar">JD</div>
-              <div class="user-info">
+            <div id="menu" class="page">
+    <div class="header">
+        <h1>Manage Your Menu</h1>
+        <div class="user-profile">
+            <div class="user-avatar">JD</div>
+            <div class="user-info">
                 <h3>Geoffrey</h3>
                 <p>Admin</p>
-              </div>
             </div>
-          </div>
-
-          <!-- Category Section -->
-          <div class="category-section">
-            <div class="category-label">Category</div>
-            <div class="category-carousel">
-              <button class="carousel-btn">&lt;</button>
-
-              <div class="category-item active" data-category="bento">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/bento.png"
-                    alt="BentoSilog"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">BentoSilog</div>
-              </div>
-
-              <div class="category-item" data-category="wings">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/wings.png"
-                    alt="Flavoured Wings"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">Flavoured Wings w/ Rice</div>
-              </div>
-
-              <div class="category-item" data-category="rice">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/rice.png"
-                    alt="Rice Meal"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">Rice Meal</div>
-              </div>
-
-              <div class="category-item" data-category="burger">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/burger.png"
-                    alt="Burger & Sandwiches"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">Burger & Sandwiches</div>
-              </div>
-
-              <div class="category-item" data-category="phlutan">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/fries.png"
-                    alt="Phlutan Express"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">Phlutan Express</div>
-              </div>
-
-              <div class="category-item" data-category="beverages">
-                <div class="category-icon">
-                  <img
-                    src="assets/image/coffee.png"
-                    alt="Beverages"
-                    class="icon-image"
-                  />
-                </div>
-                <div class="category-name">Beverages</div>
-              </div>
-            </div>
-          </div>
         </div>
+    </div>
 
-        <!-- INVENTORY MANAGEMENT PAGE -->
-        <div id="inventory" class="page">
+    <div class="category-section">
+        <div class="category-label">Category</div>
+        <div class="category-carousel" id="categoryCarousel">
+            <button class="carousel-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
+
+            <div class="category-list-wrapper">
+                <div class="category-item active" data-category="bento">
+                    <div class="category-icon">
+                        <img src="/assets/image/bento.webp" alt="BentoSilog" class="icon-image" />
+                    </div>
+                    <div class="category-name">BentoSilog</div>
+                </div>
+
+                <div class="category-item" data-category="wings">
+                    <div class="category-icon">
+                        <img src="/assets/image/Fried Legs.png" alt="Flavoured Wings" class="icon-image" />
+                    </div>
+                    <div class="category-name">Flavoured Wings w/ Rice</div>
+                </div>
+
+                <div class="category-item" data-category="rice">
+                    <div class="category-icon">
+                        <img src="/assets/image/rice.png" alt="Rice Meal" class="icon-image" />
+                    </div>
+                    <div class="category-name">Rice Meal</div>
+                </div>
+                
+                <div class="category-item" data-category="burger">
+                    <div class="category-icon">
+                        <img src="/assets/image/Burgers.png" alt="Burger & Sandwiches" class="icon-image" />
+                    </div>
+                    <div class="category-name">Burger & Sandwiches</div>
+                </div>
+
+                <div class="category-item" data-category="pulutan">
+                    <div class="category-icon">
+                        <img src="/assets/image/puluntan.png" alt="Pulutan Express" class="icon-image" />
+                    </div>
+                    <div class="category-name">Pulutan Express</div>
+                </div>
+
+                <div class="category-item" data-category="beverages">
+                    <div class="category-icon">
+                        <img src="/assets/image/beverages.png" alt="Beverages" class="icon-image" />
+                    </div>
+                    <div class="category-name">Beverages</div>
+                </div>
+            </div>
+
+            <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div class="menu-controls">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="menuSearchInput" class="search-input" placeholder="Search menu item name or description...">
+        </div>
+        
+        <div class="filter-dropdown">
+            <label for="menuSorter">Sort By:</label>
+            <select id="menuSorter" class="filter-select">
+                <option value="name_asc">Name (Z-A)</option>
+                <option value="name_desc">Name (A-Z)</option>
+                <option value="price_asc">Price (High to Low)</option>
+                <option value="price_desc">Price (Low to High)</option>
+            </select>
+        </div>
+    </div>
+    <div class="menu-grid category-section" id="menuGrid">
+        <div class="menu-card add-item" id="addNewItemCard">
+            <i class="fas fa-plus add-icon"></i>
+            <div class="add-text">Add BentoSilog Item</div>
+        </div>
+        
+        </div>
+        <div id="addEditModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('addEditModal')"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Menu Item</h2>
+                <div class="modal-image-placeholder">
+                    <img id="itemImagePreview" src="" alt="Menu Item Image" style="display: none;">
+                    <i id="imagePlaceholderIcon" class="fas fa-camera"></i>
+                    <button class="image-upload-btn" onclick="document.getElementById('imageUpload').click()">
+                        <i class="fas fa-upload"></i>
+                    </button>
+                </div>
+                <input type="file" id="imageUpload" class="file-input" accept="image/*">
+            </div>
+            
+            <form id="menuItemForm">
+                <div class="form-group">
+                    <label for="itemName">Item Name</label>
+                    <input type="text" id="itemName" placeholder="e.g., SPAM SILOG" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" placeholder="Short description of the dish..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemPrice">Price (₱)</label>
+                    <input type="number" id="itemPrice" placeholder="e.g., 109.00" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="itemCategory">Category</label>
+                    <select id="itemCategory">
+                        <option value="bento">BentoSilog</option>
+                        <option value="wings">Flavoured Wings w/ Rice</option>
+                        <option value="rice">Rice Meal</option>
+                        <option value="burger">Burger & Sandwiches</option>
+                        <option value="pulutan">Pulutan Express</option>
+                        <option value="beverages">Beverages</option>
+
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ingredients</label>
+                    <div class="ingredients-list" id="ingredientsList">
+                        </div>
+                    <div class="add-ingredient-wrapper">
+                        <input type="text" id="newIngredientInput" placeholder="Add ingredient name" onkeydown="if(event.key === 'Enter'){event.preventDefault(); document.getElementById('addIngredientBtn').click();}">
+                        <button type="button" id="addIngredientBtn" class="add-ingredient-btn"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-submit">SAVE</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('addEditModal')">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete Item</h2>
+                <i class="fas fa-exclamation-triangle delete-icon" style="color: #f0ad4e; font-size: 48px;"></i>
+            </div>
+            <p style="text-align: center; font-size: 16px; margin-bottom: 30px;">Do you really want to delete **<span id="deleteItemName"></span>**?</p>
+            <div class="modal-actions">
+                <button id="deleteConfirmBtn" class="btn-remove">DELETE</button>
+                <button type="button" class="btn-cancel" onclick="closeModal('deleteModal')">CANCEL</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification">
+        Item successfully saved!
+    </div>
+</div>
+            <div id="inventory" class="page">
            <div class="container">
         <h1>Manage your Inventory</h1>
         
@@ -322,95 +395,93 @@
             </div>
         </div>
     </div>
-
-
-        <!-- ORDER HISTORY PAGE -->
-        <div id="orders" class="page">
-          <!-- add content here -->
-          <h1>Order History</h1>
-        </div>
-
-        <!-- STAFF ACCOUNT MANAGEMENT PAGE -->
-        <div id="staff" class="page">
-          <div class="staff-management-container">
-            <div class="header">
-              <h1>Staff Account Management</h1>
-              <div class="user-profile">
-                <div class="user-avatar">JD</div>
-                <div class="user-info">
-                  <h3>Jane Doe</h3>
-                  <p>Admin</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="content-wrapper">
-              <!-- Staff List -->
-              <div class="staff-list">
-                <div class="search-filter">
-                  <input
-                    type="text"
-                    placeholder="Search Staff"
-                    class="search-input"
-                  />
-                  <select class="filter-select">
-                    <option>All Staff</option>
-                    <option>Admin</option>
-                    <option>Kitchen Staff</option>
-                  </select>
-                </div>
-
-                <table class="staff-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <!-- Staff rows will appear here dynamically -->
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Add Staff Form -->
-              <div class="add-staff-form">
-                <h2>Add Staff Account</h2>
-                <label>Full Name</label>
-                <input type="text" placeholder="Enter full name" />
-
-                <label>Contact Number</label>
-                <input type="text" placeholder="Enter contact number" />
-
-                <label>Role</label>
-                <input type="text" placeholder="Enter role" />
-
-                <label>Username</label>
-                <input type="text" placeholder="Enter username" />
-
-                <label>Password</label>
-                <input type="password" placeholder="Enter password" />
-
-                <button class="save-btn">Save</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <script src="menu_management.js"></script>
-  </body>
-  <script src="/bootstrap5/js/bootstrap.min.js"></script>
-</html>
 
-<!-- TO DO:
- - MAKE IT RESPONSIVE IN EVERY SCREENSIZE
- - RECHECK KUNG ANONG GINAGAWA NUNG JAVASCRIPT NG DASHBOARD
- - FIX THE SIDEBAR SCROLLING ISSUE
- - FIX THE IMAGES IN THE CATEGORY CAROUSEL AND THE LOGO IN THE NAVBAR
- - FIX THE PROFILE BUTTON IN THE UPPER-RIGHT CORNER
- - ADD FUNCTIONALITY TO THE LOGOUT BUTTON
- - ADD FUNCTIONALITY TO THE PRINT SUMMARY BUTTON
- -->
+            <div id="orders" class="page">
+                <div class="header"><h1>Order History</h1></div>
+                <p>Content for Order History...</p>
+            </div>
+
+            <div id="staff" class="page">
+                <div class="staff-management-container">
+                    <div class="header">
+                        <h1>Staff Account Management</h1>
+                        <div class="user-profile">
+                            <div class="user-avatar">JD</div>
+                            <div class="user-info">
+                                <h3>Jane Doe</h3>
+                                <p>Admin</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-wrapper">
+                        <div class="staff-list">
+                            <div class="search-filter">
+                                <input type="text" placeholder="Search Staff" class="search-input" />
+                                <select class="filter-select">
+                                    <option>All Staff</option>
+                                    <option>Admin</option>
+                                    <option>Kitchen Staff</option>
+                                </select>
+                            </div>
+
+                            <table class="staff-table" id="staffTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Jane Doe</td>
+                                        <td>Admin</td>
+                                        <td>
+                                            <button class="edit-btn">Edit</button>
+                                            <button class="delete-btn">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="add-staff-form">
+                            <h2>Add Staff Account</h2>
+                            <form id="addStaffForm">
+                                <label>Full Name</label>
+                                <input type="text" placeholder="Enter full name" required/>
+
+                                <label>Contact Number</label>
+                                <input type="text" placeholder="Enter contact number" required/>
+
+                                <label>Role</label>
+                                <select>
+                                    <option>Admin</option>
+                                    <option>Kitchen Staff</option>
+                                    <option>Cashier</option>
+                                </select>
+
+                                <label>Username</label>
+                                <input type="text" placeholder="Enter username" required/>
+
+                                <label>Password</label>
+                                <input type="password" placeholder="Enter password" required/>
+
+                                <button type="submit" class="save-btn">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+
+    <script src="menu_management.js"></script>
+</body>
+</html>
