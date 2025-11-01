@@ -1,30 +1,51 @@
 <?php
+session_start();
+error_log("Session set: " . print_r($_SESSION, true));
+header('Content-Type: application/json');
 require_once '../database/connect.php';
+
+if (!isset($_SESSION['staff_username'])){
+  $response =  ['logged_in' => false, 'message' => 'No session found.'];
+  exit;
+}
+$response = [
+    'logged_in' => true,
+    'staff_id' => $_SESSION['staff_id'] ?? null,
+    'staff_username' => $_SESSION['staff_username'] ?? null,
+    'staff_role' => $_SESSION['staff_role'] ?? null
+];
 
 // add new account with hashed password
 function createStaffAccount($conn) {
   if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $user = $_POST["staff_username"];
-    $pass = $_POST["staff_password"];
-    $role = $_POST["staff_role"];
-  //$user = "newuser"; // testing
-  //$pass = "newpassword"; // testing
-  //$role = "staff"; // testing
+    $fullname = $_POST["fullname"];
+    $contactno = $_POST["contactno"];
+    $user = $_POST["username"];
+    $pass = $_POST["password"];
+    $role = $_POST["role"];
+  // $fullname = "davendaven"; // testing
+  // $contactno = 9123456534; //testing
+  // $user = "davens"; // testing
+  // $pass = "gUstOkOmagwork"; // testing
+  // $role = "staff"; // testing
     $createdAt = date("Y-m-d H:i:s");
     $editedAt = date("Y-m-d H:i:s");
 
-    $encrypt_password = password_hash($pass, PASSWORD_DEFAULT);
+    $hash_password = password_hash($pass, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO staff (staffUsername, staffPassword, staffRole, createdAt, editedAt) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $user, $hashed_password, $role, $createdAt, $editedAt);
+    $stmt = $conn->prepare("INSERT INTO staff (staffFullname, contactNumber, staffUsername, staffPassword, staffRole, createdAt, editedAt) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sisssss", $fullname, $contactno, $user, $hash_password, $role, $createdAt, $editedAt);
 
     if ($stmt->execute()) {
-      echo "Account created successfully.";
-    } else {
-      echo "Error: " . $stmt->error;
+      $response = ['success' => true, 'message' => 'Account created successfully.'];
+    } 
+    else {
+      $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
     }
-
     $stmt->close();
+    } 
+  else {
+    $response = ['success' => false, 'message' => 'Invalid request method.'];
   }
 }
 
@@ -84,4 +105,5 @@ deleteStaffAccount($conn);
 */
 
 $conn->close();
+echo json_encode($response);
 ?>

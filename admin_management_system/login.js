@@ -1,14 +1,13 @@
-console.log("✅ JavaScript connected!");
-
 document.getElementById("staffLogin").addEventListener("submit", function (e) {
   e.preventDefault();
   console.log("Form submitted!");
 
   const formData = new FormData(this);
 
-  fetch("../controllers/login.php", {
+  fetch("../controllers/check_credentials.php", {
     method: "POST",
     body: formData,
+    credentials: "include"
   })
     .then((res) => res.text())
     .then((data) => {
@@ -16,7 +15,7 @@ document.getElementById("staffLogin").addEventListener("submit", function (e) {
 
       if (data.trim() === "success") {
         setTimeout(() => {
-          window.location.href = "dashboard.html";
+          window.location.href = "admin_management.php";
         }, 1000);
       } else {
         Swal.fire({

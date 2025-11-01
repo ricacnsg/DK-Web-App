@@ -1,4 +1,6 @@
 <?php
+session_start();
+require_once '../database/connect.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -8,8 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
-require_once '../database/connect.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -29,7 +29,6 @@ switch ($method) {
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
-
 
 function getMenuItems() {
     global $conn;
@@ -169,4 +168,5 @@ function deleteMenuItem() {
 }
 
 $conn->close();
+echo json_encode($response);
 ?>

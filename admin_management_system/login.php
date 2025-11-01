@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (isset($_SESSION['staff_username'])) {
+  header("Location: admin_management.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +32,7 @@
                             <h1 class="fw-bolder title text-center">Run the Business</h1>
                             <h6 class="subtitle text-center mb-4">Sign in to your account</h6>
 
-                            <form id="staffLogin" class="mx-auto" method="POST" action="../controllers/login.php">
+                            <form id="staffLogin" class="mx-auto" method="POST" action="../controllers/check_credentials.php">
                                 <div class="mb-3">
                                     <label for="accountUsername" class="form-label fw-bolder">Username</label>
                                     <input id="accountUsername" type="text"

@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['staff_username'])) {
+  header("Location: login.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Daven's Kitchenette - Management System</title>
     <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="menu_management.css" />
+    <link rel="stylesheet" href="admin_management.css" />
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" crossorigin="anonymous" />
 </head>
@@ -28,7 +37,7 @@
                 <div class="nav-item" data-page="staff"><i class="fas fa-user-friends"></i> Staff Account Management</div>
             </div>
 
-            <button class="logout-btn">LOG OUT</button>
+            <button class="logout-btn" id="logoutbtn">LOG OUT</button>
         </div>
 
         <div class="main-content">
@@ -480,7 +489,7 @@
         </div>
     </div>
 
-    <script src="menu_management.js"></script>
+    <script src="admin_management.js"></script>
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
 </body>
 </html>

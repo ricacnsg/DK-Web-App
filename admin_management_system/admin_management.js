@@ -1,3 +1,22 @@
+fetch("../controllers/staff.php", {
+  method: "GET",
+  credentials: "include"
+})
+  .then(res => res.json())
+  .then(data => {
+    if (!data.logged_in) {
+      // 🔒 No session → redirect to login page
+      window.location.href = "login.php";
+    } 
+    // else {
+    //   // ✅ Session active → continue loading the page
+    //   document.getElementById("welcome").textContent =
+    //     "Welcome, " + data.staff_username;
+    // }
+  })
+  .catch(err => console.error("Error checking session:", err));
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
     const pages = document.querySelectorAll('.page');
@@ -46,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCategory = 'bento'; 
 
     // API base URL
-    const API_BASE = '../controllers/menu_management.php';
+    const API_BASE = '../controllers/admin_control.php';
 
     // PAGE NAVIGATION LOGIC (Sidebar)
     navItems.forEach(item => {
@@ -636,4 +655,30 @@ let items = [];
 
         // Initial display
         displayItems();
+
+//Logout
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("logoutbtn");
+
+  logoutBtn.addEventListener("click", () => {
+
+    fetch("../controllers/customer_logout.php", {
+      method: "POST",
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log("✅ " + data.message);
+          // Option 1: Redirect to login page
+          window.location.href = "login.php";
+        } else {
+          console.log("⚠️ " + data.message);
+        }
+      })
+      .catch(err => {
+        console.error("Error:", err);
+      });
+  });
+});
         
