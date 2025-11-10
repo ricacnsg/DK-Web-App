@@ -1,18 +1,12 @@
-fetch("../controllers/staff.php", {
+fetch("../controllers/islogin.php", {
   method: "GET",
   credentials: "include"
 })
   .then(res => res.json())
   .then(data => {
     if (!data.logged_in) {
-      // 🔒 No session → redirect to login page
       window.location.href = "login.php";
-    } 
-    // else {
-    //   // ✅ Session active → continue loading the page
-    //   document.getElementById("welcome").textContent =
-    //     "Welcome, " + data.staff_username;
-    // }
+    }
   })
   .catch(err => console.error("Error checking session:", err));
 
@@ -65,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCategory = 'bento'; 
 
     // API base URL
-    const API_BASE = '../controllers/admin_control.php';
+    const API_BASE = '../controllers/menu_management.php';
 
     // PAGE NAVIGATION LOGIC (Sidebar)
     navItems.forEach(item => {
@@ -524,12 +518,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize menu when page loads
     if (document.getElementById('menu').classList.contains('active-page')) {
         loadMenuItems('bento');
-    }
-
-    //INVENTORY MANAGEMENT 
-    
+    } 
 });
 
+//INVENTORY MANAGEMENT 
 let items = [];
         let editingIndex = -1;
         let deletingIndex = -1;
@@ -556,7 +548,7 @@ let items = [];
             modal.style.display = 'flex';
         }
 
-        function closeModal() {
+        function closeInventoryModal() {
             document.getElementById('itemModal').style.display = 'none';
             document.getElementById('itemForm').reset();
             editingIndex = -1;
@@ -579,7 +571,7 @@ let items = [];
                 items.push(item);
             }
 
-            closeModal();
+            closeInventoryModal();
             displayItems();
         });
 
@@ -646,7 +638,7 @@ let items = [];
             const modal = document.getElementById('itemModal');
             const deleteModal = document.getElementById('deleteModal');
             if (event.target === modal) {
-                closeModal();
+                closeInventoryModal();
             }
             if (event.target === deleteModal) {
                 closeDeleteModal();
@@ -656,13 +648,14 @@ let items = [];
         // Initial display
         displayItems();
 
-//Logout
+        
+//LOGOUT BUTTON
 document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutbtn");
 
   logoutBtn.addEventListener("click", () => {
 
-    fetch("../controllers/customer_logout.php", {
+    fetch("../controllers/logout.php", {
       method: "POST",
       credentials: "include"
     })
@@ -681,4 +674,412 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 });
+
+
+//STAFF ACCOUNT MANAGEMENT
+document.addEventListener("DOMContentLoaded", () => {
+
+    const username = document.getElementById('username');
+    const message = document.getElementById('validationMessage');
+    const pass = document.getElementById('password');
+    const messagePass = document.getElementById('validationPass');
+    const createBtn = document.getElementById('createaccbtn');
+    
+    //validation 1: check if username is unique - DONE
+    username.addEventListener('input', () => {
+        fetch("../controllers/staff.php?action=usernames", {
+                method: 'GET'
+            })
+        .then(res => res.json())
+        .then(data => {
+            const user = username.value.trim().toLowerCase();
+            const exists = data.some(row => row.staffUsername.toLowerCase() === user);
+            if(user === ''){
+                message.textContent = '';
+                return;
+            }
+
+            if (exists){
+                message.textContent = '❌ Username is already taken.';
+                message.style.fontSize = '12px';
+                message.style.marginLeft = '10px'
+
+            }
+            else{
+                message.textContent = '✅ Username is available.';
+                message.style.fontSize = '12px';
+                message.style.marginLeft = '10px';
+            }
+
+            //validation 2: username should have no space - DONE
+            if (/\s/.test(username.value)){
+                message.textContent = '❌ Username should not contain spaces.';
+                message.style.fontSize = '12px';
+                message.style.marginLeft = '10px';
+            }      
+            
+            if(/\s/.test(username.value) || exists){
+                createBtn.disabled = true;
+                createBtn.style.backgroundColor = 'gray';
+            }
+            else {
+                createBtn.disabled = false;
+                createBtn.style.backgroundColor = '#062970';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    
+    pass.addEventListener('input', () => {
+        const hasUpperCase = /[A-Z]/.test(pass.value);
+        const hasLowerCase = /[a-z]/.test(pass.value);
+        const hasSpecialChar = /[!@#$%^&*()_+-=<>?:{|,.:;'"}1234567890]/.test(pass.value);
+
+        //validation 3: check if password is secure - DONE
+        if(pass.value === ''){
+            messagePass.textContent = '';
+            return;
+        }
+
+        if(pass.value.length < 8){
+            messagePass.textContent = '❌ Password should contain atleast 8 characters.';
+            messagePass.style.fontSize = '12px';
+            messagePass.style.marginLeft = '10px';
+        }
+        else if(hasUpperCase && hasLowerCase && hasSpecialChar){
+            messagePass.textContent = '✅ Password is now secure.';
+            messagePass.style.fontSize = '12px';
+            messagePass.style.marginLeft = '10px';
+        }
+        else {
+            messagePass.textContent = '❌ Password should include uppercase, lowercase, numbers, and special characters';
+            messagePass.style.fontSize = '9px';
+            messagePass.style.marginLeft = '10px';
+        }
+    });
+
+    // show/hide password button - DONE
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('hide');
+
+    togglePassword.addEventListener('click', function () {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    
+    eyeIcon.classList.toggle('fa-eye');
+    eyeIcon.classList.toggle('fa-eye-slash');   
+    });
+
+    //add staff account - DONE
+    document.getElementById('addStaffForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const fullname = document.getElementById('fullname').value;
+        const contactno = document.getElementById('contactno').value;
+        const role = document.getElementById('role').value;
+        const staff_username = document.getElementById('username').value;
+        const staff_password = document.getElementById('password').value;
+
+        const formData = new FormData();
+        formData.append('fullname', fullname);
+        formData.append('contactno', contactno);
+        formData.append('role', role);
+        formData.append('username', staff_username);
+        formData.append('password', staff_password);
+
+        fetch("../controllers/staff.php?action=createAcc", {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Account created successfully.",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                displayStaffAccounts();
+
+                document.getElementById('addStaffForm').reset();
+                document.getElementById('validationMessage').textContent = '';
+                document.getElementById('validationPass').textContent = '';
+            }
+            else {
+                console.log("⚠️ " + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    //display staff accounts - DONE
+    function displayStaffAccounts(){
+        fetch("../controllers/staff.php?action=accounts", {
+            method: 'GET'
+        })
+        .then(res => res.json())
+        .then(data => {
+            const tableBody = document.getElementById('staffTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if(data.length === 0){
+                tableBody = `<tr><td colspan="4">No record found.</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.staffFullname}</td>
+                                <td>${row.staffRole}</td>
+                                <td>
+                                    <button class="edit-btn" data-id="${row.staffID}">Edit</button>
+                                    <button class="delete-btn" data-id="${row.staffID}">Delete</button>
+                                </td>`;
+                tableBody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    displayStaffAccounts();
+    
+
+    //edit staff accounts - DONE
+    const table = document.getElementById('staffTable');
+    const form = document.getElementById('editForm');
+
+    const editModal = document.getElementById('editaccModal');
+    const deleteModal = document.getElementById('deleteaccModal');
+    const cancelDeleteBtn = document.querySelector('.canceldelete-btn');
+    const confirmDeleteBtn = document.getElementById('confirmDelete');
+    const cancelBtn = document.querySelector('.cancelbtn');
+    const saveBtn = document.querySelector('.savebtn');
+
+    const fullnameInput = document.getElementById('editFullname');
+    const contactnoInput = document.getElementById('editContact');
+    const usernameInput = document.getElementById('editUsername');
+    const roleInput = document.getElementById('editRole');
+    const passInput = document.getElementById('editPassword');
+    const passConfirm = document.getElementById('confirmPassword');
+    
+    
+    table.addEventListener('click', function(e) {
+      if (e.target.classList.contains('edit-btn')) {
+        editModal.classList.add('active');
+      }
+      else if (e.target.classList.contains('delete-btn')) {
+        deleteModal.classList.add('active');
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      editModal.classList.remove('active');
+    });
+
+    editModal.addEventListener('click', function(e) {
+      if (e.target === editModal) {
+        editModal.classList.remove('active');
+      }
+    });
+    
+    cancelDeleteBtn.addEventListener('click', () => {
+      deleteModal.classList.remove('active');
+    });
+
+    deleteModal.addEventListener('click', function(e) {
+      if (e.target === deleteModal) {
+        deleteModal.classList.remove('active');
+      }
+    });
+
+    let currentUserId = null;
+    fetch('../controllers/islogin.php')
+    .then(res => res.json())
+    .then(data => {
+        currentUserId = data.staff_id;
+    })
+    .catch(err => console.error('Error fetching session:', err));
+
+    //retrieve data to editForm - DONE
+    const tableBody = document.querySelector('#staffTable tbody');
+    tableBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('edit-btn')) {
+            const id = e.target.dataset.id;
+
+            const res = await fetch(`../controllers/staff.php?action=staffinfos&staffID=${encodeURIComponent(id)}`);
+            const data = await res.json();
+
+            data.forEach(row => {
+                document.getElementById('staffID').value = row.staffID;
+                fullnameInput.value = row.staffFullname;
+                contactnoInput.value = row.contactNumber;
+                usernameInput.value = row.staffUsername;
+                roleInput.value = row.staffRole;
+                id.value = row.id;
+
+                fullnameInput.dataset.original = row.staffFullname;
+                contactnoInput.dataset.original = row.contactNumber;
+                usernameInput.dataset.original = row.staffUsername;
+                roleInput.dataset.original = row.staffRole;
+                passInput.dataset.original = '';
+                passConfirm.dataset.original = '';
+            });
+
+            saveBtn.disabled = true;
+
+            //condition: if there is no changes, the save button is disabled, else enable. - DONE
+            function checkforChanges() {
+                const inputs = [fullnameInput, contactnoInput, usernameInput, roleInput, passInput, passConfirm];
+                const requiredInputs = [fullnameInput, contactnoInput, usernameInput, roleInput];
+
+                const hasChanged = inputs.some(input => {
+                    return input.value.trim() !== (input.dataset.original || '').trim();
+                });
+
+                const hasEmptyField = requiredInputs.some(input => input.value.trim() === '');
+
+                saveBtn.disabled = !hasChanged || hasEmptyField;
+            }
+
+
+            [fullnameInput, contactnoInput, usernameInput, roleInput, passInput, passConfirm].forEach(input => {
+                input.addEventListener('input', checkforChanges);
+                input.addEventListener('change', checkforChanges);
+            })
+
+            document.getElementById('editaccModal').classList.add('active');
+        }
+        //delete staff accounts
+        else if(e.target.classList.contains('delete-btn')){
+            const id = e.target.dataset.id;
+
+            confirmDeleteBtn.addEventListener('click', () => {
+                const formData = new FormData();
+                formData.append('staff_id', id);
+
+                fetch('../controllers/staff.php?action=deleteAcc', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data =>{
+                    if(data.success){
+                        if(parseInt(id) === parseInt(currentUserId)){
+                            fetch('../controllers/logout.php')
+                            window.location.href = "login.php";
+                        }
+                        else {
+                            document.getElementById('deleteaccModal').classList.remove('active');
+                            Swal.fire({
+                                position: "center",
+                                icon: "success",
+                                title: "Account successfully deleted.",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        displayStaffAccounts();
+                        }
+                        
+                    }
+                    else{
+                        console.log("⚠️ " + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+    });
+
+    //edit staff account
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('staffID').value;
+            const formData = new FormData();
+            formData.append('staff_id', id);
+            formData.append('newFullname', fullnameInput.value);
+            formData.append('newUsername', usernameInput.value);
+            formData.append('newContactno', contactnoInput.value);
+            formData.append('newRole', roleInput.value);
+            
+
+            if(passInput.value !== passConfirm.value){
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: "Confirm your password correctly.",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                return;
+            }
+            else {
+                formData.append('newPassword', passConfirm.value);
+            }
         
+            fetch("../controllers/staff.php?action=editAcc", {
+                method: 'POST',
+                body: formData,
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Save changes.",
+                        icon: "success"
+                    });;
+                    displayStaffAccounts();
+                }
+                else{
+                    console.log("⚠️ " + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+            editModal.classList.remove('active');
+    });
+    
+    //filter and search staff
+    const searchBox = document.getElementById('searchInput');
+    const filterRole = document.getElementById('filterStaff');
+    let debounceTimer;
+    function fetchData(){
+            const searchVal = searchBox.value.trim();
+            const roleVal = filterRole.value;
+
+            fetch(`../controllers/staff.php?action=search&search=${encodeURIComponent(searchVal)}&role=${encodeURIComponent(roleVal)}`)
+            .then(res => res.json())
+            .then(data => {
+                document.querySelector('#staffTable tbody').innerHTML = ''; 
+
+                if (data.length > 0) {
+                    data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${row.staffFullname}</td>
+                                    <td>${row.staffRole}</td>
+                                    <td>
+                                        <button class="edit-btn" data-id="${row.staffID}">Edit</button>
+                                        <button class="delete-btn" data-id="${row.staffID}">Delete</button>
+                                    </td>`;
+                    tableBody.appendChild(tr);
+                });
+                }
+            })
+            .catch(err => console.error('Error:', err));
+    };
+
+    searchBox.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fetchData, 300);
+    });
+    
+    filterRole.addEventListener('change', fetchData);
+
+    fetchData();
+
+});

@@ -168,5 +168,4 @@ function deleteMenuItem() {
 }
 
 $conn->close();
-echo json_encode($response);
 ?>

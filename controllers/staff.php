@@ -1,33 +1,79 @@
 <?php
 session_start();
-error_log("Session set: " . print_r($_SESSION, true));
 header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 require_once '../database/connect.php';
+$response = NULL;
 
-if (!isset($_SESSION['staff_username'])){
-  $response =  ['logged_in' => false, 'message' => 'No session found.'];
-  exit;
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
 }
-$response = [
-    'logged_in' => true,
-    'staff_id' => $_SESSION['staff_id'] ?? null,
-    'staff_username' => $_SESSION['staff_username'] ?? null,
-    'staff_role' => $_SESSION['staff_role'] ?? null
-];
 
-// add new account with hashed password
+// TO DO:
+// deleteStaffAccount($conn);
+// searchStaff($conn);
+// filterStaff($conn);
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+switch($method){
+  case 'GET':
+    if(isset($_GET['action'])) {
+      switch ($_GET['action']) {
+        case 'accounts':
+          displayStaffAccounts($conn);
+          break;
+        case 'usernames':
+          getStaffUsername($conn);
+          break;
+        case 'staffinfos':
+          displayInfosForEdit($conn);
+          break;
+        case 'search':
+          searchAndFilterStaffAccount($conn);
+          break;
+        default:
+          $response = ['success' => false, 'message' => 'Unknown action'];
+      }
+    }
+    else {
+      $response = ['success' => false, 'message' => 'No action specified.'];
+    }
+    break;
+  case 'POST':
+    if(isset($_GET['action'])) {
+      switch ($_GET['action']) {
+        case 'createAcc':
+          createStaffAccount($conn);
+          break;
+        case 'editAcc':
+          editStaffAccount($conn);
+          break;
+        case 'deleteAcc':
+          deleteStaffAccount($conn);
+          break;
+        default:
+          $response = ['success' => false, 'message' => 'Unknown action'];
+      }
+    }
+    else {
+      $response = ['success' => false, 'message' => 'No action specified.'];
+    }
+    break;
+  default:
+    $response = ['success' => false, 'message' => 'Invalid request method.'];
+}
+
 function createStaffAccount($conn) {
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  global $response;
     $fullname = $_POST["fullname"];
     $contactno = $_POST["contactno"];
     $user = $_POST["username"];
     $pass = $_POST["password"];
     $role = $_POST["role"];
-  // $fullname = "davendaven"; // testing
-  // $contactno = 9123456534; //testing
-  // $user = "davens"; // testing
-  // $pass = "gUstOkOmagwork"; // testing
-  // $role = "staff"; // testing
     $createdAt = date("Y-m-d H:i:s");
     $editedAt = date("Y-m-d H:i:s");
 
@@ -43,66 +89,146 @@ function createStaffAccount($conn) {
       $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
     }
     $stmt->close();
-    } 
-  else {
-    $response = ['success' => false, 'message' => 'Invalid request method.'];
-  }
 }
 
-
-// edit account details ++ mababago din ang editedAt kapag inedit
-function editStaffAccount($conn) {
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
-     $staffId = $_POST["staff_id"];
-     $newUsername = $_POST["new_username"];
-     $newRole = $_POST["new_role"];
-    //$staffId = 1; // testing
-    //$newUsername = "Daven"; // testing
-    //$newRole = "admin"; // testing
-    $editedAt = date("Y-m-d H:i:s");
-
-    $stmt = $conn->prepare("UPDATE staff SET staffUsername = ?, staffRole = ?, editedAt = ? WHERE staffID = ?");
-    $stmt->bind_param("sssi", $newUsername, $newRole, $editedAt, $staffId);
+function displayStaffAccounts($conn){
+  global $response;
+    $stmt = $conn->prepare("SELECT staffID, staffFullname, staffRole FROM staff");
 
     if ($stmt->execute()) {
-      echo "Account updated successfully.";
-    } else {
-      echo "Error: " . $stmt->error;
-    }
+      $result = $stmt->get_result();
+      $data = [];
 
+      while($row = $result->fetch_assoc()){
+        $data[] = $row;
+      }
+      $response = $data;
+    } 
+    else {
+      $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
+    }
+    $stmt->close();
+}
+
+function getStaffUsername($conn){
+  global $response;
+    $stmt = $conn->prepare("SELECT staffUsername FROM staff");
+
+    if ($stmt->execute()) {
+      $result = $stmt->get_result();
+      $usernames = [];
+
+      while($row = $result->fetch_assoc()){
+        $usernames[] = $row;
+      }
+      $response = $usernames;
+    } 
+    else {
+      $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
+    }
+    $stmt->close();
+}
+
+function displayInfosForEdit($conn){
+    global $response;
+  if (isset($_GET['staffID'])) {
+    $staffID = $_GET['staffID'];
+    $stmt = $conn->prepare("SELECT staffID, staffFullname, contactNumber, staffUsername, staffPassword, staffRole FROM staff WHERE staffID = ?");
+    $stmt->bind_param("i", $staffID);
+
+    if ($stmt->execute()) {
+      $result = $stmt->get_result();
+      $staffInfos = [];
+
+      while($row = $result->fetch_assoc()){
+        $staffInfos[] = $row;
+      }
+      $response = $staffInfos;
+    } 
+    else {
+      $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
+    }
     $stmt->close();
   }
 }
 
+function editStaffAccount($conn) {
+    global $response;
+    $staffId = $_POST["staff_id"];
+    $newFullname = $_POST["newFullname"];
+    $newUsername = $_POST["newUsername"];
+    $newContactno = $_POST["newContactno"];
+    $newRole = $_POST["newRole"];
+    $newPassword = $_POST["newPassword"];
+    $editedAt = date("Y-m-d H:i:s");
 
-// delete account
+    $hash_newpassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+    $stmt = $conn->prepare("UPDATE staff SET staffFullname = ?, staffUsername = ?, contactNumber = ?, staffRole = ?, staffPassword = ?, editedAt = ? WHERE staffID = ?");
+    $stmt->bind_param("ssisssi", $newFullname, $newUsername, $newContactno, $newRole, $hash_newpassword, $editedAt, $staffId);
+
+    if ($stmt->execute()) {
+      $response = ['success' => true, 'message' => 'Account edited successfully.'];
+    } else {
+      $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
+    }
+
+    $stmt->close();
+}
+
 function deleteStaffAccount($conn) {
-  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  global $response;
   $staffId = $_POST["staff_id"];
-  // $staffId = 3; // testing
-
   $stmt = $conn->prepare("DELETE FROM staff WHERE staffID = ?");
   $stmt->bind_param("i", $staffId);
 
   if ($stmt->execute()) {
-    echo "Account deleted successfully.";
+    $response = ['success' => true, 'message' => 'Account deleted successfully.'];
   } else {
-    echo "Error: " . $stmt->error;
+    $response = ['success' => false, 'message' => 'Database error: ' . $stmt->error];
   }
-
   $stmt->close();
-  }
 }
 
+function searchAndFilterStaffAccount($conn){
+  global $response;
+  $search = $_GET['search']  ?? '';
+  $role = $_GET['role']  ?? '';
 
-//call functions here
-createStaffAccount($conn);
-editStaffAccount($conn);
-deleteStaffAccount($conn);
+  $sql = "SELECT staffID, staffFullname, staffRole FROM staff WHERE 1=1";
+  $params = [];
+  $types = "";
 
-/* TO DO
- - try to put value and name attribute sa html and call it here base sa need iperform through conditional statements OR sa js file na lang itrigger yung function based on button clicked
-*/
+  // If search query exists
+  if ($search !== '') {
+      $sql .= " AND staffFullname LIKE CONCAT('%', ?, '%')";
+      $params[] = $search;
+      $types .= "s";
+  }
+
+  // If role filter exists
+  if ($role !== '') {
+      $sql .= " AND staffRole = ?";
+      $params[] = $role;
+      $types .= "s";
+  }
+
+  $stmt = $conn->prepare($sql);
+
+  if (!empty($params)) {
+      $stmt->bind_param($types, ...$params);
+  }
+
+  $stmt->execute();
+  $result = $stmt->get_result();
+
+  $data = [];
+  while($row = $result->fetch_assoc()){
+    $data[] = $row;
+  }
+
+  $response = $data;
+}
 
 $conn->close();
 echo json_encode($response);

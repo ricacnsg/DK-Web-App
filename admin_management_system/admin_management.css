@@ -888,24 +888,24 @@ html, body {
 .add-staff-form h2 {
     color: var(--color-dark-blue);
     margin-bottom: 15px;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .add-staff-form label {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--color-dark-blue);
-    margin-top: 10px;
-    margin-bottom: 5px;
+    margin-top: 7px;
+    margin-bottom: 4px;
 }
 
 .add-staff-form input, .add-staff-form select {
-    padding: 10px;
+    padding: 6px;
     border: 1px solid #ccc;
     border-radius: 8px;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     box-sizing: border-box;
 }
 
@@ -916,7 +916,17 @@ html, body {
     border-radius: 25px;
     font-weight: bold;
     padding: 12px;
-    margin-top: 10px;
+    margin-top: 8px;
+}
+
+.togglePassword {
+    top: 58%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #062970;
 }
 
 /* Staff Table */
@@ -974,6 +984,71 @@ html, body {
     background-color: var(--color-yellow);
     color: var(--color-dark-blue);
 }
+
+/* edit and delete modal here */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    text-align: center;
+    color: var(--color-dark-blue);
+}
+
+.modal-content label {
+    display: block;
+    margin: 8px 0 4px;
+    font-size: 13px;
+    color: var(--color-dark-blue);
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 7px;
+    margin-bottom: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-buttons {
+    text-align: right;
+}
+
+.cancelbtn {
+    background: #ccc;
+    margin-right: 8px;
+}
+
+.savebtn {
+    background: #062970;
+    color: white;
+}
+
+.savebtn:disabled {
+    background: #ccc;
+}
+
+.confirm-btn {
+    background: #062970;
+    color: white;
+}
+
+.canceldelete-btn {
+    background: #ccc;
+    margin-right: 20px;
+}
+
 
 /* Staff Search + Filter */
 .search-filter {
@@ -1266,11 +1341,11 @@ html, body {
         }
 
         .edit-btn {
-            color: #1e3a8a;
+            color: #cbc0c0;
         }
 
         .edit-btn:hover {
-            color: #2563eb;
+            color: #ffffff;
             transform: scale(1.1);
         }
 
