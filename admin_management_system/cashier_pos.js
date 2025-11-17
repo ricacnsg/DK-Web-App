@@ -1,101 +1,56 @@
-// Menu data with online images
-const menuItems = [
-    { 
-        name: 'SPAM SILOG', 
-        desc: 'Spam • Fried Rice • Fried Egg', 
-        price: 109, 
-        category: 'BentoSilog', 
-        quantity: 0,
-        image: 'https://images.unsplash.com/photo-1563379091339-03246963d96f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2lsb2clMjBmb29kfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'CHICKEN WINGS', 
-        desc: 'Garlic Parmesan Flavor', 
-        price: 129, 
-        category: 'Flavoured Wings w/ Rice', 
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2hpY2tlbiUyMHdpbmdzfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'RICE TOPPED LIEMPO', 
-        desc: 'Crispy Pork Belly', 
-        price: 159, 
-        category: 'Rice Meal', 
-        quantity: 2,
-        image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cG9yayUyMGJlbGx5fGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'CLASSIC CHEESEBURGER', 
-        desc: 'Patty, Cheese, Lettuce', 
-        price: 99, 
-        category: 'Burger and Sandwiches', 
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2hlZXNlYnVyZ2VyfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'TAPA SILOG', 
-        desc: 'Tapa • Fried Rice • Fried Egg', 
-        price: 109, 
-        category: 'BentoSilog', 
-        quantity: 1,
-        image: 'https://images.unsplash.com/photo-1604909053586-75d028495c18?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGFwYSUyMHNpbG9nfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'CALAMARES', 
-        desc: 'Deep-fried Squid Rings', 
-        price: 149, 
-        category: 'Pulutan Express', 
-        quantity: 0,
-        image: 'https://images.unsplash.com/photo-1626645735466-78696cc2b8f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2FsYW1hcmVzfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'MILK TEA', 
-        desc: 'Wintermelon Flavor', 
-        price: 85, 
-        category: 'Beverages', 
-        quantity: 0,
-        image: 'https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWlsayUyMHRlYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=500&q=60'
-    },
-    { 
-        name: 'CHICKEN SILOG', 
-        desc: 'Chicken • Fried Rice • Fried Egg', 
-        price: 109, 
-        category: 'BentoSilog', 
-        quantity: 0,
-        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2hpY2tlbiUyMHNpbG9nfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'
-    },
-];
+// Global variables
+let menuItems = [];
+let allMenuItems = []; // Store all items for search
+let orderHistory = [];
+let currentPaymentMethod = 'cash';
 
-// Order history data
-const orderHistory = [
-    { id: 1, table: 3, items: 'Tapa Silog', amount: '₱109', method: 'Cash', date: '10-15-2024', status: 'Completed' },
-    { id: 2, table: 4, items: 'Spam Silog', amount: '₱109', method: 'Cash', date: '10-16-2024', status: 'Completed' },
-    { id: 3, table: 'Takeout', items: 'Tocino Silog', amount: '₱99', method: 'Cash', date: '10-16-2024', status: 'Completed' },
-    { id: 4, table: 7, items: 'Chicken Silog', amount: '₱109', method: 'Gcash', date: '10-16-2024', status: 'Completed' },
-    { id: 5, table: 2, items: 'Bangus Silog', amount: '₱120', method: 'Cash', date: '10-16-2024', status: 'Completed' },
-    { id: 6, table: 8, items: 'Shanghai Silog Extra Rice(2) Strawberry Dalgona', amount: '₱339', method: 'Cash', date: '10-16-2024', status: 'Completed' }
-];
+// Initialize menu from database
+async function initializeMenu() {
+    try {
+        const response = await fetch('../controllers/pos.php?action=getMenuItems');
+        const result = await response.json();
+        
+        console.log('Menu load result:', result);
+        
+        if (result.success) {
+            menuItems = result.data;
+            allMenuItems = result.data; // Store all items
+            renderMenuItems();
+        } else {
+            console.error('Failed to load menu items:', result.message);
+            Swal.fire('Error', 'Failed to load menu items', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading menu:', error);
+        Swal.fire('Error', 'Failed to connect to server', 'error');
+    }
+}
 
-// Initialize menu
-function initializeMenu() {
+// Render menu items
+function renderMenuItems() {
     const menuGrid = document.getElementById('menuGrid');
     menuGrid.innerHTML = '';
+
+    if (menuItems.length === 0) {
+        menuGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">No items available in this category</div>';
+        return;
+    }
 
     menuItems.forEach((item, index) => {
         const menuItemEl = document.createElement('div');
         menuItemEl.className = 'menu-item';
         menuItemEl.innerHTML = `
             <div class="menu-item-image">
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'">
             </div>
             <div class="menu-item-content">
                 <div class="menu-item-name">${item.name}</div>
                 <div class="menu-item-desc">${item.desc}</div>
-                <div class="menu-item-price">Php ${item.price}.00</div>
+                <div class="menu-item-price">Php ${item.price.toFixed(2)}</div>
                 <div class="quantity-controls">
-                    <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
-                    <div class="quantity-display">${item.quantity}</div>
-                    <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                    <div class="quantity-display">${item.quantity || 0}</div>
+                    <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
                 </div>
             </div>
         `;
@@ -104,10 +59,20 @@ function initializeMenu() {
 }
 
 // Update quantity
-function updateQuantity(index, change) {
-    menuItems[index].quantity = Math.max(0, menuItems[index].quantity + change);
-    initializeMenu();
-    updateOrderSummary();
+function updateQuantity(itemId, change) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (item) {
+        item.quantity = Math.max(0, (item.quantity || 0) + change);
+        
+        // Update in allMenuItems too
+        const allItem = allMenuItems.find(i => i.id === itemId);
+        if (allItem) {
+            allItem.quantity = item.quantity;
+        }
+        
+        renderMenuItems();
+        updateOrderSummary();
+    }
 }
 
 // Update order summary
@@ -116,7 +81,7 @@ function updateOrderSummary() {
     let total = 0;
     let itemsHTML = '';
 
-    const orderedItems = menuItems.filter(item => item.quantity > 0);
+    const orderedItems = allMenuItems.filter(item => (item.quantity || 0) > 0);
 
     if (orderedItems.length > 0) {
         orderedItems.forEach(item => {
@@ -125,31 +90,40 @@ function updateOrderSummary() {
             itemsHTML += `
                 <div class="item-row">
                     <span>${item.quantity}x ${item.name}</span>
-                    <span class="item-row-price">Php ${itemTotal}.00</span>
+                    <span class="item-row-price">Php ${itemTotal.toFixed(2)}</span>
                 </div>
             `;
         });
     } else {
-        // Placeholder items when no items are added
         itemsHTML = `
             <div class="item-row">
-                <span>2x Chicken Silog</span>
-                <span class="item-row-price">Php 198.00</span>
-            </div>
-            <div class="item-row">
-                <span>2x Lemon Yakult</span>
-                <span class="item-row-price">Php 198.00</span>
-            </div>
-            <div class="item-row">
-                <span>1x Potato Mojos</span>
-                <span class="item-row-price">Php 99.00</span>
+                <span style="color: #999;">No items selected</span>
             </div>
         `;
-        total = 495; // Placeholder total
+        total = 0;
     }
 
     itemsList.innerHTML = itemsHTML;
     document.getElementById('totalPrice').textContent = `Php ${total.toFixed(2)}`;
+}
+
+// Search menu
+function searchMenu() {
+    const searchValue = document.getElementById('menuSearchInput').value.toLowerCase();
+    
+    if (searchValue === '') {
+        // If search is empty, show current category items
+        renderMenuItems();
+        return;
+    }
+    
+    // Filter all items by search term
+    menuItems = allMenuItems.filter(item => 
+        item.name.toLowerCase().includes(searchValue) || 
+        item.desc.toLowerCase().includes(searchValue)
+    );
+    
+    renderMenuItems();
 }
 
 // Select category
@@ -158,9 +132,46 @@ function selectCategory(el) {
         item.classList.remove('active');
     });
     el.classList.add('active');
+    
+    // Clear search
+    document.getElementById('menuSearchInput').value = '';
+    
+    const category = el.getAttribute('data-category');
+    console.log('Selected category:', category);
+    
+    filterMenuByCategory(category);
 }
 
-// Select order type and control Table Number visibility
+// Filter menu by category
+async function filterMenuByCategory(category) {
+    try {
+        const response = await fetch(`../controllers/pos.php?action=getMenuItems&category=${encodeURIComponent(category)}`);
+        const result = await response.json();
+        
+        console.log('Filter result:', result);
+        
+        if (result.success) {
+            // Preserve quantities
+            const quantities = {};
+            allMenuItems.forEach(item => {
+                if (item.quantity > 0) {
+                    quantities[item.id] = item.quantity;
+                }
+            });
+            
+            menuItems = result.data.map(item => ({
+                ...item,
+                quantity: quantities[item.id] || 0
+            }));
+            
+            renderMenuItems();
+        }
+    } catch (error) {
+        console.error('Error filtering menu:', error);
+    }
+}
+
+// Select order type
 function selectOrderType(el, type) {
     document.querySelectorAll('.order-type-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -177,34 +188,35 @@ function selectOrderType(el, type) {
     }
 }
 
-// Select payment with color change
+// Select payment
 function selectPayment(el) {
     document.querySelectorAll('.payment-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     el.classList.add('active');
+    currentPaymentMethod = el.getAttribute('data-method');
 }
 
-// Show order confirmation modal
+// Show order confirmation
 function showOrderConfirmation() {
-    const totalPriceText = document.getElementById('totalPrice').textContent;
-    const hasOrderedItems = menuItems.some(item => item.quantity > 0) || totalPriceText.includes('495');
-
-    if (!hasOrderedItems) {
-        alert('Please select items before placing an order.');
-        return; 
+    const orderedItems = allMenuItems.filter(item => (item.quantity || 0) > 0);
+    
+    if (orderedItems.length === 0) {
+        Swal.fire('No Items', 'Please select items before placing an order.', 'warning');
+        return;
     }
 
-    // Get order details for confirmation message
-    const customerName = document.querySelector('.form-input-gold').value;
-    const totalPrice = totalPriceText;
-    const activePaymentBtn = document.querySelector('.payment-btn.active');
-    const paymentMethod = activePaymentBtn ? activePaymentBtn.textContent.trim() : 'N/A';
+    const customerName = document.getElementById('customerName').value;
+    const totalPrice = document.getElementById('totalPrice').textContent;
     const orderType = document.querySelector('.order-type-btn.active').getAttribute('data-type');
     let tableNumber = '';
 
     if (orderType === 'dine-in') {
         tableNumber = document.getElementById('tableNumberInput').value;
+        if (!tableNumber) {
+            Swal.fire('Table Required', 'Please enter table number for dine-in orders', 'warning');
+            return;
+        }
     }
 
     let confirmationMessage = `Are you sure you want to place this order?<br><br>`;
@@ -216,42 +228,158 @@ function showOrderConfirmation() {
     }
 
     confirmationMessage += `<br>Total: ${totalPrice}<br>`;
-    confirmationMessage += `Payment: ${paymentMethod}`;
+    confirmationMessage += `Payment: ${currentPaymentMethod.toUpperCase()}`;
 
     document.getElementById('confirmationMessage').innerHTML = confirmationMessage;
     document.getElementById('orderConfirmationModal').style.display = 'flex';
 }
 
-// Confirm order
+// Confirm order (show payment modal)
 function confirmOrder() {
-    // Close the modal
     document.getElementById('orderConfirmationModal').style.display = 'none';
     
-    // Process the order
-    const customerName = document.querySelector('.form-input-gold').value;
-    const totalPrice = document.getElementById('totalPrice').textContent;
-    const activePaymentBtn = document.querySelector('.payment-btn.active');
-    const paymentMethod = activePaymentBtn ? activePaymentBtn.textContent.trim() : 'N/A';
-    const orderType = document.querySelector('.order-type-btn.active').getAttribute('data-type');
-    let tableNumber = '';
-
-    if (orderType === 'dine-in') {
-        tableNumber = document.getElementById('tableNumberInput').value;
+    const totalPrice = parseFloat(document.getElementById('totalPrice').textContent.replace('Php ', ''));
+    
+    if (currentPaymentMethod === 'cash') {
+        showCashPaymentModal(totalPrice);
+    } else if (currentPaymentMethod === 'gcash') {
+        showGCashModal(totalPrice);
     }
+}
 
-    let orderDetails = `Order placed successfully! ✅\n\n`;
-    orderDetails += `Customer: ${customerName}\n`;
-    orderDetails += `Order Type: ${orderType.toUpperCase()}`;
+// Show cash payment modal
+function showCashPaymentModal(total) {
+    document.getElementById('cashTotal').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('cashReceived').value = '';
+    document.getElementById('changeAmount').textContent = '';
+    document.getElementById('cashPaymentModal').style.display = 'flex';
+    
+    // Calculate change on input
+    document.getElementById('cashReceived').oninput = function() {
+        const received = parseFloat(this.value) || 0;
+        const change = received - total;
+        if (change >= 0) {
+            document.getElementById('changeAmount').textContent = `Change: Php ${change.toFixed(2)}`;
+            document.getElementById('changeAmount').style.color = '#0052cc';
+        } else {
+            document.getElementById('changeAmount').textContent = `Insufficient amount`;
+            document.getElementById('changeAmount').style.color = '#ff6b6b';
+        }
+    };
+}
 
-    if (orderType === 'dine-in' && tableNumber) {
-        orderDetails += ` (Table #${tableNumber})`;
+// Process cash payment
+function processCashPayment() {
+    const total = parseFloat(document.getElementById('cashTotal').textContent.replace('Php ', ''));
+    const received = parseFloat(document.getElementById('cashReceived').value) || 0;
+    
+    if (received < total) {
+        Swal.fire('Insufficient Amount', 'Please enter amount equal or greater than total', 'error');
+        return;
     }
+    
+    closeCashModal();
+    placeOrder();
+}
 
-    orderDetails += `\nTotal: ${totalPrice}\n`;
-    orderDetails += `Payment: ${paymentMethod}`;
-    orderDetails += `\n\n--- Order Sent to Kitchen ---`;
+// Close cash modal
+function closeCashModal() {
+    document.getElementById('cashPaymentModal').style.display = 'none';
+}
 
-    alert(orderDetails);
+// Show GCash modal
+function showGCashModal(total) {
+    document.getElementById('gcashTotal').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('gcashModal').style.display = 'flex';
+}
+
+// Confirm GCash payment
+function confirmGCashPayment() {
+    closeGCashModal();
+    placeOrder();
+}
+
+// Close GCash modal
+function closeGCashModal() {
+    document.getElementById('gcashModal').style.display = 'none';
+}
+
+// Place order to database
+async function placeOrder() {
+    try {
+        const customerName = document.getElementById('customerName').value;
+        const totalPrice = parseFloat(document.getElementById('totalPrice').textContent.replace('Php ', ''));
+        const orderType = document.querySelector('.order-type-btn.active').getAttribute('data-type');
+        let tableNumber = null;
+
+        if (orderType === 'dine-in') {
+            tableNumber = document.getElementById('tableNumberInput').value;
+        }
+
+        const orderedItems = allMenuItems.filter(item => (item.quantity || 0) > 0).map(item => ({
+            id: item.id,
+            quantity: item.quantity
+        }));
+
+        const orderData = {
+            customerName: customerName,
+            orderType: orderType,
+            tableNumber: tableNumber,
+            paymentMethod: currentPaymentMethod,
+            totalAmount: totalPrice,
+            items: orderedItems
+        };
+
+        const response = await fetch('../controllers/pos.php?action=placeOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Order Placed!',
+                html: `Order ID: ${result.orderID}<br>Total: Php ${totalPrice.toFixed(2)}<br><br>Order sent to kitchen`,
+                confirmButtonColor: '#0052cc'
+            });
+            
+            resetOrderForm();
+        } else {
+            Swal.fire('Error', 'Failed to place order: ' + result.message, 'error');
+        }
+
+    } catch (error) {
+        console.error('Error placing order:', error);
+        Swal.fire('Error', 'Error placing order. Please try again.', 'error');
+    }
+}
+
+// Reset order form
+function resetOrderForm() {
+    allMenuItems.forEach(item => {
+        item.quantity = 0;
+    });
+    
+    menuItems.forEach(item => {
+        item.quantity = 0;
+    });
+    
+    renderMenuItems();
+    updateOrderSummary();
+    
+    document.getElementById('customerName').value = 'Walk-in Customer';
+    document.getElementById('tableNumberInput').value = '';
+    
+    const dineInBtn = document.querySelector('.order-type-btn[data-type="dine-in"]');
+    selectOrderType(dineInBtn, 'dine-in');
+    
+    const cashBtn = document.querySelector('.payment-btn.cash');
+    selectPayment(cashBtn);
 }
 
 // Cancel order
@@ -259,7 +387,24 @@ function cancelOrder() {
     document.getElementById('orderConfirmationModal').style.display = 'none';
 }
 
-// Toggle order history view
+// Logout function
+function logout() {
+    Swal.fire({
+        title: 'Logout',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0052cc',
+        cancelButtonColor: '#999',
+        confirmButtonText: 'Yes, Logout'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'login.php';
+        }
+    });
+}
+
+// Switch view
 function switchView(view) {
     const menuView = document.getElementById('menuView');
     const historyView = document.getElementById('historyView');
@@ -280,14 +425,37 @@ function switchView(view) {
         historyLink.classList.add('active');
         searchBar.style.display = 'none';
         populateOrderHistory();
-        updateFilterOptions(); // Initialize filter options
+        updateFilterOptions();
     }
 }
 
 // Populate order history
-function populateOrderHistory() {
+async function populateOrderHistory() {
+    try {
+        const response = await fetch('../controllers/pos.php?action=getOrderHistory');
+        const result = await response.json();
+        
+        if (result.success) {
+            orderHistory = result.data;
+            renderOrderHistory();
+        } else {
+            console.error('Failed to load order history:', result.message);
+        }
+    } catch (error) {
+        console.error('Error loading order history:', error);
+    }
+}
+
+// Render order history
+function renderOrderHistory() {
     const tableBody = document.getElementById('orderTableBody');
     tableBody.innerHTML = '';
+    
+    if (orderHistory.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
+        return;
+    }
+    
     orderHistory.forEach(order => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -303,7 +471,7 @@ function populateOrderHistory() {
     });
 }
 
-// Update filter options based on selected filter type
+// Update filter options
 function updateFilterOptions() {
     const filterType = document.getElementById('filterType').value;
     const filterValue = document.getElementById('filterValue');
@@ -339,7 +507,6 @@ function updateFilterOptions() {
         }
     }
     
-    // Trigger filtering after updating options
     filterOrders();
 }
 
@@ -360,7 +527,7 @@ function filterOrders() {
     const rows = document.querySelectorAll('#orderTableBody tr');
     
     rows.forEach(row => {
-        const date = row.cells[5].textContent; // MM-DD-YYYY format
+        const date = row.cells[5].textContent;
         const dateParts = date.split('-');
         let display = false;
         
