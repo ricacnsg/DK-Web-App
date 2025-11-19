@@ -1,0 +1,199 @@
+body, html {
+    background-color: #efc858;
+    overflow-x: hidden;
+    font-family: "Montserrat", sans-serif;
+}
+
+.container-fluid {
+    background-color: #efc858;
+}
+
+.block{
+    background-color: #04276c;
+    min-height: 70px;
+    max-height: 150px;
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 20px;
+    padding-top: 8px;
+}
+
+.davens-header {
+    color: #efc858;
+    font-size: clamp(.3rem, 3vw, 1.3rem);
+    margin-top: 40px;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+}
+
+.davens-logo {
+    transform: rotate(15deg);
+    width: clamp(10px, 5vw, 20px);
+    height: auto;
+    position: relative;
+    left: -0.3rem;
+    top: -0.3rem;
+    vertical-align: middle;
+}
+
+.sidebar {
+    background-color: #04276c;
+}
+
+.right-div {
+    background-color: white;
+}
+.scrollable-div {
+    max-height: 100vh;
+    min-height: auto;
+    border: 1px solid #ccc;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Force table to NOT stretch */
+.table {
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    table-layout: auto !important;
+}
+
+/* Prevent tbody from stretching */
+.table tbody {
+    height: auto !important;
+    vertical-align: top !important;
+}
+
+/* Keep rows compact */
+.table tbody tr {
+    height: auto !important;
+}
+
+.table td, 
+.table th {
+    padding: 6px 10px !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    height: auto !important;
+}
+
+td {
+    font-size: 13px;
+}
+
+/* Make buttons smaller */
+.btn-sm {
+    padding: 4px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+}
+
+.reviewed {
+    background-color: #f6e6b7;
+    color: #b58b0a;
+}
+
+.verified {
+    background-color: #bae0ff;
+    color: #004a86;
+}
+
+.accepted {
+    background-color: #d0f9bb;
+    color: #2a7305;
+}
+
+.cancel {
+    background-color: #f8c4c4;
+    color: red;
+}
+
+.delivery {
+    background-color: #bae0ff;
+    color: #004a86;
+}
+
+
+.view {
+    background-color: rgb(207, 207, 207);
+    color: white;
+}
+
+.davens-receipt-header {
+    color: #efc858;
+    font-size: 1.2rem;
+    margin-top: 40px;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 700;
+}
+
+.receipt-card {
+    width:400px;
+}
+
+.view-card {
+    width: 500px; /* don't force fixed width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+}
+
+.davens-receipt-logo {
+    transform: rotate(15deg);
+    width: clamp(20px, 5vw, 30px);
+    height: auto;
+    position: relative;
+    left: -0.3rem;
+    top: -0.3rem;
+    vertical-align: middle;
+}
+
+.contact-header {
+    font-size: .6rem;
+    margin-bottom: -15px;
+}
+
+.dashed-line {
+    border-top: 2px dashed #2e2b2b;
+    margin: 10px;
+}
+
+.solid-line { 
+    border-top: 2px solid #2e2b2b;
+    /* width: clamp(355px, 3vw, 455px); */
+    margin: 10px;
+}
+
+.receiptOverlay {
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); /* semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* above everything else */
+}
+
+.details {
+    font-size: .8rem;
+    line-height: 1;
+}
+
+.payment {
+    font-size: .8rem;
+    line-height: 1;
+}
+
+.footer{
+    font-size: 1rem;
+    line-height: 1;
+}
