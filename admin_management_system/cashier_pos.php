@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daven's Kitchenette - POS System</title>
     <link rel="stylesheet" href="cashier_pos.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" crossorigin="anonymous" />
 </head>
 <body>
     <div class="header">
@@ -13,15 +15,22 @@
             <span>Daven's<br>Kitchenette</span>
         </div>
         <div class="search-bar" id="headerSearchBar">
-            <input type="text" placeholder="Search menu...">
+            <input type="text" id="menuSearchInput" placeholder="Search menu..." onkeyup="searchMenu()">
         </div>
         <div class="user-profile">👤</div>
     </div>
 
     <div class="container">
         <div class="sidebar">
-            <button class="sidebar-button active" onclick="switchView('menu')">Order Menu</button>
-            <a class="sidebar-link" onclick="switchView('history')">History</a>
+            <button class="sidebar-button active" onclick="switchView('menu')">
+                <i class="fas fa-shopping-cart"></i> Order Menu
+            </button>
+            <a class="sidebar-link" onclick="switchView('history')">
+                <i class="fas fa-history"></i> History
+            </a>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
         </div>
 
         <!-- Menu View -->
@@ -37,34 +46,39 @@
                 <div class="category-section">
                     <div class="category-label">Category</div>
                     <div class="category-carousel" id="categoryCarousel">
-                        <div class="category-item active" onclick="selectCategory(this)">
+                        <div class="category-item active" onclick="selectCategory(this)" data-category="bento">
                             <img src="/assets/image/bento.webp" alt="BentoSilog" class="category-icon" />
                             <div class="category-name">BentoSilog</div>
                         </div>
-                        <div class="category-item" onclick="selectCategory(this)">
+                        <div class="category-item" onclick="selectCategory(this)" data-category="wings">
                             <img src="/assets/image/Fried Legs.png" alt="Flavoured Wings" class="category-icon" />
                             <div class="category-name">Flavoured Wings w/ Rice</div>
                         </div>
-                        <div class="category-item" onclick="selectCategory(this)">
+                        <div class="category-item" onclick="selectCategory(this)" data-category="rice">
                             <img src="/assets/image/rice.png" alt="Rice Meal" class="category-icon" />
                             <div class="category-name">Rice Meal</div>
                         </div>
-                        <div class="category-item" onclick="selectCategory(this)">
+                        <div class="category-item" onclick="selectCategory(this)" data-category="burger">
                             <img src="/assets/image/Burgers.png" alt="Burger & Sandwiches" class="category-icon" />
-                            <div class="category-name">Burger and Sandwiches</div>
+                            <div class="category-name">Burger & Sandwiches</div>
                         </div>
-                        <div class="category-item" onclick="selectCategory(this)">
+                        <div class="category-item" onclick="selectCategory(this)" data-category="pulutan">
                             <img src="/assets/image/puluntan.png" alt="Pulutan Express" class="category-icon" />
                             <div class="category-name">Pulutan Express</div>
                         </div>
-                        <div class="category-item" onclick="selectCategory(this)">
+                        <div class="category-item" onclick="selectCategory(this)" data-category="beverages">
                             <img src="/assets/image/beverages.png" alt="Beverages" class="category-icon" />
                             <div class="category-name">Beverages</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="menu-grid" id="menuGrid">
+                <div class="menu-items-background">
+                    <div class="menu-items-container">
+                        <div class="menu-grid" id="menuGrid">
+                            <!-- Menu items will be populated here by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -73,7 +87,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Customer Name</label>
-                    <input type="text" class="form-input form-input-gold" value="Rica Mae">
+                    <input type="text" class="form-input" id="customerName" placeholder="Enter customer name">
                 </div>
 
                 <div class="form-group">
@@ -82,7 +96,6 @@
                         <button class="order-type-btn active" data-type="dine-in" onclick="selectOrderType(this, 'dine-in')">Dine In</button>
                         <input type="text" class="form-input" placeholder="Table #" id="tableNumberInput">
                         <button class="order-type-btn" data-type="takeout" onclick="selectOrderType(this, 'takeout')">Takeout</button>
-                        <button class="order-type-btn" data-type="delivery" onclick="selectOrderType(this, 'delivery')">Delivery</button>
                     </div>
                 </div>
 
@@ -90,21 +103,12 @@
                     <div class="items-label">Ordered Items</div>
                     <div class="items-list" id="itemsList">
                         <div class="item-row">
-                            <span>2x Chicken Silog</span>
-                            <span class="item-row-price">Php 198.00</span>
-                        </div>
-                        <div class="item-row">
-                            <span>2x Lemon Yakult</span>
-                            <span class="item-row-price">Php 198.00</span>
-                        </div>
-                        <div class="item-row">
-                            <span>1x Potato Mojos</span>
-                            <span class="item-row-price">Php 99.00</span>
+                            <span style="color: #999;">No items selected</span>
                         </div>
                     </div>
                     <div class="total-row">
                         <span>Total:</span>
-                        <span id="totalPrice">Php 495.00</span>
+                        <span id="totalPrice">Php 0.00</span>
                     </div>
                 </div>
 
@@ -139,7 +143,6 @@
                             </select>
                             
                             <select class="filter-select" id="filterValue">
-                                <!-- Options will be populated dynamically -->
                             </select>
                         </div>
                         
@@ -164,7 +167,6 @@
                             </tr>
                         </thead>
                         <tbody id="orderTableBody">
-                            <!-- Table rows will be populated by JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -182,6 +184,60 @@
             <div class="modal-buttons">
                 <button class="modal-btn modal-confirm" onclick="confirmOrder()">Yes, Place Order</button>
                 <button class="modal-btn modal-cancel" onclick="cancelOrder()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Payment Modal -->
+    <div id="cashPaymentModal" class="modal-overlay" style="display: none;">
+        <div class="modal modal-payment">
+            <div class="modal-title">Cash Payment</div>
+            <div class="modal-message">
+                <p>Total Amount: <strong id="cashTotal" style="font-size: 24px; color: #0052cc;">Php 0.00</strong></p>
+                <div class="form-group" style="margin-top: 20px; text-align: left;">
+                    <label class="form-label">Amount Received</label>
+                    <input type="number" id="cashReceived" class="form-input cash-input" placeholder="0.00" step="0.01" min="0" autofocus>
+                </div>
+                <div class="quick-amount-buttons">
+                    <button class="quick-amount-btn" onclick="setQuickAmount(50)">₱50</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(100)">₱100</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(200)">₱200</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(500)">₱500</button>
+                    <button class="quick-amount-btn" onclick="setQuickAmount(1000)">₱1000</button>
+                    <button class="quick-amount-btn" onclick="setExactAmount()">Exact</button>
+                </div>
+                <p id="changeAmount" style="margin-top: 20px; font-size: 20px; font-weight: bold; min-height: 30px;"></p>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" onclick="processCashPayment()">Confirm Payment</button>
+                <button class="modal-btn modal-cancel" onclick="closeCashModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="gcashModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-title">GCash Payment</div>
+            <div class="modal-message">
+                <div class="gcash-confirmation">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Payment Received</h3>
+                    <p>Please confirm that the customer has completed the GCash payment</p>
+                </div>
+                <div class="payment-details">
+                    <div class="payment-detail-row">
+                        <span>Total Amount:</span>
+                        <strong id="gcashTotal">Php 0.00</strong>
+                    </div>
+                    <div class="payment-detail-row">
+                        <span>Payment Method:</span>
+                        <strong>GCash</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-confirm" onclick="confirmGCashPayment()">Confirm Payment</button>
+                <button class="modal-btn modal-cancel" onclick="closeGCashModal()">Cancel</button>
             </div>
         </div>
     </div>
