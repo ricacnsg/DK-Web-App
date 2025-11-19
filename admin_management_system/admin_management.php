@@ -12,9 +12,10 @@ if (!isset($_SESSION['staff_username'])) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Daven's Kitchenette - Management Systzm</title>
+    <title>Daven's Kitchenette - Management System</title>
     <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
     <link rel="stylesheet" href="admin_management.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.6.0/css/all.min.css" crossorigin="anonymous" />
 </head>
@@ -407,80 +408,125 @@ if (!isset($_SESSION['staff_username'])) {
     </div>
     </div>
 
+    <div id="orders" class="page">
+        <div class="header"><h1>Order History</h1></div>
+        <p>Content for Order History...</p>
+    </div>
 
-            <div id="orders" class="page">
-                <div class="header"><h1>Order History</h1></div>
-                <p>Content for Order History...</p>
+    <div id="staff" class="page">
+        <div class="staff-management-container">
+            <div class="header">
+                <h1>Staff Account Management</h1>
+                <div class="user-profile">
+                    <div class="user-avatar">JD</div>
+                    <div class="user-info">
+                        <h3>Jane Doe</h3>
+                        <p>Admin</p>
+                    </div>
+                </div>
             </div>
 
-            <div id="staff" class="page">
-                <div class="staff-management-container">
-                    <div class="header">
-                        <h1>Staff Account Management</h1>
-                        <div class="user-profile">
-                            <div class="user-avatar">JD</div>
-                            <div class="user-info">
-                                <h3>Jane Doe</h3>
-                                <p>Admin</p>
+            <div class="content-wrapper">
+                <div class="staff-list">
+                    <div class="search-filter">
+                        <input type="text" id='searchInput' placeholder="Search Staff" class="search-input" />
+                        <select class="filter-select" id='filterStaff'>
+                            <option value=''>All Staff</option>
+                            <option value='admin' >Admin</option>
+                            <option value='cashier'>Cashier</option>
+                            <option value='kitchen_staff'>Kitchen Staff</option>
+                        </select>
+                    </div>
+                    <table class="staff-table" id="staffTable">
+                        <thead>
+                            <tr>
+                                <th>Fullname</th>
+                                <th>Role</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Staff Edit Modal -->
+                <div class="modal" id="editaccModal">
+                    <div class="modal-content">
+                        <h2>Edit Account</h2>
+                        <form id="editForm">
+                            <input type='hidden' id='staffID' name='staffID'>
+                            <label for="editFullname">Fullname</label>
+                            <input type="text" id="editFullname" required>
+                            <label for="editContact">Contact Number</label>
+                            <input type="text" id="editContact" required>
+                            <label for="editUsername">Username</label>
+                            <input type="text" id="editUsername" required>
+
+                            <label for="editRole">Role</label>
+                            <select class='form-select' id="editRole" name="role">
+                                <option value="admin">Admin</option>
+                                <option value="kitchen_staff">Kitchen Staff</option>
+                                <option value="cashier">Cashier</option>
+                            </select>
+                            
+                            <label for="editPassword">Change Password</label>
+                            <input type="password" id="editPassword">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword">
+
+                            <div class="modal-buttons">
+                                <button type="button" class="btn cancelbtn">Cancel</button>
+                                <button type="submit" class="btn savebtn">Save</button>
                             </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Staff Delete Modal -->
+                 <div class="modal" id="deleteaccModal">
+                    <div class="modal-content">
+                        <h3 class='text-center'>Are you sure?</h3>
+                        <br>
+                        <p class='text-center'>This action cannot be undone.</p>
+                        <div class="modal-buttons">
+                            <button type='button' class="btn canceldelete-btn" id="cancelDelete">Cancel</button>
+                            <button type='submit' class="btn confirm-btn" id="confirmDelete">Yes, Delete</button>
                         </div>
                     </div>
+                </div>
 
-                    <div class="content-wrapper">
-                        <div class="staff-list">
-                            <div class="search-filter">
-                                <input type="text" placeholder="Search Staff" class="search-input" />
-                                <select class="filter-select">
-                                    <option>All Staff</option>
-                                    <option>Admin</option>
-                                    <option>Kitchen Staff</option>
-                                </select>
-                            </div>
+                <!-- Add staff account -->
+                <div class="add-staff-form">
+                    <h2>Add Staff Account</h2>
+                    <form id="addStaffForm" method="POST" action="../controllers/staff.php">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" placeholder="Enter full name" id="fullname" required/>
 
-                            <table class="staff-table" id="staffTable">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Role</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Jane Doe</td>
-                                        <td>Admin</td>
-                                        <td>
-                                            <button class="edit-btn">Edit</button>
-                                            <button class="delete-btn">Delete</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <label for="contactno">Contact Number</label>
+                        <input type="text" placeholder="Enter contact number" id="contactno" required/>
+
+                        <label for="role">Role</label>
+                        <select id="role" name="role">
+                            <option value="admin">Admin</option>
+                            <option value="kitchen_staff">Kitchen Staff</option>
+                            <option value="cashier">Cashier</option>
+                        </select>
+
+                        <label for="username">Username</label>
+                        <input type="text" placeholder="Enter username" id="username"required/>
+                        <p id='validationMessage'></p>
+
+                        <div class="mb-4 position-relative">
+                            <label for="password">Password</label>
+                            <input type="password" placeholder="Enter password" id="password" required/>
+                            <button type="button" class="position-absolute togglePassword" id="togglePassword">
+                                    <i class="fa-solid fa-eye-slash" id='hide'></i>
+                            </button>
+                            <p id='validationPass'></p>
                         </div>
 
-                        <div class="add-staff-form">
-                            <h2>Add Staff Account</h2>
-                            <form id="addStaffForm">
-                                <label>Full Name</label>
-                                <input type="text" placeholder="Enter full name" required/>
-
-                                <label>Contact Number</label>
-                                <input type="text" placeholder="Enter contact number" required/>
-
-                                <label>Role</label>
-                                <select>
-                                    <option>Admin</option>
-                                    <option>Kitchen Staff</option>
-                                    <option>Cashier</option>
-                                </select>
-
-                                <label>Username</label>
-                                <input type="text" placeholder="Enter username" required/>
-
-                                <label>Password</label>
-                                <input type="password" placeholder="Enter password" required/>
-
-                                <button type="submit" class="save-btn">Save</button>
+                                <button type="submit" class="save-btn" id="createaccbtn">Create Account</button>
                             </form>
                         </div>
                     </div>

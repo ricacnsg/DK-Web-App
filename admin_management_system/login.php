@@ -81,16 +81,3 @@ if (isset($_SESSION['staff_username'])) {
 <script src="/bootstrap5/js/bootstrap.min.js"></script>
 <script src="login.js"></script>
 </html>
-
-<!-- To Do
-    Frontend:
-    - finish the frontend - DONE
-    - make it responsive in every screen size - DONE
-    - make a visible and invisible password toggle - DONE
-
-    Backend:
-    - if walang nilagay na credentials or kulang, may lalabas din dapat na message - DONE
-    - if mali ang username or password, magrereset dapat form after nung sweetalert - DONE
-    - verify hash password
-    - create a session para sa admin kapag naglogin (sessions = login memory + page access control)
--->

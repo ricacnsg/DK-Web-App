@@ -1,6 +1,5 @@
 document.getElementById("staffLogin").addEventListener("submit", function (e) {
   e.preventDefault();
-  console.log("Form submitted!");
 
   const formData = new FormData(this);
 
@@ -11,8 +10,6 @@ document.getElementById("staffLogin").addEventListener("submit", function (e) {
   })
     .then((res) => res.text())
     .then((data) => {
-      console.log("Response from PHP:", data);
-
       if (data.trim() === "success") {
         setTimeout(() => {
           window.location.href = "admin_management.php";
