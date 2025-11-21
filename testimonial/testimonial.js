@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     cancelButtonText: "Cancel"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = "../online_ordering_system/sign_in/sign_in.html";
+                        window.location.href = "../online_ordering_system/sign_in/sign_in.php?return=testimonial";
                     }
                 });
             } else {
