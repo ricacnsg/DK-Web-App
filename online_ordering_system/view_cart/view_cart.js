@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check session 
     if (window.userData.isLoggedIn) {
-        // if user is logged in → go directly to checkout
         window.location.href = '../checkout/checkout.php';
         return;
     }
@@ -115,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const guestBtn = document.getElementById('guestBtn');
 
     logInBtn?.addEventListener('click', () => {
-        window.location.href = '../sign_in/sign_in.php';
+        window.location.href = '../sign_in/sign_in.php?return=checkout';
     });
 
     signUpBtn?.addEventListener('click', () => {
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     guestBtn?.addEventListener('click', () => {
         window.location.href = '../checkout/checkout.php';
     });
-  });
+});
 
 
   continueOverlay.addEventListener('click', (e) => {

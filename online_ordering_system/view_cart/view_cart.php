@@ -153,5 +153,15 @@ $username = $_SESSION['username'] ?? 'Guest';
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="progress_bar.js"></script>
     <script src="view_cart.js"></script>
+    <?php if (isset($_GET['fromLogin']) && $isLoggedIn): ?>
+    <script>
+        // Only trigger if logged in after clicking checkout
+        if (sessionStorage.getItem("returnTo") === "checkout") {
+            sessionStorage.removeItem("returnTo");
+            window.location.href = "../checkout/checkout.php";
+        }
+    </script>
+    <?php endif; ?>
+
 </body>
 </html>

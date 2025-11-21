@@ -91,27 +91,30 @@ function placeOrder() {
             return;
         }
         
+        $now = new DateTime();
+        $dateStr = $now->format('Ymd'); // e.g., 20251119
+        $randomSuffix = rand(10000, 99999);
+        $orderNumber = $dateStr . $randomSuffix;
         // Start transaction
         $conn->begin_transaction();
         
         // Insert into orders table
-        $stmt = $conn->prepare("INSERT INTO orders (walkInName, totalPrice, paymentStatus, orderStatus, createdAT) VALUES (?, ?, 'pending', 'pending', NOW())");
-        $stmt->bind_param("sd", $customerName, $totalAmount);
+        $stmt = $conn->prepare("INSERT INTO orders (orderNo, walkInName, totalPrice, paymentStatus, orderStatus, createdAT) VALUES (?, ?, ?, 'Paid', 'Walk In', NOW())");
+        $stmt->bind_param("ssd", $orderNumber, $customerName, $totalAmount);
         $stmt->execute();
-        $orderID = $stmt->insert_id;
         $stmt->close();
         
         // Insert items ordered
-        $stmt = $conn->prepare("INSERT INTO itemsordered (orderID, menuItem, quantity) VALUES (?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO itemsordered (orderNo, menuItemID, quantity) VALUES (?, ?, ?)");
         foreach ($items as $item) {
-            $stmt->bind_param("iii", $orderID, $item['id'], $item['quantity']);
+            $stmt->bind_param("sii", $orderNumber, $item['id'], $item['quantity']);
             $stmt->execute();
         }
         $stmt->close();
         
         // Insert payment record
-        $stmt = $conn->prepare("INSERT INTO payment (orderID, paymentMethod, amountPAId, changeAmount, paymentDate) VALUES (?, ?, ?, 0, NOW())");
-        $stmt->bind_param("isd", $orderID, $paymentMethod, $totalAmount);
+        $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, amountPAId, changeAmount, paymentDate) VALUES (?, ?, ?, 0, NOW())");
+        $stmt->bind_param("ssd", $orderNumber, $paymentMethod, $totalAmount);
         $stmt->execute();
         $stmt->close();
         
@@ -121,7 +124,7 @@ function placeOrder() {
         echo json_encode([
             'success' => true, 
             'message' => 'Order placed successfully',
-            'orderID' => $orderID
+            'orderNo' => $orderNumber
         ]);
         
     } catch (Exception $e) {
@@ -135,18 +138,18 @@ function getOrderHistory() {
     
     try {
         $query = "SELECT 
-            o.orderID,
-            o.walkInName,
+            o.orderNo,
+            o.walkInName, 
             o.totalPrice,
             o.orderStatus,
             o.createdAT,
             p.paymentMethod,
             GROUP_CONCAT(CONCAT(io.quantity, 'x ', m.menuItemName) SEPARATOR ', ') as items
         FROM orders o
-        LEFT JOIN payment p ON o.orderID = p.orderID
-        LEFT JOIN itemsordered io ON o.orderID = io.orderID
-        LEFT JOIN menuitem m ON io.menuItem = m.menuItemID
-        GROUP BY o.orderID
+        LEFT JOIN payment p ON o.orderNo = p.orderNo
+        LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
+        LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
+        GROUP BY o.orderNo
         ORDER BY o.createdAT DESC
         LIMIT 100";
         
@@ -155,8 +158,8 @@ function getOrderHistory() {
         $orders = [];
         while ($row = $result->fetch_assoc()) {
             $orders[] = [
-                'id' => $row['orderID'],
-                'table' => $row['walkInName'],
+                'id' => $row['orderNo'],
+                'customerName' => $row['walkInName'] ?? 'Walk-in Customer', 
                 'items' => $row['items'] ?? 'No items',
                 'amount' => '₱' . number_format($row['totalPrice'], 2),
                 'method' => ucfirst($row['paymentMethod'] ?? 'Cash'),

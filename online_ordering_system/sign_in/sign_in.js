@@ -1,3 +1,10 @@
+function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+const returnPage = getQueryParam("return"); 
+
 const togglePassword = document.querySelector("#togglePassword");
 const passwordField = document.querySelector("#customerPassword");
 
@@ -26,7 +33,16 @@ document.getElementById("customerLogin").addEventListener("submit", function (e)
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          window.location.href = "/testimonial/testimonial.html";
+          let redirectURL = "/home/home.php"; // default
+
+          if (returnPage === "checkout") {
+            redirectURL = "../checkout/checkout.php";
+          } 
+          else if (returnPage === "testimonial") {
+            redirectURL = "../../testimonial/testimonial.html";
+          }
+
+          window.location.href = redirectURL;
         });
       } else {
         Swal.fire({
