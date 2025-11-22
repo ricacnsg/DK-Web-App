@@ -1,45 +1,4 @@
 <?php
-// session_start();
-// require_once '../database/connect.php';
-
-// if ($_SERVER["REQUEST_METHOD"] == "POST") {
-//   $user = $_POST["staff_username"];
-//   $pass = $_POST["staff_password"];
-
-//   $stmt = $conn->prepare("SELECT staffID, staffPassword, staffRole FROM staff WHERE staffUsername = ?");
-//   $stmt->bind_param("s", $user);
-//   $stmt->execute();
-//   $result = $stmt->get_result();
-
-//   if ($result->num_rows === 1) {
-//     $row = $result->fetch_assoc();
-//     $hashedPassword = $row['staffPassword'];
-    
-//     if (password_verify($pass, $hashedPassword)) {
-//         $_SESSION['staff_id'] = $row['staffID'];
-//         $_SESSION['staff_username'] = $user;
-//         $_SESSION['staff_role'] = $row['staffRole'];
-//         $response = ['success' => true, 'role' => $row['staffRole']];
-
-//         if($row['staffRole'] == 'admin'){
-//           header("Location: ../admin_management_system/admin_management.php");
-//         }
-//         else if($row['staffRole'] == 'cashier'){
-//           header("Location: ../admin_management_system/cashier_pos.php");
-//         }
-//     }
-//   } 
-//   else {
-//     echo "❌ Username not found.";
-//   }
-      
-//   $stmt->close();
-// }
-
-// $conn->close();
-// echo json_encode($response);
-
-
 session_start();
 header('Access-Control-Allow-Origin: *'); // palitan pag ilalagay na sa production ang '*'
 header('Access-Control-Allow-Methods: POST');
@@ -52,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
     exit;
 }
-
-$username = trim($_POST['staff_username'] ?? '');
-$password = trim($_POST['staff_password'] ?? '');
+$input = json_decode(file_get_contents('php://input'), true);
+$username = trim($input['staff_username'] ?? '');
+$password = trim($input['staff_password'] ?? '');
 
 if ($username === '' || $password === '') {
     http_response_code(400);

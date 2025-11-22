@@ -1,13 +1,15 @@
 document.getElementById("staffLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const form = document.getElementById("staffLogin");
-  const formData = new FormData(form);
+  const formData = {
+    staff_username: document.getElementById('accountUsername').value,
+    staff_password: document.getElementById('password').value
+  }
 
   try {
     const response = await fetch('../controllers/check_credentials.php', {
       method: 'POST',
-      body: formData
+      body: JSON.stringify(formData)
     });
 
     const data = await response.json();
