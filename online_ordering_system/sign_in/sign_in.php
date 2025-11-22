@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (isset($_SESSION['customer_id'])) {
+  header("Location: ../../../testimonial/testimonial.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

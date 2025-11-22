@@ -113,8 +113,8 @@ try {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-        $mail->Password = 'gsrj inkm zubn tdmy';   // your Gmail App password
+        $mail->Username = 'ricamaegconsigo@gmail.com'; // your Gmail
+        $mail->Password = '';   // your Gmail App password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->SMTPOptions = [
@@ -125,7 +125,7 @@ try {
             ]
         ];
 
-        $mail->setFrom('tariaobernadette@gmail.com', 'Davens Kitchenette');
+        $mail->setFrom('ricamaegconsigo@gmail.com', 'Davens Kitchenette');
         $mail->addAddress($email, $recipientName);
 
         $mail->isHTML(true);

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
     <link rel="stylesheet" href="sign_up.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Sign Up</title>
 </head>
@@ -38,11 +39,11 @@
                 <h2 class="sign-in">Sign Up</h2>
                 <p class="subhead">Sign up to get started.</p>
             </div>
-            <form>
+            <form id='signupform'>
                 <div class="form-group d-flex justify-content-center form-block">
                     <div class="input-container">
                         <i class="fas fas-solid fa-user icon"></i>
-                        <input type="text" class="form-control form-control-lg border-3" id="customerEmail" placeholder="Username">
+                        <input type="text" class="form-control form-control-lg border-3" id="customerUsername" placeholder="Username">
                     </div>
                 </div>
                 <div class="form-group d-flex justify-content-center">
@@ -64,12 +65,13 @@
                         <i class="fas fa-eye toggle-password" id="togglePassword"></i>
                     </div>
                 </div>
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-lg my-button rounded-pill border-2">Sign Up</button>
+                </div>
             </form>
         </div>
     </div>
-    <div class="d-flex justify-content-center">
-        <button type="button" class="btn btn-lg my-button rounded-pill border-2">Sign In</button>
-    </div>
+
     <div class="d-flex justify-content-center">
         <span>
             <p class="redirect">Already have an account?</p>

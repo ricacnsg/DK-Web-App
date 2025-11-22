@@ -15,25 +15,31 @@ togglePassword.addEventListener("click", () => {
   togglePassword.classList.toggle("fa-eye-slash");
 });
 
-document.getElementById("customerLogin").addEventListener("submit", function (e) {
+document.getElementById("customerLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(this);
+  const formData = {
+    customer_username: document.getElementById('customerUsername').value,
+    customer_password: document.getElementById('customerPassword').value
+  };
 
-  fetch("../../controllers/sign_in.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.text())
-    .then((data) => {
-      if (data.trim() === "success") {
+  try{
+    const response = await fetch("../../controllers/customer_sign_in.php", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    })
+    const result = await response.json();
+      if (result.success) {
         Swal.fire({
           title: "Login Successful!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          let redirectURL = "/home/home.php"; // default
+          let redirectURL = "../get_order/get_order.php"; // default
 
           if (returnPage === "checkout") {
             redirectURL = "../checkout/checkout.php";
@@ -52,6 +58,16 @@ document.getElementById("customerLogin").addEventListener("submit", function (e)
         });
         document.getElementById("customerLogin").reset();
       }
-    })
-    .catch((err) => console.error(err));
+  }
+  catch (error) {
+    Swal.fire({
+      position: "center",
+      icon: "warning",
+      title: 'Error',
+      text: error,
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+
 });
