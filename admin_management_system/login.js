@@ -1,29 +1,51 @@
-document.getElementById("staffLogin").addEventListener("submit", function (e) {
+document.getElementById("staffLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formData = new FormData(this);
+  const form = document.getElementById("staffLogin");
+  const formData = new FormData(form);
 
-  fetch("../controllers/check_credentials.php", {
-    method: "POST",
-    body: formData,
-    credentials: "include"
-  })
-    .then((res) => res.text())
-    .then((data) => {
-      if (data.trim() === "success") {
-        setTimeout(() => {
-          window.location.href = "admin_management.php";
-        }, 1000);
-      } else {
-        Swal.fire({
-            title: "Login Failed",
-            text: "Invalid username or password.",
-            icon: "warning"
-        });;
-        document.getElementById("staffLogin").reset();
+  try {
+    const response = await fetch('../controllers/check_credentials.php', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      if (data.role === 'admin') {
+        window.location.href = 'admin_management.php';
       }
-    })
-    .catch((err) => console.error(err));
+      else if (data.role === 'cashier') {
+        window.location.href = 'cashier_pos.php';
+      }
+      else if (data.role === 'kitchen staff') {
+        window.location.href = 'kitchen_staff.php';
+      } 
+      else if (data.role === 'delivery rider') {
+        window.location.href = 'kitchen_staff.php';
+      }
+      else {
+        alert('Login successful but unknown role: ' + data.role);
+      }
+    } else {
+      Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: data.message,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+  } catch (error) {
+    Swal.fire({
+        position: "center",
+        icon: "warning",
+        title: 'Something went wrong. Please try again.',
+        showConfirmButton: false,
+        timer: 1500
+    });
+  }
 });
 
 const passwordInput = document.getElementById('password');

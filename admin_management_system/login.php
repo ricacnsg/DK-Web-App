@@ -2,8 +2,16 @@
 session_start();
 
 if (isset($_SESSION['staff_username'])) {
-  header("Location: admin_management.php");
-  exit;
+    if(isset($_SESSION['staff_role'])){
+        if($_SESSION['staff_role'] == 'admin'){
+            header("Location: admin_management.php");
+            exit;
+        }
+        else if($_SESSION['staff_role'] == 'cashier'){
+            header("Location: cashier_pos.php");
+            exit;
+        }
+    }
 }
 ?>
 
@@ -33,6 +41,7 @@ if (isset($_SESSION['staff_username'])) {
                             <h6 class="subtitle text-center mb-4">Sign in to your account</h6>
 
                             <form id="staffLogin" class="mx-auto" method="POST" action="../controllers/check_credentials.php">
+                                
                                 <div class="mb-3">
                                     <label for="accountUsername" class="form-label fw-bolder">Username</label>
                                     <input id="accountUsername" type="text"

@@ -1,6 +1,5 @@
 fetch("../controllers/islogin.php", {
-  method: "GET",
-  credentials: "include"
+  method: "GET"
 })
   .then(res => res.json())
   .then(data => {
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ingredients elements
     const ingredientsList = document.getElementById('ingredientsList');
     const newIngredientInput = document.getElementById('newIngredientInput');
-    const addIngredientBtn = document.getElementById('addIngredientBtn');
+    //const addIngredientBtn = document.getElementById('addIngredientBtn');
     
     // Image handling elements
     const imageUpload = document.getElementById('imageUpload');
@@ -185,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load menu items from server
     const loadMenuItems = async (category) => {
         try {
-            const response = await fetch(`${API_BASE}?category=${category}`);
+            const response = await fetch(`${API_BASE}?action=getMenuItems&category=${category}`);
             const result = await response.json();
             
             if (result.success) {
@@ -212,8 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="menu-description">${item.desc}</div>
             <div class="menu-price">₱${item.price.toFixed(2)}</div>
             <div class="menu-actions">
-                <button class="btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> Edit</button>
-                <button class="btn-remove" data-id="${item.id}"><i class="fas fa-trash-alt"></i> Remove</button>
+                <button class="btn btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-remove" data-id="${item.id}"><i class="fas fa-trash-alt"></i> Remove</button>
             </div>
         `;
         return card;
@@ -300,35 +299,138 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // INGREDIENTS MANAGEMENT LOGIC
+    const ingredientInput = document.getElementById('newIngredientInput');
+    const selectIngredientTable = document.querySelector('#selectIngredientsTable tbody');
+    let debounceTimer;
+    async function fetchIngredients() {
+        const keyword = ingredientInput.value.trim();
+
+        const response = await fetch(`${API_BASE}?action=getIngredients&keyword=${keyword}`);
+        const data = await response.json();
+
+        selectIngredientTable.innerHTML = "";
+        if(data.success){
+            data.data.forEach(item => {
+            const row = document.createElement("tr");
+
+            row.dataset.id = item.itemID;
+            row.dataset.name = item.itemName;
+            row.dataset.unit = item.unitOfMeasurement;
+
+            let saved = currentIngredients.find(i => i.id == item.itemID);
+            let qty = saved ? saved.quantity : 0;
+
+            row.innerHTML = `
+                <td>${item.itemName}</td>
+                <td>
+                    <button type='button'class="btn qty-minus">-</button>
+                    <span class="qty-number">${qty}</span>
+                    <button type='button' class="btn qty-plus">+</button>
+                </td>
+            `;
+
+            const minusBtn = row.querySelector(".qty-minus");
+            const plusBtn = row.querySelector(".qty-plus");
+            const qtyDisplay = row.querySelector(".qty-number");
+
+            minusBtn.addEventListener("click", () => {
+                if (qty > 0) {
+                    qty--;
+                    qtyDisplay.textContent = qty;
+                }
+            });
+
+            plusBtn.addEventListener("click", () => {
+                qty++;
+                qtyDisplay.textContent = qty;
+            });
+
+            selectIngredientTable.appendChild(row);
+            });
+        }
+        else {
+            selectIngredientTable.innerHTML = `
+            <tr><td colspan="2">No results found</td></tr>
+        `;
+        }
+    }
+    ingredientInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fetchIngredients, 300);
+        });
+    fetchIngredients();
+
     const renderIngredients = () => {
         ingredientsList.innerHTML = '';
-        currentIngredients.forEach((ingredient, index) => {
+
+        currentIngredients.forEach((ingredient) => {
+            if (ingredient.quantity === 0) return;
+
             const item = document.createElement('span');
             item.className = 'ingredient-item';
-            item.innerHTML = `
-                ${ingredient}
-                <button type="button" class="remove-ingredient-btn" data-index="${index}"><i class="fas fa-times"></i></button>
-            `;
-            ingredientsList.appendChild(item);
-        });
 
-        ingredientsList.querySelectorAll('.remove-ingredient-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = parseInt(e.currentTarget.dataset.index);
-                currentIngredients.splice(index, 1);
-                renderIngredients();
-            });
+            item.innerHTML = `
+                ${ingredient.name} (x${ingredient.quantity} ${ingredient.unit})
+            `;
+
+            ingredientsList.appendChild(item);
         });
     };
 
-    addIngredientBtn.addEventListener('click', () => {
-        const ingredientName = newIngredientInput.value.trim();
-        if (ingredientName) {
-            currentIngredients.push(ingredientName);
-            newIngredientInput.value = '';
-            renderIngredients();
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("qty-plus") ||
+            e.target.classList.contains("qty-minus")) {
+            
+            const row = e.target.closest("tr");
+
+            const id = row.dataset.id;
+            const name = row.dataset.name;
+            const unit = row.dataset.unit;
+
+            const qtyDisplay = row.querySelector(".qty-number");
+
+            let item = currentIngredients.find(i => i.id == id);
+
+            if (!item) {
+                item = { id, name, quantity: 0, unit };
+                currentIngredients.push(item);
+            }
+
+            if (e.target.classList.contains("qty-plus")) {
+                item.quantity++;
+            }
+
+            if (e.target.classList.contains("qty-minus")) {
+                if (item.quantity > 0) item.quantity--;
+            }
+
+            qtyDisplay.textContent = item.quantity;
+
+            if (item.quantity === 0) {
+                currentIngredients = currentIngredients.filter(i => i.id != id);
+            }
+            addIngredient(row); 
         }
     });
+
+    function addIngredient(row) {
+        const id = row.dataset.id;
+        const name = row.dataset.name;
+        const unit = row.dataset.unit;
+
+        const qtyDisplay = row.querySelector(".qty-number");
+        let quantity = parseInt(qtyDisplay.textContent);
+
+        let existing = currentIngredients.find(i => i.id == id);
+
+        if (!existing) {
+            currentIngredients.push({ id, name, quantity, unit });
+        } else {
+            existing.quantity = quantity;
+        }
+
+        renderIngredients(); // update the div
+    }
 
     // Handle Open Add Modal
     addNewItemCard.addEventListener('click', () => {
@@ -373,7 +475,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('itemPrice').value = item.price;
         document.getElementById('itemCategory').value = item.category;
         
-        currentIngredients = [...item.ingredients];
+        currentIngredients = item.ingredients.map(ing => ({
+            id: ing.itemID,
+            name: ing.itemName,
+            quantity: ing.quantity,
+            unit: ing.unit
+        }));
         renderIngredients();
 
         if (item.img && item.img !== 'assets/image/placeholder.jpg') {
@@ -437,8 +544,11 @@ document.addEventListener('DOMContentLoaded', () => {
             description: document.getElementById('itemDescription').value,
             price: parseFloat(document.getElementById('itemPrice').value),
             category: document.getElementById('itemCategory').value,
-            ingredients: currentIngredients,
-            imageData: itemImagePreview.style.display !== 'none' ? itemImagePreview.src : ''
+            imageData: itemImagePreview.style.display !== 'none' ? itemImagePreview.src : '',
+            ingredients: currentIngredients.map(i => ({
+                ingredient_id: i.id,
+                quantity: i.quantity
+            }))
         };
 
         try {
@@ -522,131 +632,308 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 //INVENTORY MANAGEMENT 
-let items = [];
-        let editingIndex = -1;
-        let deletingIndex = -1;
+document.addEventListener("DOMContentLoaded", () => {
+    const addNewItemBtn = document.querySelector('.add-btn');
+    const addNewItemModal = document.getElementById('itemModal');
+    const addItemForm = document.getElementById('itemForm');
+    const itemName = document.getElementById('itemname');
+    const stocks = document.getElementById('itemStocks');
+    const measurement = document.getElementById('itemMeasurement');
+    const reorder = document.getElementById('itemReorder');
+    const unitCost = document.getElementById('itemCost');
+    const itemCategory = document.getElementById('itemcategory');
+    let items = [];
 
-        function openModal(index = -1) {
-            const modal = document.getElementById('itemModal');
-            const modalTitle = document.getElementById('modalTitle');
-            
-            if (index >= 0) {
-                editingIndex = index;
-                modalTitle.textContent = 'Edit Item';
-                const item = items[index];
-                document.getElementById('itemName').value = item.name;
-                document.getElementById('itemStocks').value = item.stocks;
-                document.getElementById('itemCategory').value = item.category;
-                document.getElementById('itemReorder').value = item.reorder;
-                document.getElementById('itemCost').value = item.cost;
-            } else {
-                editingIndex = -1;
-                modalTitle.textContent = 'Add Item';
+    addNewItemBtn.addEventListener('click', function(e) {
+        if (e.target === addNewItemBtn) {
+            addNewItemModal.classList.add('active');
+        }
+    });
+
+    addNewItemModal.addEventListener('click', function(e) {
+        if (e.target === addNewItemModal) {
+            addNewItemModal.classList.remove('active');
+        }
+    });
+
+    //add item - DONE
+    addItemForm.addEventListener('submit', async(e) => {
+        e.preventDefault();
+
+        const formData = {
+            itemName: itemName.value,
+            stocks: stocks.value,
+            measurement: measurement.value,
+            reorder: reorder.value,
+            unitCost: unitCost.value,
+            itemCategory: itemCategory.value
+        };
+
+        try{
+            const response = await fetch('../controllers/inventory.php?action=addItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+            if(result.success){
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: "Item added successfully.",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
                 document.getElementById('itemForm').reset();
+                addNewItemModal.classList.remove('active');
+                displayItem();
             }
-            
-            modal.style.display = 'flex';
-        }
-
-        function closeInventoryModal() {
-            document.getElementById('itemModal').style.display = 'none';
-            document.getElementById('itemForm').reset();
-            editingIndex = -1;
-        }
-
-        document.getElementById('itemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const item = {
-                name: document.getElementById('itemName').value,
-                stocks: document.getElementById('itemStocks').value,
-                category: document.getElementById('itemCategory').value,
-                reorder: document.getElementById('itemReorder').value,
-                cost: parseFloat(document.getElementById('itemCost').value).toFixed(2)
-            };
-
-            if (editingIndex >= 0) {
-                items[editingIndex] = item;
-            } else {
-                items.push(item);
+            else {
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             }
-
-            closeInventoryModal();
-            displayItems();
-        });
-
-        function deleteItem(index) {
-            deletingIndex = index;
-            document.getElementById('deleteModal').style.display = 'flex';
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Something went wrong. Please try again.',
+                showConfirmButton: false,
+                timer: 1500
+            });
         }
+    });
 
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-            deletingIndex = -1;
-        }
+    //filter and search item - DONE
+    const filterCategory = document.getElementById('categoryFilter');
+    const searchItem = document.getElementById('searchItem');
+    const inventoryTable = document.getElementById('inventoryTable');
+    let debounceTimer;
 
-        function confirmDelete() {
-            if (deletingIndex >= 0) {
-                items.splice(deletingIndex, 1);
-                displayItems();
+    async function displayItem() {
+        const filterValue = filterCategory.value.trim();
+        const searchValue = searchItem.value;
+        try{
+            const response = await fetch(`../controllers/inventory.php?action=getItems&category=${encodeURIComponent(filterValue)}&searchItem=${encodeURIComponent(searchValue)}`)
+            items = await response.json();
+            const tbody = inventoryTable.querySelector('tbody');
+            tbody.innerHTML = ''; 
+            if (items.length > 0) {
+                items.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${item.itemName}</td>
+                                    <td>${item.quantity} ${item.unitOfMeasurement}</td>
+                                    <td>${item.reorderLevel} ${item.unitOfMeasurement}</td>
+                                    <td>${item.itemCategory}</td>
+                                    <td>${item.pricePerQuantity}</td>
+                                    <td>
+                                        <button class="editItem-btn" data-id="${item.itemID}">Edit</button>
+                                        <button class="deleteItem-btn" data-id="${item.itemID}">Delete</button>
+                                    </td>`;
+                    tbody.appendChild(tr);
+                });
             }
-            closeDeleteModal();
-        }
-
-        function filterItems() {
-            const filterValue = document.getElementById('categoryFilter').value;
-            displayItems(filterValue);
-        }
-
-        function displayItems(filter = '') {
-            const container = document.getElementById('itemsContainer');
-            
-            let filteredItems = items;
-            if (filter) {
-                filteredItems = items.filter(item => item.category === filter);
+            else{
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="6">No record found</td>`;
+                tbody.appendChild(tr);
             }
 
-            if (filteredItems.length === 0) {
-                container.innerHTML = '<div class="empty-state">No items yet. Click "ADD NEW ITEM" to add your first inventory item.</div>';
-                return;
-            }
+            searchItem.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(displayItem, 300);
+            });
+        } catch (error) {
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Error:', error,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } 
+    }
+    displayItem();
+    filterCategory.addEventListener('change', displayItem);
 
-            container.innerHTML = filteredItems.map((item, index) => {
-                const actualIndex = items.indexOf(item);
-                return `
-                    <div class="item-row">
-                        <div class="item-cell">Item #${actualIndex + 1}: ${item.name}</div>
-                        <div class="item-cell">${item.stocks}</div>
-                        <div class="item-cell">${item.category}</div>
-                        <div class="item-cell">${item.reorder}</div>
-                        <div class="item-cell">₱${item.cost}</div>
-                        <div class="actions">
-                            <button class="action-btn edit-btn" onclick="openModal(${actualIndex})">
-                                <i class="fas fa-pencil"></i>
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deleteItem(${actualIndex})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+    //edit and delete item
+    const editItemModal = document.getElementById('editItemModal');
+    const deleteItemModal = document.getElementById('deleteItemModal');
+    const cancelDeleteItemBtn = document.querySelector('.delete-cancel-btn');
+    const cancelEditItemBtn = document.querySelector('.cancelEditItem-btn');
+
+
+    let currentID = null;   // store ID of item being edited
+    let currentItemData = null;
+
+    inventoryTable.addEventListener('click', function(e) {
+      if (e.target.classList.contains('editItem-btn')) {
+        editItemModal.classList.add("active");
+
+        currentID = e.target.dataset.id;
+        currentItemData = items.find(i => i.itemID == currentID);
+
+        document.getElementById("editMeasurement").value = currentItemData.unitOfMeasurement;
+        document.getElementById("editUnitPrice").value = currentItemData.pricePerQuantity;
+        document.getElementById("editQuantity").value = currentItemData.quantity;
+        document.getElementById("editReorder").value = currentItemData.reorderLevel;
+      }
+      else if (e.target.classList.contains('deleteItem-btn')) {
+        deleteItemModal.classList.add('active');
+        currentID = e.target.dataset.id;
+      }
+    });
+
+    editItemModal.addEventListener('click', function(e) {
+        if (e.target === editItemModal) {
+            editItemModal.classList.remove('active');
+        }
+    });
+
+    cancelEditItemBtn.addEventListener('click', function(e) {
+        if (e.target === cancelEditItemBtn) {
+            editItemModal.classList.remove('active');
+        }
+    });
+
+    deleteItemModal.addEventListener('click', function(e) {
+        if (e.target === deleteItemModal) {
+            deleteItemModal.classList.remove('active');
+        }
+    });
+
+    cancelDeleteItemBtn.addEventListener('click', function(e) {
+        if (e.target === cancelDeleteItemBtn) {
+            deleteItemModal.classList.remove('active');
+        }
+    });
+
+    document.getElementById("editItemForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        if (!currentID || !currentItemData) {
+            console.error("No item selected for editing.");
+            return;
         }
 
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('itemModal');
-            const deleteModal = document.getElementById('deleteModal');
-            if (event.target === modal) {
-                closeInventoryModal();
+        const updateItems = {
+            id: currentID,
+            unitOfMeasurement: document.getElementById("editMeasurement").value,
+            unitCost: document.getElementById("editUnitPrice").value,
+            quantity: document.getElementById("editQuantity").value,
+            reorder: document.getElementById("editReorder").value
+        };
+
+        try {
+            const response = await fetch(`../controllers/inventory.php`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updateItems)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                editItemModal.classList.remove("active");
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                displayItem();
+
+                currentID = null;
+                currentItemData = null;
+
+                document.getElementById("editMeasurement").value = "";
+                document.getElementById("editUnitPrice").value = "";
+                document.getElementById("editQuantity").value = "";
+                document.getElementById("editReorder").value = "";
             }
-            if (event.target === deleteModal) {
-                closeDeleteModal();
+            else {
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: result.error || result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
             }
+        } catch (error) {
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Error:', 
+                text: error,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+    });
+
+    document.querySelector('.delete-confirm-btn').addEventListener('click', async function(e) {
+        e.preventDefault();
+
+        if (!currentID) {
+            console.error("No item selected for editing.");
+            return;
         }
 
-        // Initial display
-        displayItems();
+        try{
+            const response = await fetch(`../controllers/inventory.php`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentID })
+            });
+
+            const result = await response.json();
+            if(result.success){
+                deleteItemModal.classList.remove("active");
+                Swal.fire({
+                    position: "center",
+                    icon: "success",
+                    title: result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+
+                displayItem();
+
+                currentID = null;
+            }
+            else{
+                deleteItemModal.classList.remove("active");
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: result.error || result.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+
+        } catch (error) {
+            Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: 'Error:', 
+                    text: error,
+                    showConfirmButton: false,
+                    timer: 1500
+            });
+        }
+    });
+
+});
 
         
 //LOGOUT BUTTON
@@ -656,8 +943,7 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn.addEventListener("click", () => {
 
     fetch("../controllers/logout.php", {
-      method: "POST",
-      credentials: "include"
+      method: "POST"
     })
       .then(res => res.json())
       .then(data => {
@@ -790,8 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         fetch("../controllers/staff.php?action=createAcc", {
             method: 'POST',
-            body: formData,
-            credentials: 'include'
+            body: formData
         })
         .then(res => res.json())
         .then(data => {
@@ -817,6 +1102,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error('Error:', error));
     });
 
+    let rowStaff = [];
+
     //display staff accounts - DONE
     function displayStaffAccounts(){
         fetch("../controllers/staff.php?action=accounts", {
@@ -826,13 +1113,13 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             const tableBody = document.getElementById('staffTable').querySelector('tbody');
             tableBody.innerHTML = '';
-
-            if(data.length === 0){
+            rowStaff = data;
+            if(rowStaff.length === 0){
                 tableBody = `<tr><td colspan="4">No record found.</td></tr>`;
                 return;
             }
-
-            data.forEach(row => {
+            
+            rowStaff.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${row.staffFullname}</td>
                                 <td>${row.staffRole}</td>
@@ -919,7 +1206,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 contactnoInput.value = row.contactNumber;
                 usernameInput.value = row.staffUsername;
                 roleInput.value = row.staffRole;
-                id.value = row.id;
+                // id.value = row.id;
 
                 fullnameInput.dataset.original = row.staffFullname;
                 contactnoInput.dataset.original = row.contactNumber;
@@ -997,7 +1284,8 @@ document.addEventListener("DOMContentLoaded", () => {
     //edit staff account
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        const id = document.getElementById('staffID').value;
+        //To Do: ayusin ang staff ID
+            const id = document.getElementById('staffID').value;
             const formData = new FormData();
             formData.append('staff_id', id);
             formData.append('newFullname', fullnameInput.value);
@@ -1022,8 +1310,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
             fetch("../controllers/staff.php?action=editAcc", {
                 method: 'POST',
-                body: formData,
-                credentials: 'include'
+                body: formData
             })
             .then(res => res.json())
             .then(data => {
@@ -1071,7 +1358,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             })
             .catch(err => console.error('Error:', err));
-    };
+    }
 
     searchBox.addEventListener('input', () => {
         clearTimeout(debounceTimer);
