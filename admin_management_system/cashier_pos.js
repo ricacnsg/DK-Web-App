@@ -466,21 +466,44 @@ function cancelOrder() {
 }
 
 // Logout function
-function logout() {
-    Swal.fire({
-        title: 'Logout',
-        text: 'Are you sure you want to logout?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#0052cc',
-        cancelButtonColor: '#999',
-        confirmButtonText: 'Yes, Logout'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = 'login.php';
+// function logout() {
+//     Swal.fire({
+//         title: 'Logout',
+//         text: 'Are you sure you want to logout?',
+//         icon: 'question',
+//         showCancelButton: true,
+//         confirmButtonColor: '#0052cc',
+//         cancelButtonColor: '#999',
+//         confirmButtonText: 'Yes, Logout'
+//     }).then((result) => {
+//         if (result.isConfirmed) {
+//             window.location.href = 'login.php';
+//         }
+//     });
+// }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutBtn = document.getElementById("logoutbtn");
+
+  logoutBtn.addEventListener("click", () => {
+
+    fetch("../controllers/logout.php", {
+      method: "POST"
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log("✅ " + data.message);
+          window.location.href = "login.php";
+        } else {
+          console.log("⚠️ " + data.message);
         }
-    });
-}
+      })
+      .catch(err => {
+        console.error("Error:", err);
+      });
+  });
+});
 
 // Switch view
 function switchView(view) {

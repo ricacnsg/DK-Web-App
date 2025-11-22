@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier') {
+  header("Location: login.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +39,7 @@
                 <button class="sidebar-link rounded me-1" onclick="switchView('history')">
                     <i class="fas fa-history"></i>  History
                 </button>
-                <button class="logout-btn rounded me-1" onclick="logout()">
+                <button class="logout-btn rounded me-1" id="logoutbtn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i>  Logout
                 </button>
             </div>

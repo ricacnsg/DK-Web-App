@@ -5,17 +5,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 require_once '../database/connect.php';
-$response = NULL;
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
-
-// TO DO:
-// deleteStaffAccount($conn);
-// searchStaff($conn);
-// filterStaff($conn);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -162,11 +156,29 @@ function editStaffAccount($conn) {
     $newPassword = $_POST["newPassword"];
     $editedAt = date("Y-m-d H:i:s");
 
-    $hash_newpassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    if (!empty($newPassword)) {
+        // Update including password
+        $hash_newpassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("UPDATE staff SET staffFullname = ?, staffUsername = ?, contactNumber = ?, staffRole = ?, staffPassword = ?, editedAt = ? WHERE staffID = ?");
-    $stmt->bind_param("ssisssi", $newFullname, $newUsername, $newContactno, $newRole, $hash_newpassword, $editedAt, $staffId);
+        $stmt = $conn->prepare("
+            UPDATE staff 
+            SET staffFullname = ?, staffUsername = ?, contactNumber = ?, staffRole = ?, staffPassword = ?, editedAt = ?
+            WHERE staffID = ?
+        ");
 
+        $stmt->bind_param("ssisssi", $newFullname, $newUsername, $newContactno, $newRole, $hash_newpassword, $editedAt, $staffId);
+
+    } else {
+        // Update WITHOUT changing password
+        $stmt = $conn->prepare("
+            UPDATE staff 
+            SET staffFullname = ?, staffUsername = ?, contactNumber = ?, staffRole = ?, editedAt = ?
+            WHERE staffID = ?
+        ");
+
+        $stmt->bind_param("ssissi", $newFullname, $newUsername, $newContactno, $newRole, $editedAt, $staffId);
+    }
+    
     if ($stmt->execute()) {
       $response = ['success' => true, 'message' => 'Account edited successfully.'];
     } else {

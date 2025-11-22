@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['staff_username'])) {
+if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') {
   header("Location: login.php");
   exit;
 }
@@ -48,13 +48,6 @@ if (!isset($_SESSION['staff_username'])) {
             <div id="dashboard" class="page active-page">
                 <header class="main-header">
                     <h1>Dashboard</h1>
-                    <div class="user-profile">
-                        <div class="user-avatar">JD</div>
-                        <div class="user-info">
-                            <h3>Geoffrey</h3>
-                            <p>Admin</p>
-                        </div>
-                    </div>
                 </header>
 
                 <div class="toolbar">
@@ -144,13 +137,6 @@ if (!isset($_SESSION['staff_username'])) {
             <div id="menu" class="page">
     <div class="header">
         <h1>Manage Your Menu</h1>
-        <div class="user-profile">
-            <div class="user-avatar">JD</div>
-            <div class="user-info">
-                <h3>Geoffrey</h3>
-                <p>Admin</p>
-            </div>
-        </div>
     </div>
 
     <div class="category-section">
@@ -222,13 +208,13 @@ if (!isset($_SESSION['staff_username'])) {
             </select>
         </div>
     </div>
+    
     <div class="menu-grid category-section" id="menuGrid">
         <div class="menu-card add-item" id="addNewItemCard">
             <i class="fas fa-plus add-icon"></i>
             <div class="add-text">Add BentoSilog Item</div>
         </div>
-        
-        </div>
+    </div>
         <div id="addEditModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('addEditModal')"><i class="fas fa-times"></i></button>
@@ -273,15 +259,31 @@ if (!isset($_SESSION['staff_username'])) {
                     </select>
                 </div>
                 
+                <!-- Add Ingredients -->
                 <div class="form-group">
                     <label>Ingredients</label>
-                    <div class="ingredients-list" id="ingredientsList">
-                        </div>
+                    <div class="ingredients-list" id="ingredientsList"></div>
                     <div class="add-ingredient-wrapper">
-                        <input type="text" id="newIngredientInput" placeholder="Add ingredient name" onkeydown="if(event.key === 'Enter'){event.preventDefault(); document.getElementById('addIngredientBtn').click();}">
-                        <button type="button" id="addIngredientBtn" class="add-ingredient-btn"><i class="fas fa-plus"></i> Add</button>
+                        <input type="text" id="newIngredientInput" placeholder="Enter ingredient name">
+                        <!-- onkeydown="if(event.key === 'Enter'){event.preventDefault(); document.getElementById('addIngredientBtn').click();} -->
+                        <!-- <button type="button" id="addIngredientBtn" class="add-ingredient-btn"><i class="fas fa-plus"></i> Add</button> -->
+
+                        <div class='table-ingredients'>
+                            <table class='table select-ingredient-table' id='selectIngredientsTable'>
+                                <thead>
+                                    <tr>
+                                        <th>Ingredient Name</th>
+                                        <th>Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- dynamic data here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
                 <div class="modal-actions">
                     <button type="submit" class="btn-submit">SAVE</button>
                     <button type="button" class="btn-cancel" onclick="closeModal('addEditModal')">CANCEL</button>
@@ -307,123 +309,215 @@ if (!isset($_SESSION['staff_username'])) {
     <div id="notification" class="notification">
         Item successfully saved!
     </div>
+
 </div>
-            <div id="inventory" class="page">
-           <div class="container">
-        <h1>Manage your Inventory</h1>
+<div id="inventory" class="page">
+    <div class="container">
+        <div class="header"><h1>Manage your Inventory</h1></div>
         
         <div class="button-container">
-            <button class="add-btn" onclick="openModal()">
+            <button class="add-btn">
                 <i class="fas fa-plus"></i>
                 ADD NEW ITEM
             </button>
 
+            <div class='search-container'>
+                <input type="text" placeholder='Search Item' id='searchItem' class='form-control rounded-pill searchItem'>
+            </div>
+
             <div class="filter-container">
-                <select class="filter-select" id="categoryFilter" onchange="filterItems()">
-                    <option value="">Filter By Category</option>
-                    <option value="Bento Silog">Bento Silog</option>
-                    <option value="Flavoured with Wings&Rice">Flavoured with Wings&Rice</option>
-                    <option value="Ricemeal">Ricemeal</option>
-                    <option value="Burger & Sandwiches">Burger & Sandwiches</option>
-                    <option value="Pulutan Express">Pulutan Express</option>
-                    <option value="Beverages">Beverages</option>
+                <select class="filter-select" id="categoryFilter">
+                    <option value="">All Item</option>
+                    <option value="Vegetables">Vegetables</option>
+                    <option value="Meat">Meat</option>
                     <option value="Drinks">Drinks</option>
+                    <option value="Bread">Bread</option>
+                    <option value="Condiments">Condiments</option>
+                    <option value="Utensils">Utensils</option>
                 </select>
             </div>
         </div>
 
         <div class="table-wrapper">
-            <div class="table-header">
-                <div>Name</div>
-                <div>Stocks</div>
-                <div>Category</div>
-                <div>Reorder Level</div>
-                <div>Unit Cost</div>
-                <div></div>
-            </div>
-            <div id="itemsContainer">
-                <div class="empty-state">
-                    No items yet. Click "ADD NEW ITEM" to add your first inventory item.
-                </div>
-            </div>
+            <table class='table inventory-table' id="inventoryTable">
+                <thead class="table-header">
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Stocks</th>
+                        <th>Reorder Level</th>
+                        <th>Category</th>
+                        <th>Unit Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsContainer">
+                </tbody>
+            </table>
         </div>
-    </div>
 
-    <!-- Modal -->
+
+    <!-- Add New Item Modal -->
     <div id="itemModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-header" id="modalTitle">Add Item</h2>
             <form id="itemForm">
                 <div class="form-group">
-                    <label>Item Name</label>
-                    <input type="text" id="itemName" placeholder="Enter item name" required>
+                    <label for='itemname'>Item Name</label>
+                    <input type="text" id="itemname" placeholder="Enter item name" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Stocks</label>
+                        <label for='itemStocks'>Stocks</label>
                         <input type="number" id="itemStocks" placeholder="How many stocks?" required>
                     </div>
                     <div class="form-group">
-                        <label>Reorder Level</label>
-                        <input type="number" id="itemReorder" placeholder="Enter reorder level" required>
+                        <label for="itemMeasurement">Unit of Measurement</label>
+                         <select class="filter-select" id="itemMeasurement">
+                            <option value="">kg, slice, liter, etc.</option>
+                            <option value="kilograms">Kilograms</option>
+                            <option value="grams">Grams</option>
+                            <option value="ml">Millimeter</option>
+                            <option value="liters">Liters</option>
+                            <option value="pieces">Pieces</option>
+                            <option value="packs">Packs</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Unit Cost</label>
+                    <label for='itemReorder'>Reorder Level</label>
+                    <input type="number" id="itemReorder" placeholder="Enter reorder level" required>
+                </div>
+                <div class="form-group">
+                    <label for='itemCost'>Unit Cost</label>
                     <input type="number" id="itemCost" step="0.01" placeholder="What is the unit cost?" required>
                 </div>
                 <div class="form-group">
-                    <label>Category</label>
-                    <select id="itemCategory" required>
+                    <label for='itemcategory'>Category</label>
+                    <select id="itemcategory" required>
                         <option value="">Select Category</option>
-                        <option value="Bento Silog">Bento Silog</option>
-                        <option value="Flavoured with Wings&Rice">Flavoured with Wings&Rice</option>
-                        <option value="Ricemeal">Ricemeal</option>
-                        <option value="Burger & Sandwiches">Burger & Sandwiches</option>
-                        <option value="Pulutan Express">Pulutan Express</option>
-                        <option value="Beverages">Beverages</option>
+                        <option value="Vegetables">Vegetables</option>
+                        <option value="Meat">Meat</option>
                         <option value="Drinks">Drinks</option>
+                        <option value="Bread">Bread</option>
+                        <option value="Condiments">Condiments</option>
+                        <option value="Utensils">Utensils</option>
                     </select>
                 </div>
                 <div class="modal-buttons">
-                    <button type="submit" class="modal-btn save-btn">ADD</button>
+                    <button type="submit" id="addItemBtn" class="modal-btn save-btn">ADD</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="delete-modal">
-        <div class="delete-modal-content">
-            <h2 class="delete-modal-header">Delete Item</h2>
-            <div class="warning-icon">
-                <div class="warning-triangle"></div>
+        <!-- Edit Ingredients Item -->
+        <div class='modal' id='editItemModal'>
+            <div class='modal-content'>
+                <h2 class='editItem-modal-header'>Edit Item</h2>
+
+                <form class="editItem-form" id='editItemForm'>  
+                    <div class='form-group'>
+                        <label for="editMeasurement">Unit of Measurement</label>
+                        <select id="editMeasurement" class='form-control'>
+                            <option value="kilograms">Kilograms</option>
+                            <option value="grams">Grams</option>
+                            <option value="ml">Millimeter</option>
+                            <option value="liters">Liters</option>
+                            <option value="pieces">Pieces</option>
+                            <option value="packs">Packs</option>
+                        </select>
+
+                        <label for="editUnitPrice">Unit Price</label>
+                        <input class='form-control' type="number" id="editUnitPrice" min="0" placeholder="Enter unit price">
+
+                        <label for="editQuantity">Quantity</label>
+                        <input class='form-control' type="number" id="editQuantity" min="0" placeholder="Enter quantity">
+
+                        <label for="editReorder">Reorder Level </label>
+                        <input class='form-control' type="number" id="editReorder" min="0" placeholder="Enter reorder level">
+
+                        <div class="modal-buttons">
+                            <button type="button" class="btn cancelEditItem-btn">Cancel</button>
+                            <button type="submit" class="btn saveEditItem-btn">Save</button>
+                        </div>
+                    </div>
+                </form>
             </div>
-            <p class="delete-message">Do you really want to delete this item?</p>
-            <div class="delete-buttons">
-                <button class="delete-confirm-btn" onclick="confirmDelete()">DELETE</button>
-                <button class="delete-cancel-btn" onclick="closeDeleteModal()">CANCEL</button>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteItemModal" class="modal">
+            <div class="modal-content">
+                <h2 class="delete-modal-header">Delete Item</h2>
+                <!-- <div class="warning-icon">
+                    <div class="warning-triangle"></div>
+                </div> -->
+                <p class="delete-message text-center">Do you really want to delete this item?</p>
+                <div class="modal-buttons">
+                    <button class="btn delete-confirm-btn">DELETE</button>
+                    <button class="btn delete-cancel-btn">CANCEL</button>
+                </div>
             </div>
         </div>
     </div>
-    </div>
+</div>
 
     <div id="orders" class="page">
         <div class="header"><h1>Order History</h1></div>
-        <p>Content for Order History...</p>
+        <!-- <p>Content for Order History...</p> -->
+
+                    <!-- Order History View -->
+            <div id="historyView" class="order-history justify-content-center">
+                <div class="history-background mt-2 mb-2">
+                    <div class="history-header">
+                        <!-- <div class="history-title">Order History</div> -->
+                        <div class="history-controls">
+                            <span class="search-label">Search Order</span>
+                            <input type="text" class="history-search" placeholder="Enter Order ID" id="searchOrderId" onkeyup="searchOrders()">
+                            
+                            <div class="filter-group">
+                                <select class="filter-select" id="filterType" onchange="updateFilterOptions()">
+                                    <option value="month">Filter By Month</option>
+                                    <option value="day">Filter By Day</option>
+                                    <option value="year">Filter By Year</option>
+                                </select>
+                                
+                                <select class="filter-select" id="filterValue" onchange="filterOrders()">
+                                </select>
+                            </div>
+                            
+                            <div class="history-buttons">
+                                <button class="history-btn" onclick="exportData()">EXPORT</button>
+                                <button class="history-btn" onclick="printData()">PRINT</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="order-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Item Order</th>
+                                    <th>Total Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Order Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
     </div>
 
     <div id="staff" class="page">
         <div class="staff-management-container">
             <div class="header">
                 <h1>Staff Account Management</h1>
-                <div class="user-profile">
-                    <div class="user-avatar">JD</div>
-                    <div class="user-info">
-                        <h3>Jane Doe</h3>
-                        <p>Admin</p>
-                    </div>
-                </div>
             </div>
 
             <div class="content-wrapper">
@@ -437,17 +531,19 @@ if (!isset($_SESSION['staff_username'])) {
                             <option value='kitchen_staff'>Kitchen Staff</option>
                         </select>
                     </div>
-                    <table class="staff-table" id="staffTable">
-                        <thead>
-                            <tr>
-                                <th>Fullname</th>
-                                <th>Role</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
+                    <div class='stafftable-wrapper'>
+                        <table class="staff-table" id="staffTable">
+                            <thead>
+                                <tr>
+                                    <th>Fullname</th>
+                                    <th>Role</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Staff Edit Modal -->
@@ -455,7 +551,9 @@ if (!isset($_SESSION['staff_username'])) {
                     <div class="modal-content">
                         <h2>Edit Account</h2>
                         <form id="editForm">
+                            <!-- TO DO: Gawing csrf token 'tong hidden input -->
                             <input type='hidden' id='staffID' name='staffID'>
+
                             <label for="editFullname">Fullname</label>
                             <input type="text" id="editFullname" required>
                             <label for="editContact">Contact Number</label>
@@ -466,8 +564,9 @@ if (!isset($_SESSION['staff_username'])) {
                             <label for="editRole">Role</label>
                             <select class='form-select' id="editRole" name="role">
                                 <option value="admin">Admin</option>
-                                <option value="kitchen_staff">Kitchen Staff</option>
+                                <option value="kitchen staff">Kitchen Staff</option>
                                 <option value="cashier">Cashier</option>
+                                <option value="delivery rider">Delivery Rider</option>
                             </select>
                             
                             <label for="editPassword">Change Password</label>
@@ -509,8 +608,9 @@ if (!isset($_SESSION['staff_username'])) {
                         <label for="role">Role</label>
                         <select id="role" name="role">
                             <option value="admin">Admin</option>
-                            <option value="kitchen_staff">Kitchen Staff</option>
+                            <option value="kitchen staff">Kitchen Staff</option>
                             <option value="cashier">Cashier</option>
+                            <option value="delivery rider">Delivery Rider</option>
                         </select>
 
                         <label for="username">Username</label>

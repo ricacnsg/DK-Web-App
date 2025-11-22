@@ -800,7 +800,7 @@ html, body {
 }
 
 .add-ingredient-wrapper {
-    display: flex;
+    display: block;
     gap: 10px;
     margin-top: 10px;
 }
@@ -857,6 +857,26 @@ html, body {
     color: var(--color-text-light);
 }
 
+/* Inventory Style Here */
+.inventory-table {
+    background-color: transparent;
+}
+.inventory-table th,
+.inventory-table td {
+    background-color: transparent;
+}
+
+.saveEditItem-btn {
+    background: #062970;
+    color: white;
+}
+
+.cancelEditItem-btn {
+    background: #ccc;
+    margin-right: 20px;
+}
+
+
 /* --- Staff Management Specific Styles --- */
 .staff-management-container {
     display: flex;
@@ -869,12 +889,18 @@ html, body {
     gap: 30px;
 }
 
+.stafftable-wrapper {
+    max-height: 60vh;
+    overflow: auto;
+}
+
 .staff-list {
     flex: 2;
     background: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    overflow-y: auto;
 }
 
 .add-staff-form {
@@ -985,6 +1011,16 @@ html, body {
     color: var(--color-dark-blue);
 }
 
+.edit-btn:hover {
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
 /* edit and delete modal here */
 .modal {
     position: fixed;
@@ -1081,6 +1117,151 @@ html, body {
     background-size: 12px;
     padding-right: 40px;
 }
+
+
+/* Order History */
+.order-history {
+    display: block;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    overflow-y: hidden;
+    margin-left: 20px;
+}
+
+.order-history.active {
+    display: flex;
+}
+
+.history-header {
+    color: black;
+}
+
+.history-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.history-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: -15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-label {
+    color: black;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.history-search {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    min-width: 200px;
+    font-size: 14px;
+    background: white;
+}
+
+.history-filter {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.history-buttons {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.history-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #062970;
+    color: white;
+    transition: transform 0.2s;
+}
+
+.history-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* .table-wrapper {
+    background-color: white;
+    border-radius: 20px;
+    margin-top: -15px;
+    padding: 20px;
+    overflow-x: auto;
+    overflow-y: scroll;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+} */
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.order-table thead {
+    background-color: #f5f5f5;
+}
+
+.order-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+    color: #333;
+}
+
+.order-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #666;
+}
+
+.order-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 15px;
+    background-color: transparent;
+    color: #ffd700;
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
 
 /* Notification */
 .notification {
@@ -1247,6 +1428,12 @@ html, body {
             right: 20px;
         }
 
+        .search-container{
+            position: absolute;
+            top: 80px;
+            left: 20px;
+        }
+
         .filter-select {
             background-color: white;
             border: none;
@@ -1265,34 +1452,37 @@ html, body {
         }
 
         .table-wrapper {
-            background-color: #fffacd;
+            background-color: #ffffff;
             border-radius: 20px;
             padding: 20px;
-            margin: 60px 20px 0 20px;
+            margin: 55px 20px 0 20px;
             max-height: 500px;
             overflow-y: auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 60vh;
         }
 
-        .table-wrapper::-webkit-scrollbar {
+        /* .table-wrapper::-webkit-scrollbar {
             width: 10px;
-        }
+            background: #f1e9a8;
+            border-radius: 10px;
+        } */
 
-        .table-wrapper::-webkit-scrollbar-track {
+        /* .table-wrapper::-webkit-scrollbar-track {
             background: #f1e9a8;
             border-radius: 10px;
         }
 
         .table-wrapper::-webkit-scrollbar-thumb {
-            background: #e8b923;
+            background: #9e9e9d;
             border-radius: 10px;
         }
 
         .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #d4a620;
-        }
+            background: #f6f6f1;
+        } */
 
-        .table-header {
+        /* .table-header {
             display: grid;
             grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 0.8fr;
             gap: 15px;
@@ -1300,9 +1490,9 @@ html, body {
             font-weight: 700;
             color: #1e3a8a;
             font-size: 1rem;
-        }
+        } */
 
-        .item-row {
+        /* .item-row {
             display: grid;
             grid-template-columns: 2fr 1fr 1.5fr 1fr 1fr 0.8fr;
             gap: 15px;
@@ -1313,14 +1503,14 @@ html, body {
             align-items: center;
             transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+        } */
 
-        .item-row:hover {
+        /* .item-row:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+        } */
 
-        .item-cell {
+        /* .item-cell {
             color: #333;
             font-weight: 600;
         }
@@ -1329,9 +1519,9 @@ html, body {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
-        }
+        } */
 
-        .action-btn {
+        /* .action-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -1340,30 +1530,51 @@ html, body {
             transition: all 0.3s ease;
         }
 
-        .edit-btn {
+        .editItem-btn {
             color: #cbc0c0;
-        }
+        }*/
 
-        .edit-btn:hover {
+        /*
+        .deleteItem-btn {
+            color: #1e3a8a;
+        }
+        */
+
+        .editItem-btn:hover {
             color: #ffffff;
             transform: scale(1.1);
         }
 
-        .delete-btn {
-            color: #1e3a8a;
-        }
-
-        .delete-btn:hover {
+        .deleteItem-btn:hover {
             color: #dc2626;
             transform: scale(1.1);
         }
 
-        .empty-state {
+        .editItem-btn, .deleteItem-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .editItem-btn {
+            background-color: var(--color-dark-blue);
+            color: white;
+        }
+
+        .deleteItem-btn {
+            background-color: var(--color-yellow);
+            color: var(--color-dark-blue);
+        }
+        
+        /* .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #666;
             font-size: 1.1rem;
-        }
+        } */
 
         .modal {
             display: none;
@@ -1396,19 +1607,19 @@ html, body {
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #333;
             font-weight: 600;
             font-size: 0.95rem;
@@ -1472,9 +1683,9 @@ html, body {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .cancel-btn {
+        /* .cancel-btn {
             display: none;
-        }
+        } */
 
         .delete-modal {
             display: none;
@@ -1541,36 +1752,46 @@ html, body {
             margin-bottom: 30px;
         }
 
-        .delete-buttons {
+        /* .delete-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
-        }
+        } */
 
         .delete-confirm-btn,
         .delete-cancel-btn {
-            padding: 14px 40px;
+            padding: 7px 17px;
             border: none;
-            border-radius: 25px;
+            border-radius: 15px;
             font-family: 'Montserrat', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .delete-confirm-btn {
+        /* .delete-confirm-btn {
             background-color: #1e3a8a;
+            color: white;
+        } */
+
+        .delete-confirm-btn {
+            background: #062970;
             color: white;
         }
 
-        .delete-confirm-btn:hover {
+        .delete-cancel-btn {
+            background: #ccc;
+            margin-left: 20px;
+        }
+
+        /* .delete-confirm-btn:hover {
             background-color: #162d6b;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+        } */
 
-        .delete-cancel-btn {
+        /* .delete-cancel-btn {
             background-color: #f4c430;
             color: #1e3a8a;
         }
@@ -1579,4 +1800,4 @@ html, body {
             background-color: #e8b923;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+        } */
