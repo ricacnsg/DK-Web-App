@@ -34,6 +34,39 @@ if ($update->affected_rows > 0) {
         <p>Thank you! Your order <strong>$orderNo</strong> has been verified and is now being processed.</p>
         <a href='http://localhost:3000/landing_page/landing.html' style='color:white; background-color:#04276c; padding:10px 20px; text-decoration:none; border-radius:5px;'>Return to Homepage</a>
     </div>";
+
+    // 1. Get all menuItemID for the given order number
+    $stmt1 = $conn->prepare("SELECT menuItemID FROM itemsordered WHERE orderNo = ?");
+    $stmt1->bind_param("s", $orderNo);
+    $stmt1->execute();
+    $menuItemsResult = $stmt1->get_result();
+
+    while ($menuRow = $menuItemsResult->fetch_assoc()) {
+
+        $menuItemID = $menuRow['menuItemID'];
+
+        // 2. Get all ingredients for this menu item
+        $stmt2 = $conn->prepare("SELECT itemID, quantity FROM menuitemingredients WHERE menuItemID = ?");
+        $stmt2->bind_param("i", $menuItemID);
+        $stmt2->execute();
+        $ingredientsResult = $stmt2->get_result();
+
+        while ($ingredientRow = $ingredientsResult->fetch_assoc()) {
+
+            $itemID = $ingredientRow['itemID'];
+            $deductQty = $ingredientRow['quantity'];
+
+            // 3. Deduct quantity from the item table
+            $stmt3 = $conn->prepare("UPDATE item SET quantity = quantity - ? WHERE itemID = ?");
+            $stmt3->bind_param("ii", $deductQty, $itemID);
+            $stmt3->execute();
+            $stmt3->close();
+        }
+
+        $stmt2->close();
+    }
+
+    $stmt1->close();
 } else {
     echo "Verification failed. Please try again later.";
 }
