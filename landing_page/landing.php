@@ -89,483 +89,68 @@
 
 
       
-    <!-- Menu Section -->
-    <div class="container-fluid menu-part" id="menu">
-        <div class="row">
-            <!-- LEFT MENU BUTTONS -->
-            <div class="col-12 col-md-4">
-                <h1 class="fw-bold text-shadow-angled menu-text">Our Menu</h1>
-                <p class="fw-bold what-popular">What's Popular?</p>
+<!-- Menu Section -->
+<div class="container-fluid menu-part" id="menu">
+    <div class="row">
+        <!-- LEFT MENU BUTTONS -->
+        <div class="col-12 col-md-4">
+            <h1 class="fw-bold text-shadow-angled menu-text">Our Menu</h1>
+            <p class="fw-bold what-popular">What's Popular?</p>
 
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="bentosilog">
-                    Bento Silog
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="burgers">
-                    Burger & Sandwiches
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="wings">
-                    Flavored Wings & Rice
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="rice_meal">
-                    Rice Meal
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="pulutan">
-                    Pulutan Express
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="beverages">
-                    Drinks
-                </button>
-                <br class="d-none d-md-block">
-                <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2">
-                    View All Menu
-                </button>
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2 active" data-filter="bento">
+                Bento Silog
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="burger">
+                Burger & Sandwiches
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="wings">
+                Flavored Wings & Rice
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="rice">
+                Rice Meal
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="pulutan">
+                Pulutan Express
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="beverages">
+                Drinks
+            </button>
+            <br class="d-none d-md-block">
+            <button type="button" class="btn rounded-pill menu-button fw-bold border-3 mb-2" data-filter="all">
+                View All Menu
+            </button>
 
-                <p class="menu-description">Our menu is carefully crafted to satisfy every craving. From hearty classics and savory specialties to refreshing sides and delightful beverages, there’s something here for everyone. Each dish is prepared fresh, made with quality ingredients, and served with care. Whether you’re in the mood for a light snack, a full meal, or a sweet treat to end the day, you’ll always find something to love at Daven’s Kitchenette.</p>
-            </div>
+            <p class="menu-description">Our menu is carefully crafted to satisfy every craving. From hearty classics and savory specialties to refreshing sides and delightful beverages, there's something here for everyone. Each dish is prepared fresh, made with quality ingredients, and served with care. Whether you're in the mood for a light snack, a full meal, or a sweet treat to end the day, you'll always find something to love at Daven's Kitchenette.</p>
+        </div>
 
-            <!-- RIGHT CARDS -->
-            <div class="col-12 col-md-8">
-                <div class="row g-3 m-5">
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/tapasilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Tapasilog</p>
-                                <br>
-                                <p class="menuitem-description">Tapa, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
+        <!-- RIGHT CARDS - This will be populated by JavaScript -->
+        <div class="col-12 col-md-8">
+            <div class="menu-items-container">
+                <div class="menu-items-grid" id="menu-items-container">
+                    <!-- Menu items will be loaded here dynamically -->
+                    <div class="loading-state">
+                        <div class="spinner-border text-warning" role="status">
+                            <span class="visually-hidden">Loading menu...</span>
                         </div>
+                        <p class="mt-2">Loading menu items...</p>
                     </div>
-                    
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/chickensilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Chicken Silog</p>
-                                <br>
-                                <p class="menuitem-description">Fried Chicken, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/spamsilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Spam Silog</p>
-                                <br>
-                                <p class="menuitem-description">Spam, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 89.00</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/tapasilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Tapasilog</p>
-                                <br>
-                                <p class="menuitem-description">Tapa, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/chickensilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Chicken Silog</p>
-                                <br>
-                                <p class="menuitem-description">Fried Chicken, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="bentosilog">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/spamsilog.png" class="img-fluid rounded">
-                                <p class="menuitem-name">Spam Silog</p>
-                                <br>
-                                <p class="menuitem-description">Spam, Fried Rice, Fried Egg</p>
-                                <p class="menuitem-price">Php 89.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/coke.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Capuccino</p>
-                                <br>
-                                <p class="menuitem-description">Cappucino</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/sprite.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Matcha Latte</p>
-                                <br>
-                                <p class="menuitem-description">Matcha Latte</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Spanish Latte</p>
-                                <br>
-                                <p class="menuitem-description">Royal</p>
-                                <p class="menuitem-price">Php 30.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/coke.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Milktea</p>
-                                <br>
-                                <p class="menuitem-description">Coke</p>
-                                <p class="menuitem-price">Php 30.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/sprite.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Gulaman</p>
-                                <br>
-                                <p class="menuitem-description">Sprite</p>
-                                <p class="menuitem-price">Php 30.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="beverages">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Lemonade</p>
-                                <br>
-                                <p class="menuitem-description">Royal</p>
-                                <p class="menuitem-price">Php 30.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Buttered Shrimp</p>
-                                <br>
-                                <p class="menuitem-description">Buttered Shrimp, Rice</p>
-                                <p class="menuitem-price">Php 180.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Pork Tonkatsu</p>
-                                <br>
-                                <p class="menuitem-description">Pork Tonkatsu, Rice</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Beef Burger Steak</p>
-                                <br>
-                                <p class="menuitem-description">Beef Burger Steak, Rice</p>
-                                <p class="menuitem-price">Php 120.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Chicken Katsu</p>
-                                <br>
-                                <p class="menuitem-description">Chicken Katsu, Rice</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Chicken Fillet</p>
-                                <br>
-                                <p class="menuitem-description">Chicken Fillet, Rice</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="rice_meal">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Sweet & Sour Fish Fillet</p>
-                                <br>
-                                <p class="menuitem-description">Sweet & Sour Fish Fillet, Rice</p>
-                                <p class="menuitem-price">Php 180.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Garlic Parmesan</p>
-                                <br>
-                                <p class="menuitem-description">Garlic Parmesan flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Honey Butter</p>
-                                <br>
-                                <p class="menuitem-description">Honey Butter flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Spicy Buffalo</p>
-                                <br>
-                                <p class="menuitem-description">Spicy Buffalo flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Salted Egg</p>
-                                <br>
-                                <p class="menuitem-description">Salted Egg flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Barbeque</p>
-                                <br>
-                                <p class="menuitem-description">Barbeque flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="wings">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Sour Cream</p>
-                                <br>
-                                <p class="menuitem-description">Sour Cream flavored chicken wings, Rice</p>
-                                <p class="menuitem-price">Php 150.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Tender Juicy hotdog Sandwich</p>
-                                <br>
-                                <p class="menuitem-description">Tender Juicy hotdog, Lettuce, Ketchup, Mayonnaise</p>
-                                <p class="menuitem-price">Php 79.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Hungarian Cheesy Sandwich</p>
-                                <br>
-                                <p class="menuitem-description">Hungarian Sausage, Lettuce, Ketchup, Mayonnaise, Cheese</p>
-                                <p class="menuitem-price">Php 99.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Daven's Beef Burger Solo</p>
-                                <br>
-                                <p class="menuitem-description">Beef Patty, Lettuce, Ketchup, Mayonnaise, Cheese</p>
-                                <p class="menuitem-price">Php 99.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Beef Burger w/ Fries&Moza</p>
-                                <br>
-                                <p class="menuitem-description">Beef Patty, Lettuce, Ketchup, Mayonnaise, Cheese, Fries</p>
-                                <p class="menuitem-price">Php 179.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Spam & Egg Sandwich</p>
-                                <br>
-                                <p class="menuitem-description">Spam, Egg, Lettuce, Ketchup, Mayonnaise, Cheese</p>
-                                <p class="menuitem-price">Php 179.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="burgers">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Ham & Egg Sandwich</p>
-                                <br>
-                                <p class="menuitem-description">Ham, Egg, Lettuce, Ketchup, Mayonnaise, Cheese</p>
-                                <p class="menuitem-price">Php 179.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Daven's French Fries</p>
-                                <br>
-                                <p class="menuitem-description">(Cheese, BBQ, & Sour&Cream)</p>
-                                <p class="menuitem-price">Php 99.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Cheesy Bacon Fries</p>
-                                <br>
-                                <p class="menuitem-description">Fries, Bacon Cheese</p>
-                                <p class="menuitem-price">Php 109.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Potato Mojos</p>
-                                <br>
-                                <p class="menuitem-description">Potato Mojos</p>
-                                <p class="menuitem-price">Php 99.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Mozarella Cheesticks</p>
-                                <br>
-                                <p class="menuitem-description">Sticks with Mozarella Cheese inside</p>
-                                <p class="menuitem-price">Php 99.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Lechon Kawali</p>
-                                <br>
-                                <p class="menuitem-description">Lechon Kawali</p>
-                                <p class="menuitem-price">Php 180.00</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-4" data-category="pulutan">
-                        <div class="card card-design border-3 text-center menu-name h-100 rounded-5">
-                            <div class="card-body mb-3">
-                                <img src="../assets/image/royal.jpg" class="img-fluid rounded">
-                                <p class="menuitem-name">Pork Sisig</p>
-                                <br>
-                                <p class="menuitem-description">Pork Sisig</p>
-                                <p class="menuitem-price">Php 120.00</p>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                
+                <!-- Navigation Arrows -->
+                <div class="menu-navigation" id="menu-navigation" style="display: none;">
+                    <button class="nav-arrow prev-arrow" id="prev-arrow" disabled>‹</button>
+                    <div class="page-indicator" id="page-indicator">Page 1 of 1</div>
+                    <button class="nav-arrow next-arrow" id="next-arrow" disabled>›</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- About Section -->
     <!-- Wave Divider -->
@@ -609,8 +194,8 @@
 
                 <div class ="col-md-6 text-center">
                     <h1 class="fw-bold text-shadow-angled text-center mx-auto about-text responsive-text">STORY BEHIND THE KITCHENETTE</h1>
-                    <p class="text-center about-text1"> Daven’s Kitchenette was named after ‘Daven,’ the beloved son of the couple who is the founder of Daven’s.</p>
-                    <p class="text-center about-text2 m-4">We started small during the pandemic, cooking right from our home kitchen. Back then, it was all deliveries—no dine-in, just simple meals served straight from our garage with no fancy setup. Today, we’re proud to welcome you to a cozy, homey, and chill space where you can enjoy your favorite comfort meals—made with the same love, just in a bigger and warmer place.</p>
+                    <p class="text-center about-text1"> Daven's Kitchenette was named after 'Daven,' the beloved son of the couple who is the founder of Daven's.</p>
+                    <p class="text-center about-text2 m-4">We started small during the pandemic, cooking right from our home kitchen. Back then, it was all deliveries—no dine-in, just simple meals served straight from our garage with no fancy setup. Today, we're proud to welcome you to a cozy, homey, and chill space where you can enjoy your favorite comfort meals—made with the same love, just in a bigger and warmer place.</p>
                 </div>
 
         </div>        
@@ -665,160 +250,33 @@
         </div>
     </div>
 
-    <!-- Feedback Section -->
-    <div id="feedback" class="testimonial-background">
+<!-- Feedback Section -->
+<div id="feedback" class="testimonial-background">
     <section class="testimonial-section container">
-    <h2 class="testimonial-title">Testimonials</h2>
-    <div class="testimonial-divider"></div>
-    <h3 class="testimonial-subtitle">What they're saying about us</h3>
-    
-
-    <div class="testimonial-container">
-      <!-- Slide 1 -->
-      <div class="testimonial-slide active">
-        <div class="testimonial-box">
-          <p>The food at Daven's Kitchenette is absolutely amazing! Their Tapasilog is my go-to breakfast, and the coffee is always perfect. Highly recommended!</p>
-          <div class="testimonial-profile">
-            <img src="../assets/image/davens_staff.jpg" alt="Juan Dela Cruz">
-            <div class="testimonial-profile-info">
-              <h4>Juan Dela Cruz</h4>
+        <h2 class="testimonial-title">Testimonials</h2>
+        <div class="testimonial-divider"></div>
+        <h3 class="testimonial-subtitle">What they're saying about us</h3>
+        
+        <div class="testimonial-container">
+            <!-- Testimonials will be loaded dynamically here -->
+            <div class="loading-state text-center py-5">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading testimonials...</span>
+                </div>
+                <p class="mt-2">Loading testimonials...</p>
             </div>
-          </div>
         </div>
-      </div>
 
-      <!-- Slide 2 -->
-      <div class="testimonial-slide">
-        <div class="testimonial-box">
-          <p>I love their Flavored Wings! The Garlic Parmesan is my favorite. Great value for money and the service is always friendly and fast.</p>
-          <div class="testimonial-profile">
-            <img src="../assets/image/davens_staff.jpg" alt="Maria Santos">
-            <div class="testimonial-profile-info">
-              <h4>John</h4>
+        <!-- Slider Controls -->
+        <div class="slider-controls">
+            <button class="prev-btn">‹</button>
+            <div class="dots">
             </div>
-          </div>
+            <button class="next-btn">›</button>
         </div>
-      </div>
-
-      <!-- Slide 3 -->
-      <div class="testimonial-slide">
-        <div class="testimonial-box">
-          <p>Perfect spot for pulutan with friends! Their Pork Sisig and Lechon Kawali are the best in town. Affordable prices and generous servings.</p>
-          <div class="testimonial-profile">
-            <img src="../assets/image/davens_staff.jpg" alt="Robert Johnson">
-            <div class="testimonial-profile-info">
-              <h4>Fang</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Slide 4 -->
-      <div class="testimonial-slide">
-        <div class="testimonial-box">
-          <p>Daven's Kitchenette has become our family's favorite weekend treat. The kids love the burgers while we enjoy their rice meals. Cozy ambiance too!</p>
-          <div class="testimonial-profile">
-            <img src="../assets/image/davens_staff.jpg">
-            <div class="testimonial-profile-info">
-              <h4>Geo</h4>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slider Controls -->
-    <div class="slider-controls">
-      <button class="prev-btn">‹</button>
-      <div class="dots">
-        <span class="dot active" data-slide="0"></span>
-        <span class="dot" data-slide="1"></span>
-        <span class="dot" data-slide="2"></span>
-        <span class="dot" data-slide="3"></span>
-      </div>
-      <button class="next-btn">›</button>
-    </div>
-  </section>
-    </div>
-
-    <script>
-    function filterMenu(filter) {
-        document.querySelectorAll("[data-category]").forEach(item => {
-            if (filter === "all" || item.getAttribute("data-category") === filter) {
-                item.style.display = "block"; // show
-            } else {
-                item.style.display = "none"; // hide
-            }
-        });
-    }
-
-    // Attach event listeners
-    document.querySelectorAll(".menu-button").forEach(button => {
-        button.addEventListener("click", () => {
-            const filter = button.getAttribute("data-filter");
-            filterMenu(filter);
-        });
-    });
-
-    // Default filter on page load
-    window.addEventListener("DOMContentLoaded", () => {
-        filterMenu("bentosilog"); // auto-show only Bento Silog items
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-  const slides = document.querySelectorAll('.testimonial-slide');
-  const dots = document.querySelectorAll('.dot');
-  const prevBtn = document.querySelector('.prev-btn');
-  const nextBtn = document.querySelector('.next-btn');
-  let currentSlide = 0;
-  let slideInterval;
-
-  function showSlide(n) {
-    slides.forEach(slide => slide.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
-    slides[n].classList.add('active');
-    dots[n].classList.add('active');
-    currentSlide = n;
-  }
-
-  function nextSlide() {
-    let next = (currentSlide + 1) % slides.length;
-    showSlide(next);
-  }
-
-  function prevSlide() {
-    let prev = (currentSlide - 1 + slides.length) % slides.length;
-    showSlide(prev);
-  }
-
-  function startSlideShow() {
-    slideInterval = setInterval(nextSlide, 5000);
-  }
-
-  function stopSlideShow() {
-    clearInterval(slideInterval);
-  }
-
-  nextBtn.addEventListener('click', () => { stopSlideShow(); nextSlide(); startSlideShow(); });
-  prevBtn.addEventListener('click', () => { stopSlideShow(); prevSlide(); startSlideShow(); });
-
-  dots.forEach(dot => {
-    dot.addEventListener('click', function() {
-      stopSlideShow();
-      showSlide(parseInt(this.getAttribute('data-slide')));
-      startSlideShow();
-    });
-  });
-
-  const testimonialSection = document.querySelector('.testimonial-section');
-  testimonialSection.addEventListener('mouseenter', stopSlideShow);
-  testimonialSection.addEventListener('mouseleave', startSlideShow);
-
-  startSlideShow();
-});
-
-</script>
-
+    </section>
+</div>
+    <script src="landing.js"></script>
 
 <footer class="footer">
     <div class="footer-overlay">
@@ -827,8 +285,8 @@
             <!-- Left Side Logo -->
             <div class="footer-logo">
                 <img src="../assets/image/davens_logo.png" class="logo-img" >
-                <h2>Daven’s <span>Kitchenette</span></h2>
-                <p>© 2025 Daven’s Kitchenette. All rights reserved.</p>
+                <h2>Daven's <span>Kitchenette</span></h2>
+                <p>© 2025 Daven's Kitchenette. All rights reserved.</p>
             </div>
 
             <!-- Middle Links -->
