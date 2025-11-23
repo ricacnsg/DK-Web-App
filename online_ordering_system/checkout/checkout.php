@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../../database/connect.php'; // adjust the path to your DB connection
+require_once '../../database/connect.php';
 
 $isLoggedIn = isset($_SESSION['customer_id']);
 $customerID = $_SESSION['customer_id'] ?? null;
@@ -63,28 +63,35 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
                     </button>
                 </div>
                 <?php endif; ?>
+
+                <?php if (!($isLoggedIn)): ?>
+                <div>
+                    <button type="button" class="user-btn" id="logIn">
+                        Log In
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         
         <!-- PROGRESS BAR SECTION -->
-        <div>
-            <div class="row d-flex justify-content-center mt-4">
-                <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2">
-                        Get Order
-                    </button>
-                </div>
-                <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
-                        View Cart
-                    </button>
-                </div>
-                <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
-                        Checkout
-                    </button>
-                </div>
+        <div class="row d-flex justify-content-center mt-4">
+            <div class="col col-md-4 d-flex justify-content-center" id="backToMenuBtn">
+                <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    Get Order
+                </button>
             </div>
+            <div class="col col-md-4 d-flex justify-content-center" id="backToCartBtn">
+                <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    View Cart
+                </button>
+            </div>
+            <div class="col col-md-4 d-flex justify-content-center">
+                <button class="rounded-pill upper-buttons p-2">
+                    Checkout
+                </button>
+            </div>
+        </div>
             
             <!-- PROGRESS DOTS AND LINES - ALL START SAME SIZE -->
             <div class="divider d-flex justify-content-center me-5 ms-5">
@@ -100,7 +107,7 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
             <p class="our-menu-header"></p>
         </div>
         
-        <div class="card p-2 main-card border-2 mb-3">
+        <div class="card p-2 main-card border-2 mb-3 m-5">
             <div class="row">
                 <div class="col-12 col-md-4 p-2">
                     <div class="ms-4">
@@ -120,6 +127,13 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
                             <input type="email" class="form-control rounded border-2" id="email" name="emailAddress">
                         </div>
                     </form>
+                    <?php if ($isLoggedIn): ?>
+                        <div class="ms-4 me-4 mt-2 d-flex justify-content-end">
+                            <button type="button" class="edit-btn" id="redirectToMyProfile">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="col-12 col-md-4 p-2">
                     <div class="ms-4">
@@ -254,7 +268,6 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../progress_bar.js"></script>
     <script src="checkout.js"></script>
 </body>
 </html>

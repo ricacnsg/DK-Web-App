@@ -105,6 +105,8 @@ body {
     padding-right: 0;
     margin: -10px;
     overflow-y: hidden;
+    border-radius: 25px;
+
 }
 
 .container-fluid {
@@ -142,74 +144,86 @@ body {
 
 .sidebar-button {
     background-color: transparent;
-    color: white;
+    color:  #2e2b2b;
     border: none;
     padding: 12px 20px;
     cursor: pointer;
     align-items: center;
     font-size: 14px;
     text-align: left;
+    font-weight: bold;
 }
 
 .sidebar-button i{
     font-size: 16px;
+    font-weight: bold;
 }
 
 .sidebar-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
 }
 
 .sidebar-button.active {
     background: #ffd700;
     color: #003d99;
+    font-weight: bold;
 }
 
 .sidebar-link {
     background-color: transparent;
-    color: white;
+    color:  #2e2b2b;
     border: none;
     padding: 12px 20px;
     cursor: pointer;
     align-items: center;
     font-size: 14px;
     text-align: left;
+    font-weight: bold;
 }
 
 .sidebar-link i{
     font-size: 16px;
+    font-weight: bold;
 }
 
 .sidebar-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
 }
 
 .sidebar-link.active {
     background: #ffd700;
     color: #003d99;
+    font-weight: bold;
 }
 
 .online-order-button {
     background-color: transparent;
-    color: #ffffff;
+    color:  #2e2b2b;
     border: none;
     padding: 12px 20px;
     cursor: pointer;
     align-items: center;
     font-size: 14px;
     text-align: left;
+    font-weight: bold;
 }
 
 .online-order-button i{
     font-size: 16px;
+    font-weight: bold;
 }
 
 .online-order-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
 }
 
 .online-order-button.active {
     background: #ffd700;
     color: #003d99;
+    font-weight: bold;
 }
 
 /* Main Content */
@@ -959,24 +973,28 @@ body {
 .logout-btn {
     text-align: left;
     background-color: transparent;
-    color: #ffffff;
     border: none;
     padding: 12px 20px;
     cursor: pointer;
     align-items: center;
     font-size: 14px;
+    color:  #2e2b2b;
+    font-weight: bold;
 }
 
 .logout-btn i{
     font-size: 16px;
+    font-weight: bold;
 }
 
 .logout-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
 }
 
 .logout-btn i {
     font-size: 14px;
+    font-weight: bold;
 }
 
 
@@ -1086,7 +1104,7 @@ body, html {
 }
 
 .sidebar {
-    background-color: #04276c;
+    background-color: white;
 }
 
 .right-div {
@@ -1097,6 +1115,7 @@ body, html {
     max-height: 100%;
     min-height: auto;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 10px;
 }
 
@@ -1169,6 +1188,11 @@ td {
 }
 
 .view {
+    background-color: rgb(207, 207, 207);
+    color: white;
+}
+
+.view-history-receipt {
     background-color: rgb(207, 207, 207);
     color: white;
 }

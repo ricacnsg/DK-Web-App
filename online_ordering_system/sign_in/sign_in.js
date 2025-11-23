@@ -47,6 +47,15 @@ document.getElementById("customerLogin").addEventListener("submit", async (e) =>
           else if (returnPage === "testimonial") {
             redirectURL = "../../testimonial/testimonial.html";
           }
+          else if (returnPage === "get_order") {
+            redirectURL = "../get_order/get_order.php";
+          }
+          else if (returnPage === "view_cart") {
+            redirectURL = "../view_cart/view_cart.php";
+          }
+          else if (returnPage === "checkout") {
+            redirectURL = "../checkout/checkout.php";
+          }
 
           window.location.href = redirectURL;
         });

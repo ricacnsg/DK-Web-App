@@ -41,11 +41,19 @@ $username = $_SESSION['username'] ?? 'Guest';
                 <!-- RIGHT SIDE -->
                 <?php if ($isLoggedIn): ?>
                 <div>
-                    <button type="button" class="user-btn">
+                    <button type="button" class="user-btn" id="myProfile">
                         <i class="fa-regular fa-user user-icon"></i>
                     </button>
                     <button type="button" class="user-btn" id="logoutBtn">
                         <i class="fa-solid fa-right-from-bracket user-icon"></i>
+                    </button>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!($isLoggedIn)): ?>
+                <div>
+                    <button type="button" class="user-btn" id="logIn">
+                        Log In
                     </button>
                 </div>
                 <?php endif; ?>
@@ -56,7 +64,7 @@ $username = $_SESSION['username'] ?? 'Guest';
         <div>
             <div class="row d-flex justify-content-center mt-4">
                 <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;" id="backToMenuBtn">
                         Get Order
                     </button>
                 </div>
@@ -66,7 +74,7 @@ $username = $_SESSION['username'] ?? 'Guest';
                     </button>
                 </div>
                 <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;" id="secondCheckoutBtn">
                         Checkout
                     </button>
                 </div>
@@ -88,12 +96,12 @@ $username = $_SESSION['username'] ?? 'Guest';
         
         <!-- CART CONTENT -->
         <div class="row">
-            <div class="col-12 col-md-7 me-2">
+            <div class="col-12 col-md-7">
                 <div class="d-flex justify-content-center align-items-center">
                     <div id="cartContainer" class="row g-3"></div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-4 justify-content-start">
                 <div class="card p-2 card-summary">
                     <h3>Order Summary</h3>
                     <div id="summaryContainer">
@@ -114,7 +122,7 @@ $username = $_SESSION['username'] ?? 'Guest';
                         <h5><span id="cartTotal">₱0.00</span></h5>
                     </div>
                     <div class="d-flex justify-content-center">
-                        <button type="submit" class="w-25 rounded-pill buttons" id="checkoutBtn">Checkout</button>
+                        <button type="submit" class="w-50 rounded-pill buttons" id="checkoutBtn">Checkout</button>
                     </div>
                 </div>
             </div>
@@ -151,7 +159,6 @@ $username = $_SESSION['username'] ?? 'Guest';
     };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="progress_bar.js"></script>
     <script src="view_cart.js"></script>
     <?php if (isset($_GET['fromLogin']) && $isLoggedIn): ?>
     <script>

@@ -18,7 +18,7 @@ body, html {
 
 .davens-header {
     color: #efc858;
-    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-size: clamp(.3rem, 3vw, 1.3rem);
     margin-top: 40px;
     margin: 0;
     font-family: "Montserrat", sans-serif;
@@ -27,7 +27,7 @@ body, html {
 
 .davens-logo {
     transform: rotate(15deg);
-    width: clamp(30px, 5vw, 40px);
+    width: clamp(10px, 5vw, 20px);
     height: auto;
     position: relative;
     left: -0.3rem;
@@ -68,7 +68,7 @@ body, html {
 .line {
   flex: 1;
   height: 4px;
-  background-color: #d3d3d3; /* Inactive gray */
+  background-color: #2e2b2b; /* Inactive gray */
   transition: background-color 0.3s ease;
 }
 
@@ -79,9 +79,15 @@ body, html {
 .dot {
   width: 12px;
   height: 12px;
-  background-color: #d3d3d3; /* Inactive gray */
+  background-color: #2e2b2b; /* Inactive gray */
   border-radius: 50%;
   transition: all 0.3s ease;
+}
+
+.dot:first-child {
+  width: 20px;
+  height: 20px;
+  background-color: #2e2b2b;
 }
 
 .dot.active {
@@ -114,7 +120,7 @@ body, html {
 .input-container .icon {
   position: absolute;
   left: 18px;
-  top: 35%;
+  top: 50%;
   transform: translateY(-50%);
   color: #8d8980;
   font-size: 18px;
@@ -151,20 +157,22 @@ body, html {
     border: none;
     border-radius: 30px;
     padding: 12px 18px;
-    font-size: 14px;
-    color: var(--color-subtitle-gray);
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    color: #8d8980;
     outline: none;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-    flex: 1;
+    width: 100%;
 }
 
 .icon {
   position: absolute;
-  left: 10px; 
-  top: 38%;
+  left: 18px; 
+  top: 50%;
   transform: translateY(-50%);
-  color: #aaa; /* Icon color */
+  color: #8d8980;
+  font-size: 18px;
+  pointer-events: none;
 }
 
 .filter-select {
@@ -177,6 +185,63 @@ body, html {
     padding-right: 40px;
 }
 
+.filter-dropdown {
+    width: 100%;
+}
+
+.filter-dropdown label {
+    display: block;
+    font-size: clamp(0.7rem, 1.8vw, 1rem);
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #2e2b2b;
+}
+
+@media (max-width: 576px) {
+    .filter-dropdown label {
+        font-size: 0.75rem;
+        margin-bottom: 3px;
+    }
+    
+    .search-input, .filter-select {
+        height: 40px;
+        padding: 10px 15px;
+        font-size: 0.8rem;
+    }
+    
+    .input-container input {
+        height: 40px;
+        padding-left: 38px;
+    }
+    
+    .icon {
+        left: 12px;
+        font-size: 14px;
+    }
+}
+
+.filter-select {
+    cursor: pointer;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23808080' height='14' width='14' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l3 3 3-3z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px;
+    padding-right: 40px;
+}
+
+.filter-dropdown {
+    width: 100%;
+}
+
+.filter-dropdown label {
+    display: block;
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #2e2b2b;
+}
+
 .menu-text {
   font-size: clamp(2rem, 8vw, 6rem);
   font-weight: 800;
@@ -187,6 +252,18 @@ body, html {
   color: #ffffff;
   font-size: clamp(1rem, 3vw, 1.5rem);
   margin-top: 5px;
+  margin-left: 5px !important;
+  margin-right: 5px !important;
+}
+
+.menu-button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.menu-button-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
 @media (min-width: 992px) {
@@ -256,7 +333,7 @@ body, html {
 .overlay-button {
   font-size: clamp(.2rem, 2.5vw, 1rem);
   position: fixed;
-  bottom: 100px;
+  bottom: 20px;
   right: 20px;
   z-index: 1000;
   background-color: #f5f1ec;
@@ -282,8 +359,15 @@ body, html {
   border: none;
   padding: 8px 12px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
+  color: white;
+}
+
+.user-btn:hover {
+  transform: scale(1.2);
+  color: white;
+  border: 2px solid white;
 }
 
 .user-icon {

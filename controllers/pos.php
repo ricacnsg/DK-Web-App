@@ -149,6 +149,7 @@ function getOrderHistory() {
         LEFT JOIN payment p ON o.orderNo = p.orderNo
         LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
         LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
+        WHERE o.orderStatus != 'Pending'
         GROUP BY o.orderNo
         ORDER BY o.createdAT DESC
         LIMIT 100";

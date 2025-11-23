@@ -22,14 +22,14 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
 <body>
     <div class="container-fluid">
         <div class="container">
-            <div class="sidebar">
+            <div class="sidebar rounded">
                 <div class="logo">
                 <img src="\assets\image\davens_logo.png" alt="Logo" class="logo-image" />
-                <div style="color: white;">
+                <div style="color: #ffd700;">
                     <div>Daven's</div>
                     <div>Kitchenette</div>
                 </div>
-            </div>
+            </div class="mt-5" style="box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); border-radius: 25px;">
                 <button class="sidebar-button active rounded" onclick="switchView('menu')">
                     <i class="fas fa-shopping-cart me-1"></i>  Order Menu
                 </button>
@@ -77,8 +77,8 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                     </div>
 
                     <div class="menu-items-background">
-                        <div class="search-menu">
-                            <input type="text" class="rounded-pill w-50 form-input" placeholder="Search for Menu Item" placeholder="Search menu items..." onkeyup="searchMenu()" id="menuSearchInput">
+                        <div>
+                            <input type="text" class="w-25 form-control" placeholder="Search menu items..." onkeyup="searchMenu()" id="menuSearchInput">
                         </div>
                         <div class="menu-grid" id="menuGrid">
                             <!-- Menu items will be populated here by JavaScript -->
@@ -136,29 +136,31 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                     <div class="history-header">
                         <div class="history-title">Order History</div>
                         <div class="history-controls">
-                            <span class="search-label">Search Order</span>
-                            <input type="text" class="history-search" placeholder="Enter Order ID" id="searchOrderId" onkeyup="searchOrders()">
-                            
-                            <div class="filter-group">
-                                <select class="filter-select" id="filterType" onchange="updateFilterOptions()">
-                                    <option value="month">Filter By Month</option>
-                                    <option value="day">Filter By Day</option>
-                                    <option value="year">Filter By Year</option>
-                                </select>
-                                
-                                <select class="filter-select" id="filterValue" onchange="filterOrders()">
-                                </select>
+                            <div class="col-md-4 d-flex align-items-center">
+                                <span class="mb-0 me-1">Search Order</span>
+                                <input type="text" class="form-control w-50" placeholder="Enter Order ID" id="searchOrderId" onkeyup="searchOrders()">
                             </div>
                             
-                            <div class="history-buttons">
-                                <button class="history-btn" onclick="exportData()">EXPORT</button>
-                                <button class="history-btn" onclick="printData()">PRINT</button>
+                            <div class="col col-md-3">
+                                <div class="filter-group">
+                                    <select class="form-select" id="filterType" onchange="updateFilterOptions()">
+                                        <option value="month">Filter By Month</option>
+                                        <option value="day">Filter By Day</option>
+                                        <option value="year">Filter By Year</option>
+                                    </select>
+                                </div>
+                            </div>        
+                            
+                            <div class="col col-md-3">
+                                    <select class="form-select" id="filterValue" onchange="filterOrders()">
+                                    </select>
                             </div>
+                            
                         </div>
                     </div>
 
                     <div class="table-wrapper">
-                        <table class="order-table">
+                        <table class="order-table table-striped">
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
@@ -174,6 +176,11 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                             </tbody>
                         </table>
                     </div>
+                    
+                            <div class="history-buttons">
+                                <button class="history-btn" onclick="exportData()">EXPORT</button>
+                                <button class="history-btn" onclick="printData()">PRINT</button>
+                            </div>
                 </div>
             </div>
 
@@ -184,19 +191,20 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                         <div class="history-title">Online Orders</div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4">
-                            <input type="text" id="searchOnlineOrder" class="form-control" placeholder="Search Order ID">
+                        <div class="col-md-4 d-flex align-items-center">
+                            <label for="searchOnlineOrder" class="mb-0 me-1">Search Order</label>
+                            <input type="text" id="searchOnlineOrder" class="form-control w-50" placeholder="Search Order ID">
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <select id="onlineFilterType" class="form-select">
-                                <option value="day">Day</option>
-                                <option value="month">Month</option>
-                                <option value="year">Year</option>
+                                <option value="day" selected>Filter by Day</option>
+                                <option value="month">Filter by Month</option>
+                                <option value="year">Filter by Year</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <select id="onlineFilterValue" class="form-select"></select>
                         </div>
                     </div>

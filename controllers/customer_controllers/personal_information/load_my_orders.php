@@ -1,9 +1,16 @@
 <?php
 session_start();
-require_once '../database/connect.php';
+require_once '../../../database/connect.php';
 header('Content-Type: application/json');
 
+// Get customer ID from session
+$customerID = $_SESSION['customer_id'] ?? null;
 $orderId = $_GET['order_id'] ?? null;
+
+if (!$customerID) {
+    echo json_encode(['error' => 'Not authenticated']);
+    exit();
+}
 
 try {
     $sql = "SELECT 
@@ -32,11 +39,15 @@ try {
             LEFT JOIN location l ON o.orderNo = l.orderNo
             LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
             LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
-            WHERE o.orderStatus IN ('Verified', 'Accepted', 'Reviewed', 'Canceled', 'Rejected')";
+            WHERE o.customerID = ?";
     
-    // Add WHERE clause for specific order if order_id is provided
+    $params = [$customerID];
+    $types = "i";
+    
     if ($orderId) {
         $sql .= " AND o.orderNo = ?";
+        $params[] = $orderId;
+        $types .= "s";
     }
     
     $sql .= " GROUP BY o.orderNo, o.createdAT, o.totalPrice, o.deliveryFee, o.orderStatus, 
@@ -45,12 +56,7 @@ try {
             ORDER BY o.createdAT DESC";
     
     $stmt = $conn->prepare($sql);
-    
-    // Bind parameter if order_id is provided
-    if ($orderId) {
-        $stmt->bind_param("s", $orderId);
-    }
-    
+    $stmt->bind_param($types, ...$params);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -59,7 +65,17 @@ try {
         $orders[] = $row;
     }
     
-    echo json_encode($orders);
+    // Add debug info to the response
+    $response = [
+        'debug' => [
+            'customer_id' => $customerID,
+            'order_count' => count($orders),
+            'query' => $sql
+        ],
+        'orders' => $orders
+    ];
+    
+    echo json_encode($response);
     
     $stmt->close();
     $conn->close();

@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 $isLoggedIn = isset($_SESSION['customer_id']);
 $customerID = $_SESSION['customer_id'] ?? null;
 $username = $_SESSION['username'] ?? 'Guest';
@@ -43,6 +44,14 @@ $_SESSION['visited_get_order'] = true;
                     </button>
                 </div>
                 <?php endif; ?>
+
+                <?php if (!($isLoggedIn)): ?>
+                <div>
+                    <button type="button" class="user-btn" id="logIn">
+                        Log In
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -55,12 +64,12 @@ $_SESSION['visited_get_order'] = true;
                     </button>
                 </div>
                 <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;" id="secondViewCartBtn">
                         View Cart
                     </button>
                 </div>
                 <div class="col col-md-4 d-flex justify-content-center">
-                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;">
+                    <button class="rounded-pill upper-buttons p-2" style="opacity: 0.6;" id="checkoutBtn">
                         Checkout
                     </button>
                 </div>
@@ -81,16 +90,15 @@ $_SESSION['visited_get_order'] = true;
         </div>
         
         <!-- SEARCH AND FILTER -->
-        <div class="row d-flex justify-content-between">
-            <div class="col-12 col-md-4 d-flex justify-content-center">
-                <div class="input-container w-100">
+        <div class="row mx-3 mx-md-5 mb-3 gx-2 gx-md-3">
+            <div class="col-7 col-sm-8 col-md-6 col-lg-4">
+                <div class="input-container">
                     <i class="fas fa-search icon"></i>
-                    <input type="text" id="searchInput" class="form-control form-control-lg border-3 search-input" placeholder="Search menu item name or description...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search menu item name or description...">
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-5 col-sm-4 col-md-6 col-lg-4">
                 <div class="filter-dropdown">
-                    <label for="menuSorter">Sort By:</label>
                     <select id="menuSorter" class="filter-select">
                         <option value="name_asc">Name (Z-A)</option>
                         <option value="name_desc">Name (A-Z)</option>
@@ -149,7 +157,6 @@ $_SESSION['visited_get_order'] = true;
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="progress_bar.js"></script>
     <script src="get_order.js"></script>
 </body>
 </html>

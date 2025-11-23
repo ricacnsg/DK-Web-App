@@ -76,7 +76,7 @@ body, html {
 .line {
   flex: 1;
   height: 4px;
-  background-color: #d3d3d3; /* Inactive gray */
+  background-color: #2e2b2b; /* Inactive gray */
   transition: background-color 0.3s ease;
 }
 
@@ -87,9 +87,15 @@ body, html {
 .dot {
   width: 12px;
   height: 12px;
-  background-color: #d3d3d3; /* Inactive gray */
+  background-color: #2e2b2b; /* Inactive gray */
   border-radius: 50%;
   transition: all 0.3s ease;
+}
+
+.dot:nth-child(3) {
+  width: 20px;
+  height: 20px;
+  background-color: #2e2b2b;
 }
 
 .dot.active {
@@ -151,63 +157,104 @@ body, html {
   font-weight: 300;
 }
 
-/* Cart Item Card */
-
+/* Cart Item Container */
 #cartContainer {
   display: flex;
-  flex-wrap: wrap; 
-  gap: 10px;
-  overflow-x: hidden; /* prevent horizontal overflow */
-  width: 100%; /* ensure container doesn’t exceed page width */
+  flex-direction: column;
+  gap: 15px;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 10px;
+  max-width: 500px;
 }
 
+/* Cart Item Card */
 .cart-item-card {
   background-color: #FFF4D6;
-  border: 2px solid #000;
-  box-shadow: 3px 3px 0 #000;
+  border: 3px solid #000;
+  box-shadow: none;
   transition: transform 0.2s;
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 10px;
+  padding: 15px 20px;
+  border-radius: 25px;
+  margin-bottom: -20px;
+  position: relative;
 }
+
+.cart-page {
+  display: flex;
+  justify-content: center;   /* centers both sections */
+  align-items: flex-start;
+  gap: 20px;                 /* small gap between left & right */
+  max-width: 1100px;         /* keeps layout tight */
+  margin: 0 auto;            /* centers content */
+  padding: 20px;
+}
+
 
 .cart-item-card:hover {
   transform: translateY(-2px);
-  box-shadow: 4px 4px 0 #000;
+  box-shadow: 2px 2px 0 #000;
+}
+
+/* Left Side: Image + Details */
+.cart-item-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  flex: 1;           /* ← VERY IMPORTANT */
+  min-width: 0;      /* ← Allows text to wrap properly */
 }
 
 .cart-item-img {
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  border: 2px solid #000;
 }
 
 .cart-item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   word-break: break-word;
-  flex-shrink: 1; /* allow details to shrink */
-  min-width: 0; /* prevents flexbox from forcing overflow */
+  flex: 1;           /* ← Prevents overflow */
+  min-width: 0;      /* ← Prevents pushing buttons */
 }
 
 .cart-item-name {
-  font-size: clamp(.7rem, 3vw, 1rem);
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
   font-weight: 700;
   margin-bottom: 0;
+  text-transform: uppercase;
+  color: #000;
 }
 
 .cart-item-price {
-  font-size: clamp(.6rem, 3vw, .9rem);
+  font-size: clamp(0.75rem, 2.5vw, 0.9rem);
   color: #666;
   margin-bottom: 0;
+  font-weight: 500;
+}
+
+/* Right Side: Quantity */
+.cart-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-top: 2px;
 }
 
 /* Quantity Buttons */
 .btn-quantity {
-  width: clamp(25px, 3vw, 35px);
-  height: clamp(25px, 3vw, 35px);
+  width: 30px;
+  height: 30px;
   background-color: #efc858;
   border: 2px solid #000;
   border-radius: 50%;
@@ -216,7 +263,9 @@ body, html {
   justify-content: center;
   cursor: pointer;
   font-weight: 700;
+  font-size: 1rem;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .btn-quantity:hover {
@@ -229,15 +278,19 @@ body, html {
   min-width: 25px;
   text-align: center;
   font-weight: 700;
-  font-size: clamp(.8rem, 3vw, 1.2rem);
-  margin: 0 5px;
+  font-size: 0.95rem;
+  margin: 0 3px;
+  line-height: 30px;
+}
+
+/* Remove/Delete Button (DISABLED) — KEEP FOR SAFETY BUT NOT USED */
+.btn-delete {
+  display: none !important;
 }
 
 @media (max-width: 576px) {
   .cart-item-card {
-    flex-direction: row; /* keep image and details side by side */
-    flex-wrap: wrap; /* allow wrapping if needed */
-    gap: 10px;
+    padding: 12px 15px;
   }
 
   .cart-item-img {
@@ -245,21 +298,45 @@ body, html {
     height: 50px;
   }
 
-  .cart-item-details {
-    flex: 1;
-    min-width: 0;
+  .cart-item-left {
+    gap: 10px;
   }
 
   .btn-quantity {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .quantity-display {
+    min-width: 22px;
+    font-size: 0.9rem;
+    line-height: 28px;
+  }
+}
+
+@media (max-width: 400px) {
+  .cart-item-card {
+    flex-direction: row;       /* keep items in one row */
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cart-item-right {
+    width: auto;               /* prevent forced shrinking */
+    justify-content: flex-end;
+  }
+
+  .btn-quantity {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
   }
 
   .quantity-display {
     min-width: 25px;
   }
 }
-
 
 /* Summary Card */
 .card-summary {
@@ -416,8 +493,15 @@ body, html {
   border: none;
   padding: 8px 12px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
+  color: white;
+}
+
+.user-btn:hover {
+  transform: scale(1.2);
+  color: white;
+  border: 2px solid white;
 }
 
 .user-icon {

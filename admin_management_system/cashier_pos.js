@@ -613,7 +613,7 @@ function renderOrderHistory() {
             <td>${order.date}</td>
             <td><span class="status-badge">${order.status}</span></td>
             <td>
-                <button class="btn btn-sm view-history-receipt m-2" type="button">
+                <button class="btn btn-sm view-history-receipt m-2 btn btn-sm " type="button">
                     <i class="fa-solid fa-eye text-muted"></i>
                 </button>
             </td>
@@ -1341,6 +1341,11 @@ function searchOnlineOrders() {
 function filterOnlineOrders() {
     const type = document.getElementById('onlineFilterType').value;
     const val = document.getElementById('onlineFilterValue').value;
+
+        if (type === "day" && val === "1") {
+        val = new Date().getDate().toString();
+        document.getElementById('onlineFilterValue').value = val; 
+    }
 
     if (!val) return;
 

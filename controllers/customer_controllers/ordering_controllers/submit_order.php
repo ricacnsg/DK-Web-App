@@ -1,5 +1,13 @@
 <?php
 session_start();
+
+// DEBUG: Log session data
+error_log("=== SESSION DEBUG ===");
+error_log("Session ID: " . session_id());
+error_log("Customer ID in session: " . ($_SESSION['customer_id'] ?? 'NOT SET'));
+error_log("All session data: " . print_r($_SESSION, true));
+error_log("====================");
+
 require_once '../../../database/connect.php';
 header('Content-Type: application/json');
 
@@ -21,13 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true);
-
-if ($dataSavedSuccessfully) {
-    unset($_SESSION['visited_get_order']);  
-    unset($_SESSION['visited_view_cart']);
-    echo json_encode(['success' => true]);
-    exit;
-}
 
 $orderNumber = $data['orderNumber'] ?? '';
 $recipientName = $data['recipientName'] ?? '';
@@ -51,28 +52,50 @@ if (empty($recipientName) || empty($contactNumber) || empty($email) || empty($it
 $conn->begin_transaction();
 
 try {
-    // Check or create customer
-    $stmt = $conn->prepare("SELECT customerID FROM customer WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $customerID = $row['customerID'];
-
-        $updateStmt = $conn->prepare("UPDATE customer SET recipientName = ?, phoneNumber = ? WHERE customerID = ?");
-        $updateStmt->bind_param("ssi", $recipientName, $contactNumber, $customerID);
+    // Get customer ID from session (if logged in)
+    $customerID = $_SESSION['customer_id'] ?? null;
+    
+    error_log("📧 Email from form: $email");
+    error_log("👤 Customer ID from session: " . ($customerID ?? 'NULL'));
+    
+    if ($customerID) {
+        // User is logged in - use their customer ID and update their info
+        error_log("✅ Path A: Using logged-in customer ID: $customerID");
+        
+        $updateStmt = $conn->prepare("UPDATE customer SET recipientName = ?, phoneNumber = ?, email = ? WHERE customerID = ?");
+        $updateStmt->bind_param("sssi", $recipientName, $contactNumber, $email, $customerID);
         $updateStmt->execute();
         $updateStmt->close();
     } else {
-        $insertStmt = $conn->prepare("INSERT INTO customer (recipientName, phoneNumber, email) VALUES (?, ?, ?)");
-        $insertStmt->bind_param("sss", $recipientName, $contactNumber, $email);
-        $insertStmt->execute();
-        $customerID = $conn->insert_id;
-        $insertStmt->close();
+        // User is NOT logged in - check or create customer by email
+        error_log("⚠️ Path B: No session customer ID - checking by email");
+        
+        $stmt = $conn->prepare("SELECT customerID FROM customer WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $customerID = $row['customerID'];
+            error_log("📌 Found existing customer by email: $customerID");
+
+            $updateStmt = $conn->prepare("UPDATE customer SET recipientName = ?, phoneNumber = ? WHERE customerID = ?");
+            $updateStmt->bind_param("ssi", $recipientName, $contactNumber, $customerID);
+            $updateStmt->execute();
+            $updateStmt->close();
+        } else {
+            $insertStmt = $conn->prepare("INSERT INTO customer (recipientName, phoneNumber, email) VALUES (?, ?, ?)");
+            $insertStmt->bind_param("sss", $recipientName, $contactNumber, $email);
+            $insertStmt->execute();
+            $customerID = $conn->insert_id;
+            error_log("🆕 Created new customer: $customerID");
+            $insertStmt->close();
+        }
+        $stmt->close();
     }
-    $stmt->close();
+    
+    error_log("🎯 Final customer ID for order: $customerID");
 
     // Generate verification token
     $verificationToken = bin2hex(random_bytes(32));
@@ -103,6 +126,10 @@ try {
 
     $conn->commit();
 
+    // Clear session flags after successful order
+    unset($_SESSION['visited_get_order']);  
+    unset($_SESSION['visited_view_cart']);
+
     // Email verification link
     $verifyLink = "http://localhost:3000/controllers/customer_controllers/ordering_controllers/verify_order.php?token=$verificationToken";
 
@@ -113,7 +140,7 @@ try {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'ricamaegconsigo@gmail.com'; // your Gmail
+        $mail->Username = ''; // your Gmail
         $mail->Password = '';   // your Gmail App password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
@@ -125,7 +152,7 @@ try {
             ]
         ];
 
-        $mail->setFrom('ricamaegconsigo@gmail.com', 'Davens Kitchenette');
+        $mail->setFrom('', 'Davens Kitchenette');
         $mail->addAddress($email, $recipientName);
 
         $mail->isHTML(true);

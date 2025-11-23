@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const subtotalElement = document.getElementById("checkoutSubtotal");
   const deliveryFeeElement = document.getElementById("checkoutDeliveryFee");
   const totalElement = document.getElementById("checkoutTotal");
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const continueOverlay = document.getElementById('continue_overlay');
 
   const selectedItems = JSON.parse(sessionStorage.getItem("selectedItems")) || [];
   const subtotal = parseFloat(sessionStorage.getItem("cartSubtotal")) || 0;
@@ -23,7 +25,120 @@ document.addEventListener('DOMContentLoaded', () => {
   deliveryFeeElement.textContent = `₱${deliveryFee.toFixed(2)}`;
   totalElement.textContent = `₱${total.toFixed(2)}`;
 
-  document.getElementById('checkoutBtn').addEventListener('click', (e) => {
+  // ============================
+  // BACK TO MENU BUTTON
+  // ============================
+  const backToMenuBtn = document.getElementById('backToMenuBtn');
+  if (backToMenuBtn) {
+    backToMenuBtn.addEventListener('click', () => {
+      window.location.href = '../get_order/get_order.php';
+    });
+  }
+
+  // ============================
+  // BACK TO CART BUTTON
+  // ============================
+  const backToCartBtn = document.getElementById('backToCartBtn');
+  if (backToCartBtn) {
+    backToCartBtn.addEventListener('click', () => {
+      window.location.href = '../view_cart/view_cart.php';
+    });
+  }
+
+  // ============================
+  // PRE-FILL CUSTOMER INFO & LOAD ADDRESSES
+  // ============================
+  if (window.userData.isLoggedIn) {
+    // Load customer details
+    fetch('../../../controllers/customer_controllers/personal_information/load_my_details.php')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Pre-filling customer data:", data);
+        
+        if (!data.error && data.customerID) {
+          const recipientField = document.getElementById('recipient');
+          const contactField = document.getElementById('contact');
+          const emailField = document.getElementById('email');
+          
+          // Pre-fill values
+          recipientField.value = data.name || '';
+          contactField.value = data.contact_number || '';
+          emailField.value = data.email || '';
+          
+          // Make fields readonly for logged-in users
+          recipientField.setAttribute('readonly', true);
+          contactField.setAttribute('readonly', true);
+          emailField.setAttribute('readonly', true);
+          
+          // Add visual styling to show they're readonly
+          recipientField.style.backgroundColor = '#f0f0f0';
+          contactField.style.backgroundColor = '#f0f0f0';
+          emailField.style.backgroundColor = '#f0f0f0';
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching customer data:", error);
+      });
+
+    // Load saved addresses
+    fetch('../../../controllers/customer_controllers/personal_information/load_my_addresses.php')
+      .then(response => response.json())
+      .then(addresses => {
+        console.log("Loaded addresses:", addresses);
+        
+        if (!addresses.error && Array.isArray(addresses) && addresses.length > 0) {
+          // Create address dropdown
+          const streetInput = document.getElementById('street');
+          const addressDropdown = document.createElement('select');
+          addressDropdown.id = 'savedAddressSelect';
+          addressDropdown.className = 'form-control rounded border-2 mb-2';
+          
+          // Add default option
+          addressDropdown.innerHTML = '<option value="">-- Select Saved Address or Enter New --</option>';
+          
+          // Add saved addresses
+          addresses.forEach(addr => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify({
+              street: addr.street,
+              barangay: addr.barangay,
+              municipality: addr.municipality,
+              remark: addr.locationRemark
+            });
+            option.textContent = addr.full_address;
+            addressDropdown.appendChild(option);
+          });
+          
+          // Insert dropdown before street input
+          streetInput.parentNode.insertBefore(addressDropdown, streetInput.previousElementSibling.nextSibling);
+          
+          // Handle address selection
+          addressDropdown.addEventListener('change', function() {
+            if (this.value) {
+              const selectedAddr = JSON.parse(this.value);
+              document.getElementById('street').value = selectedAddr.street || '';
+              document.getElementById('barangay').value = selectedAddr.barangay || '';
+              document.getElementById('municipality').value = selectedAddr.municipality || '';
+              document.getElementById('remark').value = selectedAddr.remark || '';
+            } else {
+              // Clear fields if "Select..." is chosen
+              document.getElementById('street').value = '';
+              document.getElementById('barangay').value = '';
+              document.getElementById('municipality').value = '';
+              document.getElementById('remark').value = '';
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error("Error loading addresses:", error);
+      });
+  }
+
+  // ============================
+  // CHECKOUT BUTTON
+  // ============================
+  checkoutBtn?.addEventListener('click', (e) => {
     e.preventDefault();
 
     const recipientName = document.getElementById('recipient').value.trim();
@@ -68,17 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
     const randomSuffix = Math.floor(Math.random() * 90000) + 10000;
     const orderNumber = `${dateStr}${randomSuffix}`;
-
-    // Save to sessionStorage
-    sessionStorage.setItem('orderNumber', orderNumber);
-    sessionStorage.setItem('recipientName', recipientName);
-    sessionStorage.setItem('contactNumber', contactNumber);
-    sessionStorage.setItem('email', email);
-    sessionStorage.setItem('street', street);
-    sessionStorage.setItem('barangay', barangay);
-    sessionStorage.setItem('municipality', municipality);
-    sessionStorage.setItem('remark', remark);
-    sessionStorage.setItem('paymentMethod', paymentOption.value);
 
     const orderData = {
       orderNumber,
@@ -168,20 +272,60 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================
-// Logout
-// ============================
-document.getElementById("logoutBtn").addEventListener("click", function() {
-  // If logged in → confirm logout
-  Swal.fire({
-    title: "Log Out?",
-    text: "Are you sure you want to log out?",
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes, log out",
-    cancelButtonText: "Cancel"
-  }).then((result) => {
-    if (result.isConfirmed) {
-      window.location.href = "/controllers/sign_out.php";
-    }
-  });
-});
+  // Profile button - redirect to profile page
+  // ============================
+  const myProfileBtn = document.getElementById('myProfile');
+  if (myProfileBtn) {
+    myProfileBtn.addEventListener('click', () => {
+      // Get customer ID from session data (made available in the PHP file)
+      const customerID = window.userData.customerID;
+      
+      // Option 2: Store in sessionStorage (uncomment if preferred)
+      sessionStorage.setItem('customer_id', customerID);
+      window.location.href = '../personal_info/personal_info.php';
+    });
+  }
+
+  const profileRedirect = document.getElementById('redirectToMyProfile');
+  if (profileRedirect) {
+    profileRedirect.addEventListener('click', () => {
+      // Get customer ID from session data (made available in the PHP file)
+      const customerID = window.userData.customerID;
+      
+      sessionStorage.setItem('customer_id', customerID);
+      window.location.href = '../personal_info/personal_info.php';
+    });
+  }
+
+
+  // ============================
+  // Logout
+  // ============================
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function() {
+      // If logged in → confirm logout
+      Swal.fire({
+        title: "Log Out?",
+        text: "Are you sure you want to log out?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, log out",
+        cancelButtonText: "Cancel"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/controllers/sign_out.php";
+        }
+      });
+    });
+  }
+
+  // ============================
+  // Login button - redirect to login page
+  // ============================
+  const logInBtn = document.getElementById("logIn");
+  if (logInBtn) {
+    logInBtn.addEventListener("click", function() {
+      window.location.href = '../sign_in/sign_in.php?return=view_cart';
+    });
+  }

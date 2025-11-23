@@ -20,7 +20,7 @@ height: auto !important;
 
 .davens-header {
     color: #efc858;
-    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-size: clamp(.3rem, 3vw, 1.3rem);
     margin-top: 40px;
     margin: 0;
     font-family: "Montserrat", sans-serif;
@@ -29,7 +29,7 @@ height: auto !important;
 
 .davens-logo {
     transform: rotate(15deg);
-    width: clamp(30px, 5vw, 40px);
+    width: clamp(10px, 5vw, 20px);
     height: auto;
     position: relative;
     left: -0.3rem;
@@ -60,67 +60,42 @@ height: auto !important;
     transition: transform 0.3s ease-in-out; 
 }
 
-/* ============================================
-   PROGRESS BAR STYLES
-   ============================================ */
-
-/* Progress Bar Container */
 .divider {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px 0;
-  margin: 20px 0;
 }
 
-/* Lines between dots */
 .line {
   flex: 1;
   height: 4px;
-  background-color: #c4b896; /* Inactive - light tan */
-  transition: all 0.4s ease;
-  position: relative;
+  background-color: #2e2b2b; /* Inactive gray */
+  transition: background-color 0.3s ease;
 }
 
 .line.active {
-  background-color: #2e2b2b; /* Active - dark */
-  box-shadow: 0 2px 4px rgba(46, 43, 43, 0.3);
+  background-color: #2e2b2b; /* Active dark color */
 }
 
-/* Progress dots */
 .dot {
-  width: 14px;
-  height: 14px;
-  background-color: #c4b896; /* Inactive - light tan */
-  border: 3px solid #c4b896;
+  width: 12px;
+  height: 12px;
+  background-color: #2e2b2b; /* Inactive gray */
   border-radius: 50%;
-  transition: all 0.4s ease;
-  position: relative;
-  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.dot:nth-child(5) {
+  width: 20px;
+  height: 20px;
+  background-color: #2e2b2b;
 }
 
 .dot.active {
-  width: 22px;
-  height: 22px;
-  background-color: #2e2b2b; /* Active - dark */
-  border: 3px solid #2e2b2b;
-  box-shadow: 0 3px 8px rgba(46, 43, 43, 0.4);
-  transform: scale(1.1);
-}
-
-/* Pulse animation for current active dot */
-.dot.current {
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 3px 8px rgba(46, 43, 43, 0.4);
-  }
-  50% {
-    box-shadow: 0 3px 15px rgba(46, 43, 43, 0.6), 
-                0 0 0 8px rgba(239, 200, 88, 0.3);
-  }
+  width: 20px;
+  height: 20px;
+  background-color: #2e2b2b; /* Active dark color */
 }
 
 /* Responsive adjustments for progress bar */
@@ -263,8 +238,15 @@ input[type="email"]:focus {
   border: none;
   padding: 8px 12px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
+  color: white;
+}
+
+.user-btn:hover {
+  transform: scale(1.2);
+  color: white;
+  border: 2px solid white;
 }
 
 .user-icon {
@@ -274,6 +256,26 @@ input[type="email"]:focus {
 .user-btn:hover .user-icon {
   color: white;          /* icon turns white */
   transform: scale(1.2); /* slight zoom effect */
+}
+
+.edit-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  color: #04276c;
+}
+
+.edit-btn:hover {
+  transform: scale(1.2);
+  color: #04276c;
+  border: 2px solid #04276c;
+}
+
+.edit-icon {
+  color: #04276c;
 }
 
 .buttons {
