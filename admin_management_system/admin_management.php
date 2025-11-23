@@ -332,6 +332,8 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                     <option value="Meat">Meat</option>
                     <option value="Drinks">Drinks</option>
                     <option value="Bread">Bread</option>
+                    <option value="Dairy">Dairy</option>
+                    <option value="Poultry">Poultry</option>
                     <option value="Condiments">Condiments</option>
                     <option value="Utensils">Utensils</option>
                 </select>
@@ -376,8 +378,15 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                             <option value="">kg, slice, liter, etc.</option>
                             <option value="kilograms">Kilograms</option>
                             <option value="grams">Grams</option>
-                            <option value="ml">Millimeter</option>
+                            <option value="mg">Milligrams</option>
+                            <option value="oz">Ounces</option>
+                            <option value="lb">Pounds</option>
+                            <option value="ml">Milliliters</option>
                             <option value="liters">Liters</option>
+                            <option value="tsp">Teaspoon</option>
+                            <option value="tbsp">Tablespoon</option>
+                            <option value="cup">Cups</option>
+                            <option value="slice">Slices</option>
                             <option value="pieces">Pieces</option>
                             <option value="packs">Packs</option>
                         </select>
@@ -399,6 +408,8 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                         <option value="Meat">Meat</option>
                         <option value="Drinks">Drinks</option>
                         <option value="Bread">Bread</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Poultry">Poultry</option>
                         <option value="Condiments">Condiments</option>
                         <option value="Utensils">Utensils</option>
                     </select>

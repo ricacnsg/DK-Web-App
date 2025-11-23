@@ -47,13 +47,28 @@ switch ($method) {
 function getMenuItems() {
     global $conn;
 
-    $category = $_GET['category'] ?? '';
+    $category = strtolower(trim($_GET['category'] ?? ''));
+    $validCategories = ['bento','rice','pulutan','wings','burger','beverages'];
+    if ($category && !in_array($category, $validCategories)) {
+        echo json_encode(['success'=>false,'message'=>'Invalid category']);
+        return;
+    }
+
 
     if ($category) {
-        $stmt = $conn->prepare("SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemCategory, menuItemImage, createdAT, editedAT FROM menuitem WHERE menuItemCategory = ?");
+        $stmt = $conn->prepare("
+            SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, 
+                   menuItemCategory, menuItemImage, createdAT, editedAT 
+            FROM menuitem 
+            WHERE menuItemCategory = ?
+        ");
         $stmt->bind_param("s", $category);
     } else {
-        $stmt = $conn->prepare("SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemCategory, menuItemImage, createdAT, editedAT FROM menuitem");
+        $stmt = $conn->prepare("
+            SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, 
+                   menuItemCategory, menuItemImage, createdAT, editedAT 
+            FROM menuitem
+        ");
     }
 
     $stmt->execute();
@@ -65,47 +80,45 @@ function getMenuItems() {
         if (!empty($row['menuItemImage'])) {
             $row['menuItemImage'] = 'data:image/jpeg;base64,' . base64_encode($row['menuItemImage']);
         } else {
-            $row['menuItemImage'] = 'assets/image/placeholder.jpg';
+            $row['menuItemImage'] = '/assets/image/davens_logo.png';
         }
 
-        // 🔥 Save index where this item will be inserted
-        $index = count($menuItems);
+        $id = (int)$row['menuItemID'];
+        $name = htmlspecialchars($row['menuItemName'], ENT_QUOTES, 'UTF-8');
+        $desc = htmlspecialchars($row['menuItemDescription'], ENT_QUOTES, 'UTF-8');
+        $price = floatval($row['menuItemPrice']);
+        $cat = htmlspecialchars($row['menuItemCategory'], ENT_QUOTES, 'UTF-8');
+        $img = $row['menuItemImage'];
 
-        // Insert base menu item
+        $index = count($menuItems);
         $menuItems[$index] = [
-            'id' => $row['menuItemID'],
-            'name' => $row['menuItemName'],
-            'desc' => $row['menuItemDescription'],
-            'price' => floatval($row['menuItemPrice']),
-            'category' => $row['menuItemCategory'],
-            'img' => $row['menuItemImage'],
-            'ingredients' => []   // Placeholder
+            'id' => $id,
+            'name' => $name,
+            'desc' => $desc,
+            'price' => $price,
+            'category' => $cat,
+            'img' => $img,
+            'ingredients' => []
         ];
 
-        // Now load ingredients
-        $menuItemID = $row['menuItemID'];
         $stmt2 = $conn->prepare("
-            SELECT 
-                mii.itemID,
-                i.itemName,
-                mii.quantity,
-                i.unitOfMeasurement
+            SELECT mii.itemID, i.itemName, mii.quantity, i.unitOfMeasurement
             FROM menuitemingredients AS mii
-            JOIN item AS i 
-                ON mii.itemID = i.itemID
+            JOIN item AS i ON mii.itemID = i.itemID
             WHERE mii.menuItemID = ?
         ");
-        $stmt2->bind_param("i", $menuItemID);
+
+        $stmt2->bind_param("i", $id);
         $stmt2->execute();
         $ingredientsResult = $stmt2->get_result();
 
         while ($ingredientRow = $ingredientsResult->fetch_assoc()) {
-            // 🔥 Insert ingredients inside the correct item
+
             $menuItems[$index]['ingredients'][] = [
-                'itemID' => $ingredientRow['itemID'],
-                'itemName' => $ingredientRow['itemName'],
-                'quantity' => $ingredientRow['quantity'],
-                'unit' => $ingredientRow['unitOfMeasurement']
+                'itemID' => (int)$ingredientRow['itemID'],
+                'itemName' => htmlspecialchars($ingredientRow['itemName'], ENT_QUOTES, 'UTF-8'),
+                'quantity' => (int)$ingredientRow['quantity'],
+                'unit' => htmlspecialchars($ingredientRow['unitOfMeasurement'], ENT_QUOTES, 'UTF-8')
             ];
         }
 
@@ -116,17 +129,30 @@ function getMenuItems() {
     $stmt->close();
 }
 
-
 function addMenuItem() {
     global $conn;
 
     $input = json_decode(file_get_contents('php://input'), true);
-    $name = $input['name'] ?? '';
-    $description = $input['description'] ?? '';
-    $price = $input['price'] ?? 0;
-    $category = $input['category'] ?? '';
-    $imageData = $input['imageData'] ?? '';
-    $ingredients = $input['ingredients'] ?? [];
+    $name = trim($input['name'] ?? '');
+    $description = trim($input['description'] ?? '');
+    $price = isset($input['price']) ? floatval($input['price']) : 0;
+    $category = trim($input['category'] ?? '');
+    $imageData = trim($input['imageData'] ?? '');
+    $ingredients = [];
+
+    if (isset($input['ingredients']) && is_array($input['ingredients'])) {
+        foreach ($input['ingredients'] as $ingredient) {
+            if (!is_array($ingredient)) continue; 
+
+            $sanitizedIngredient = [];
+
+            $sanitizedIngredient['ingredient_id'] = isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0;
+
+            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (int)$ingredient['quantity'] : 0;
+
+            $ingredients[] = $sanitizedIngredient;
+        }
+    }
 
     if (empty($name) || empty($category) || empty($ingredients) || empty($price)) {
         echo json_encode(['success' => false, 'message' => 'Fill up the required fields.']);
@@ -155,7 +181,6 @@ function addMenuItem() {
     if ($stmt->execute()) {
         $menuItemID = $stmt->insert_id;
 
-        // Insert ingredients
         foreach ($ingredients as $ing) {
             $ingredientID = $ing['ingredient_id'];
             $qty = $ing['quantity'];
@@ -189,13 +214,27 @@ function updateMenuItem() {
     global $conn;
 
     $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? 0;
-    $name = $input['name'] ?? '';
-    $description = $input['description'] ?? '';
-    $price = $input['price'] ?? 0;
-    $category = $input['category'] ?? '';
-    $imageData = $input['imageData'] ?? '';
-    $ingredients = $input['ingredients'] ?? [];
+    $id = isset($input['id']) ? (int)$input['id'] : 0;
+    $name = trim($input['name'] ?? '');
+    $description = trim($input['description'] ?? '');
+    $price = isset($input['price']) ? floatval($input['price']) : 0;
+    $category = trim($input['category'] ?? '');
+    $imageData = trim($input['imageData'] ?? '');
+    $ingredients = [];
+
+    if (isset($input['ingredients']) && is_array($input['ingredients'])) {
+        foreach ($input['ingredients'] as $ingredient) {
+            if (!is_array($ingredient)) continue; 
+
+            $sanitizedIngredient = [];
+
+            $sanitizedIngredient['ingredient_id'] = isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0;
+
+            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (int)$ingredient['quantity'] : 0;
+
+            $ingredients[] = $sanitizedIngredient;
+        }
+    }
 
     if ($id == 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid menu item ID']);
@@ -266,12 +305,11 @@ function updateMenuItem() {
     echo json_encode(['success' => true, 'message' => 'Menu item and ingredients updated successfully']);
 }
 
-
 function deleteMenuItem() {
     global $conn;
 
     $input = json_decode(file_get_contents('php://input'), true);
-    $id = $input['id'] ?? 0;
+    $id = isset($input['id']) ? (int)$input['id'] : 0;
 
     if ($id == 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid menu item ID']);
@@ -290,18 +328,26 @@ function deleteMenuItem() {
     $stmt->close();
 }
 
-function getIngredients(){
+function getIngredients() {
     global $conn;
 
-    $keyword = $_GET['keyword'] ?? '';
+    $keyword= $_GET['keyword'] ?? '';
 
-    if (empty($keyword)) {
+    $keyword = trim($keyword);
+    $keyword = preg_replace("/[^a-zA-Z0-9\s\-]/", "", $keyword); 
+
+    if ($keyword === "") {
         echo json_encode(['success' => false, 'message' => 'No keyword']);
         exit;
     }
-    $keyword = "%{$keyword}%";
-    
-    $stmt = $conn->prepare("SELECT itemID, itemName, unitOfMeasurement FROM item WHERE itemName LIKE ?");
+
+    $likeKeyword = "%{$keyword}%";
+
+    $stmt = $conn->prepare("
+        SELECT itemID, itemName, unitOfMeasurement
+        FROM item
+        WHERE itemName LIKE ?
+    ");
 
     if (!$stmt) {
         http_response_code(500);
@@ -309,7 +355,7 @@ function getIngredients(){
         exit;
     }
 
-    $stmt->bind_param('s', $keyword);
+    $stmt->bind_param('s', $likeKeyword);
 
     if (!$stmt->execute()) {
         http_response_code(500);
@@ -320,16 +366,19 @@ function getIngredients(){
     $result = $stmt->get_result();
 
     $ingredients = [];
-    while($row = $result->fetch_assoc()){
+    while ($row = $result->fetch_assoc()) {
+        $row['itemName'] = htmlspecialchars($row['itemName'], ENT_QUOTES, 'UTF-8');
+        $row['unitOfMeasurement'] = htmlspecialchars($row['unitOfMeasurement'], ENT_QUOTES, 'UTF-8');
+
         $ingredients[] = $row;
     }
 
-    if ($result->num_rows > 0) {
-        echo json_encode(['success' => true, 'data' => $ingredients]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No record found']);
-    }
+    echo json_encode([
+        'success' => count($ingredients) > 0,
+        'data' => $ingredients
+    ]);
 }
+
 
 $conn->close();
 ?>

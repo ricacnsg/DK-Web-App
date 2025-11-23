@@ -12,47 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-
 switch($method){
   case 'GET':
-    if(isset($_GET['action'])) {
-      switch ($_GET['action']) {
-        case 'getItems':
-           displayItems($conn);
-          break;
-        case 'staffinfos':
-          
-          break;
-        case 'search':
-          
-          break;
-        default:
-          echo json_encode(['success' => false, 'message' => 'Unknown action']);
-      }
-    }
-    else {
-      echo json_encode(['success' => false, 'message' => 'No action specified.']);
-    }
+    displayItems($conn);
     break;
   case 'POST':
-    if(isset($_GET['action'])) {
-      switch ($_GET['action']) {
-        case 'addItem':
-          addNewItem($conn);
-          break;
-        case 'editAcc':
-          
-          break;
-        case 'deleteAcc':
-          
-          break;
-        default:
-          echo json_encode(['success' => false, 'message' => 'Unknown action']);
-      }
-    }
-    else {
-      echo json_encode(['success' => false, 'message' => 'No action specified.']);
-    }
+    addNewItem($conn);
     break;
   case 'PUT':
     editItem($conn);
@@ -77,7 +42,7 @@ function addNewItem($conn){
     
     $requiredFields = [$itemName, $stocks, $measurement, $reorder, $unitCost, $itemCategory];
     $numOnly = [$stocks, $reorder, $unitCost];
-    $validMeasurements = ['kilograms', 'grams', 'liters', 'ml', 'pieces', 'packs'];
+    $validMeasurements = ['kilograms', 'grams', 'mg', 'oz', 'lb', 'ml', 'liters', 'tsp', 'tbsp', 'cup', 'slice', 'pieces', 'packs'];
 
 
     foreach($requiredFields as $field){
@@ -139,7 +104,7 @@ function displayItems($conn) {
     $params = [];
     $types = "";
 
-    $validCategories = ['vegetables', 'meat', 'drinks', 'condiments', 'bread', 'utensils'];
+    $validCategories = ['vegetables', 'meat', 'drinks', 'dairy', 'poultry', 'condiments', 'bread', 'utensils'];
 
     if (isset($_GET['category']) && $_GET['category'] !== "") {
         $category = strtolower($_GET['category']);
@@ -188,9 +153,11 @@ function displayItems($conn) {
     }
 
     if (!empty($data)) {
-        echo json_encode($data);
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     } else {
-        echo json_encode(['success' => false, 'message' => 'No record found']);
+        echo json_encode(['success' => false, 'message' => 'No record found'],
+        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
     }
     $stmt->close();
 }

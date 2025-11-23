@@ -1,3 +1,14 @@
+function escapeHTML(value) {
+    if (typeof value === "number") return value;
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
 fetch("../controllers/islogin.php", {
   method: "GET"
 })
@@ -204,19 +215,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'menu-card';
         card.dataset.itemId = item.id;
-        
         card.innerHTML = `
-            <img src="${item.img}" alt="${item.name}" class="menu-image">
-            <div class="menu-name">${item.name}</div>
-            <div class="menu-description">${item.desc}</div>
-            <div class="menu-price">₱${item.price.toFixed(2)}</div>
+            <img src="${escapeHTML(item.img)}" alt="${escapeHTML(item.name)}" class="menu-image">
+            <div class="menu-name">${escapeHTML(item.name)}</div>
+            <div class="menu-description">${escapeHTML(item.desc)}</div>
+            <div class="menu-price">₱${escapeHTML(item.price.toFixed(2))}</div>
             <div class="menu-actions">
-                <button class="btn btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> Edit</button>
-                <button class="btn btn-remove" data-id="${item.id}"><i class="fas fa-trash-alt"></i> Remove</button>
+                <button class="btn btn-edit" data-id="${escapeHTML(item.id)}">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-remove" data-id="${escapeHTML(item.id)}">
+                    <i class="fas fa-trash-alt"></i> Remove
+                </button>
             </div>
         `;
         return card;
     };
+
 
     // Helper function for sorting items
     const sortMenuItems = (items, sortBy) => {
@@ -321,10 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
             let qty = saved ? saved.quantity : 0;
 
             row.innerHTML = `
-                <td>${item.itemName}</td>
+                <td>${escapeHTML(item.itemName)}</td>
                 <td>
                     <button type='button'class="btn qty-minus">-</button>
-                    <span class="qty-number">${qty}</span>
+                    <span class="qty-number">${escapeHTML(qty)}</span>
                     <button type='button' class="btn qty-plus">+</button>
                 </td>
             `;
@@ -505,17 +520,14 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteModal.classList.add('active');
     };
 
-    // Handle Image Upload Change
         imageUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                // Validate file type
                 if (!file.type.startsWith('image/')) {
                     showNotification('Please select a valid image file');
                     return;
                 }
 
-                // Validate file size (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     showNotification('Image size should be less than 5MB');
                     return;
@@ -670,7 +682,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         try{
-            const response = await fetch('../controllers/inventory.php?action=addItem', {
+            const response = await fetch('../controllers/inventory.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -721,21 +733,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const filterValue = filterCategory.value.trim();
         const searchValue = searchItem.value;
         try{
-            const response = await fetch(`../controllers/inventory.php?action=getItems&category=${encodeURIComponent(filterValue)}&searchItem=${encodeURIComponent(searchValue)}`)
+            const response = await fetch(`../controllers/inventory.php?&category=${encodeURIComponent(filterValue)}&searchItem=${encodeURIComponent(searchValue)}`)
             items = await response.json();
             const tbody = inventoryTable.querySelector('tbody');
             tbody.innerHTML = ''; 
             if (items.length > 0) {
                 items.forEach(item => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${item.itemName}</td>
-                                    <td>${item.quantity} ${item.unitOfMeasurement}</td>
-                                    <td>${item.reorderLevel} ${item.unitOfMeasurement}</td>
-                                    <td>${item.itemCategory}</td>
-                                    <td>${item.pricePerQuantity}</td>
+                    tr.innerHTML = `<td>${escapeHTML(item.itemName)}</td>
+                                    <td>${escapeHTML(item.quantity)} ${escapeHTML(item.unitOfMeasurement)}</td>
+                                    <td>${escapeHTML(item.reorderLevel)} ${escapeHTML(item.unitOfMeasurement)}</td>
+                                    <td>${escapeHTML(item.itemCategory)}</td>
+                                    <td>${escapeHTML(item.pricePerQuantity)}</td>
                                     <td>
-                                        <button class="editItem-btn" data-id="${item.itemID}">Edit</button>
-                                        <button class="deleteItem-btn" data-id="${item.itemID}">Delete</button>
+                                        <button class="editItem-btn" data-id="${escapeHTML(item.itemID)}">Edit</button>
+                                        <button class="deleteItem-btn" data-id="${escapeHTML(item.itemID)}">Delete</button>
                                     </td>`;
                     tbody.appendChild(tr);
                 });
@@ -948,11 +960,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          console.log("✅ " + data.message);
-          // Option 1: Redirect to login page
           window.location.href = "login.php";
         } else {
-          console.log("⚠️ " + data.message);
+          console.log(data.message);
         }
       })
       .catch(err => {

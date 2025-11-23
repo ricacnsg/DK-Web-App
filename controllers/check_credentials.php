@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 $input = json_decode(file_get_contents('php://input'), true);
-$username = trim($input['staff_username'] ?? '');
+$username = htmlspecialchars(trim($input['staff_username'] ?? ''), ENT_QUOTES, 'UTF-8');
 $password = trim($input['staff_password'] ?? '');
 
 if ($username === '' || $password === '') {
