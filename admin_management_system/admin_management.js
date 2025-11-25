@@ -1669,20 +1669,20 @@ function showWalkInReceipt(order) {
     try {
         const orderNumEl = document.getElementById('walkInOrderNumber');
         if (orderNumEl) {
-            orderNumEl.innerHTML = `Order No: <b>${order.id || 'N/A'}</b>`;
+            orderNumEl.innerHTML = `Order No: <b>${escapeHTML(order.id) || 'N/A'}</b>`;
         }
         
         const orderDateEl = document.getElementById('walkInOrderDate');
         if (orderDateEl) {
-            orderDateEl.innerHTML = `<b>${order.date || 'N/A'}</b>`;
+            orderDateEl.innerHTML = `<b>${escapeHTML(order.date) || 'N/A'}</b>`;
         }
         
         const nameEl = document.getElementById('walkInName');
         if (nameEl) {
-            nameEl.innerHTML = `Walk In Name: <b>${order.customerName || 'Walk-in Customer'}</b>`;
+            nameEl.innerHTML = `Walk In Name: <b>${escapeHTML(order.customerName) || 'Walk-in Customer'}</b>`;
         }
         
-        const totalAmount = order.amount || '₱0.00';
+        const totalAmount = escapeHTML(order.amount) || '₱0.00';
         
         const subtotalEl = document.getElementById('walkInSubtotal');
         if (subtotalEl) {
@@ -1696,7 +1696,7 @@ function showWalkInReceipt(order) {
         
         const methodEl = document.getElementById('walkInPaymentMethod');
         if (methodEl) {
-            methodEl.innerHTML = `Payment Method: <b>${order.method || 'Cash'}</b>`;
+            methodEl.innerHTML = `Payment Method: <b>${escapeHTML(order.method) || 'Cash'}</b>`;
         }
 
         const itemsContainer = document.getElementById('walkInItemsContainer');
@@ -1706,7 +1706,7 @@ function showWalkInReceipt(order) {
             
             if (order.items && order.items.trim() !== '' && order.items !== 'No items') {
                 // Parse items like "1x coke" or "2x burger, 1x fries"
-                const itemsList = order.items.split(', ');
+                const itemsList = escapeHTML(order.items).split(', ');
                 
                 itemsList.forEach(item => {
                     const div = document.createElement('div');
@@ -1721,7 +1721,7 @@ function showWalkInReceipt(order) {
                         div.innerHTML = `<span><b>${qty} ×</b> ${name}</span>`;
                     } else {
                         // If format doesn't match, just display as is
-                        div.innerHTML = `<span>${item}</span>`;
+                        div.innerHTML = `<span>${escapeHTML(item)}</span>`;
                     }
                     
                     itemsContainer.appendChild(div);
@@ -1753,21 +1753,21 @@ function showReceipt(order) {
     // Show online receipt with flex display
     receiptSection.style.display = 'flex';
     
-    document.getElementById('orderNumber').innerHTML = `Order No: <b>${order.order_number || 'N/A'}</b>`;
-    document.getElementById('orderDate').innerHTML = `<b>${order.date_ordered || 'N/A'}</b>`;
-    document.getElementById('recipient').innerHTML = `Customer Name: <b>${order.recipient_name || 'N/A'}</b>`;
-    document.getElementById('contactNumber').innerHTML = `Contact Number: <b>${order.phone_number || 'N/A'}</b>`;
-    document.getElementById('emailAddress').innerHTML = `Email Address: <b>${order.email || 'N/A'}</b>`;
-    document.getElementById('deliveryAddress').innerHTML = `Delivery Address: <b>${order.delivery_address || 'N/A'}</b>`;
+    document.getElementById('orderNumber').innerHTML = `Order No: <b>${escapeHTML(order.order_number) || 'N/A'}</b>`;
+    document.getElementById('orderDate').innerHTML = `<b>${escapeHTML(order.date_ordered) || 'N/A'}</b>`;
+    document.getElementById('recipient').innerHTML = `Customer Name: <b>${escapeHTML(order.recipient_name) || 'N/A'}</b>`;
+    document.getElementById('contactNumber').innerHTML = `Contact Number: <b>${escapeHTML(order.phone_number) || 'N/A'}</b>`;
+    document.getElementById('emailAddress').innerHTML = `Email Address: <b>${escapeHTML(order.email) || 'N/A'}</b>`;
+    document.getElementById('deliveryAddress').innerHTML = `Delivery Address: <b>${escapeHTML(order.delivery_address) || 'N/A'}</b>`;
     
     const subtotal = parseFloat(order.subtotal) || 0;
     const deliveryFee = parseFloat(order.delivery_fee) || 0;
     const total = subtotal + deliveryFee;
     
-    document.getElementById('subtotal').innerHTML = `<b>₱${subtotal.toFixed(2)}</b>`;
-    document.getElementById('deliveryFee').innerHTML = `<b>₱${deliveryFee.toFixed(2)}</b>`;
-    document.getElementById('total').innerHTML = `<b>₱${total.toFixed(2)}</b>`;
-    document.getElementById('paymentMethod').innerHTML = `Payment Method: <b>${order.payment_method || 'N/A'}</b>`;
+    document.getElementById('subtotal').innerHTML = `<b>₱${escapeHTML(subtotal.toFixed(2))}</b>`;
+    document.getElementById('deliveryFee').innerHTML = `<b>₱${escapeHTML(deliveryFee.toFixed(2))}</b>`;
+    document.getElementById('total').innerHTML = `<b>₱${escapeHTML(total.toFixed(2))}</b>`;
+    document.getElementById('paymentMethod').innerHTML = `Payment Method: <b>${escapeHTML(order.payment_method) || 'N/A'}</b>`;
 
     const itemsContainer = document.getElementById('itemsContainer');
     itemsContainer.innerHTML = '';
@@ -1788,8 +1788,8 @@ function showReceipt(order) {
             const itemSubtotal = qty * price;
 
             span.innerHTML = `
-                <span><b>${qty} ×</b> ${name}</span>
-                <span><b>₱${itemSubtotal.toFixed(2)}</b></span>
+                <span><b>${escapeHTML(qty)} ×</b> ${escapeHTML(name)}</span>
+                <span><b>₱${escapeHTML(itemSubtotal.toFixed(2))}</b></span>
             `;
 
             itemsContainer.appendChild(span);
