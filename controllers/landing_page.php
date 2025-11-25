@@ -1,5 +1,5 @@
 <?php
-session_start();
+// REMOVED session_start() - No session required for public landing page!
 require_once '../database/connect.php';
 
 // DEBUG: Log the request
@@ -52,7 +52,8 @@ function getMenuItems() {
                 $imageData = base64_encode($row['menuItemImage']);
                 $row['menuItemImage'] = 'data:image/jpeg;base64,' . $imageData;
             } else {
-                $row['menuItemImage'] = '../assets/image/placeholder.jpg';
+                // Return null instead of hardcoded path
+                $row['menuItemImage'] = null;
             }
             
             $menuItems[] = [
@@ -69,6 +70,7 @@ function getMenuItems() {
         $stmt->close();
         
     } catch (Exception $e) {
+        error_log("Error in getMenuItems: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
@@ -77,22 +79,30 @@ function getTestimonials() {
     global $conn;
     
     try {
+        // Use LEFT JOIN instead of INNER JOIN to show feedback even if customer is missing
         $query = "SELECT f.feedbackID, f.customerID, f.input, f.createdAT, f.updatedAt,
-                         c.username, c.recipientName
+                         COALESCE(c.username, 'Anonymous') as username, 
+                         COALESCE(c.recipientName, 'Guest User') as recipientName
                   FROM feedback f
-                  INNER JOIN customer c ON f.customerID = c.customerID
+                  LEFT JOIN customer c ON f.customerID = c.customerID
+                  WHERE f.input IS NOT NULL AND TRIM(f.input) != ''
                   ORDER BY f.createdAT DESC
-                  LIMIT 6";
+                  LIMIT 10";
         
         error_log("Executing testimonials query: " . $query);
         
         $result = $conn->query($query);
         
+        if (!$result) {
+            error_log("Query failed: " . $conn->error);
+            echo json_encode(['success' => false, 'message' => 'Database query failed: ' . $conn->error]);
+            return;
+        }
+        
         error_log("Number of testimonials found: " . $result->num_rows);
         
         $testimonials = [];
         while ($row = $result->fetch_assoc()) {
-            // Use recipientName as the display name, fallback to username
             $displayName = !empty($row['recipientName']) ? $row['recipientName'] : $row['username'];
             
             $testimonials[] = [
@@ -107,7 +117,9 @@ function getTestimonials() {
             ];
         }
         
-        echo json_encode(['success' => true, 'data' => $testimonials]);
+        error_log("Testimonials to return: " . json_encode($testimonials));
+        
+        echo json_encode(['success' => true, 'data' => $testimonials, 'count' => count($testimonials)]);
         
     } catch (Exception $e) {
         error_log("Error in getTestimonials: " . $e->getMessage());
