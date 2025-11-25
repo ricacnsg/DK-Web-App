@@ -94,7 +94,7 @@ $_SESSION['visited_get_order'] = true;
             <div class="col-7 col-sm-8 col-md-6 col-lg-4">
                 <div class="input-container">
                     <i class="fas fa-search icon"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search menu item name or description...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search Item" style="border: 2px solid #2e2b2b;">
                 </div>
             </div>
             <div class="col-5 col-sm-4 col-md-6 col-lg-4">

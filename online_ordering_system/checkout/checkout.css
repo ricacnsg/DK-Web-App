@@ -233,6 +233,17 @@ input[type="email"]:focus {
     line-height: 1;
 }
 
+.checkout-btn {
+  background-color: #ffd700;
+  color: white;
+}
+
+.checkout-btn:hover {
+  background-color: #ffd700;
+  color: white;
+  transform: scale(1.2);
+}
+
 .user-btn {
   background: transparent;
   border: none;
@@ -256,6 +267,10 @@ input[type="email"]:focus {
 .user-btn:hover .user-icon {
   color: white;          /* icon turns white */
   transform: scale(1.2); /* slight zoom effect */
+}
+
+.form-control {
+  border: 2px solid #2e2b2b;
 }
 
 .edit-btn {

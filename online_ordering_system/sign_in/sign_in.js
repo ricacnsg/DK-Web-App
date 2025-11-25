@@ -23,52 +23,62 @@ document.getElementById("customerLogin").addEventListener("submit", async (e) =>
     customer_password: document.getElementById('customerPassword').value
   };
 
-  try{
+  try {
     const response = await fetch("../../controllers/customer_sign_in.php", {
       method: "POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
-    })
+    });
+
     const result = await response.json();
-      if (result.success) {
-        Swal.fire({
-          title: "Login Successful!",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        }).then(() => {
-          let redirectURL = "../get_order/get_order.php"; // default
 
-          if (returnPage === "checkout") {
-            redirectURL = "../checkout/checkout.php";
-          } 
-          else if (returnPage === "testimonial") {
-            redirectURL = "../../testimonial/testimonial.html";
-          }
-          else if (returnPage === "get_order") {
-            redirectURL = "../get_order/get_order.php";
-          }
-          else if (returnPage === "view_cart") {
-            redirectURL = "../view_cart/view_cart.php";
-          }
-          else if (returnPage === "checkout") {
-            redirectURL = "../checkout/checkout.php";
-          }
+    if (result.success) {
+      // Successful login
+      Swal.fire({
+        title: "Login Successful!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        let redirectURL = "../get_order/get_order.php"; // default
+        if (returnPage === "checkout") redirectURL = "../checkout/checkout.php";
+        else if (returnPage === "testimonial") redirectURL = "../../testimonial/testimonial.html";
+        else if (returnPage === "get_order") redirectURL = "../get_order/get_order.php";
+        else if (returnPage === "view_cart") redirectURL = "../view_cart/view_cart.php";
 
-          window.location.href = redirectURL;
-        });
-      } else {
+        window.location.href = redirectURL;
+      });
+
+    } else if (result.notVerified) {
+      // Email not verified
+      Swal.fire({
+        title: "Email Not Verified",
+        text: result.message,
+        icon: "warning",
+        confirmButtonText: "Resend Verification Email"
+      }).then(() => {
+        // Optional: call your resend verification API here
+        // fetch('/resend_verification.php', ...)
         Swal.fire({
-          title: "Login Failed",
-          text: "Invalid username or password.",
-          icon: "warning",
+          title: "Check your email!",
+          text: "A verification link has been sent.",
+          icon: "info",
+          timer: 2000,
+          showConfirmButton: false
         });
-        document.getElementById("customerLogin").reset();
-      }
-  }
-  catch (error) {
+      });
+
+    } else {
+      // Invalid login
+      Swal.fire({
+        title: "Login Failed",
+        text: result.message || "Invalid username or password.",
+        icon: "error",
+      });
+      document.getElementById("customerLogin").reset();
+    }
+
+  } catch (error) {
     Swal.fire({
       position: "center",
       icon: "warning",
@@ -78,5 +88,4 @@ document.getElementById("customerLogin").addEventListener("submit", async (e) =>
       timer: 1500
     });
   }
-
 });

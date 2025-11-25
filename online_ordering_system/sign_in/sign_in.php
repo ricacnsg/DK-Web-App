@@ -61,6 +61,9 @@ if (isset($_SESSION['customer_id'])) {
                         <i class="fas fa-eye toggle-password" id="togglePassword"></i>
                     </div>
                 </div>
+                <div class="form-group d-flex justify-content-end">
+                    <p><a href="/online_ordering_system/forgot_password/forgot_password.php" class="link-opacity-25-hover">Forgot Password?</a></p>
+                </div>
                 <div class="d-flex justify-content-center">
                     <button type="submit" class="btn btn-lg my-button rounded-pill border-2">Sign In</button>
                 </div>

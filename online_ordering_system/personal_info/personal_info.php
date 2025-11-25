@@ -68,7 +68,7 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
         <!-- Address Section -->
         <section id="section-address" class="content-section">
             <div class="d-flex justify-content-center">
-                <div class="mobile-card">
+                <div class="mobile-card w-100">
                     <h5 class="card-title text-center mb-3">My Addresses</h5>
 
                     <label>Address 1</label>
@@ -89,11 +89,11 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
                     <h5 class="card-title text-center mb-3" >Order History</h5>
                     <div style="overflow-y: scroll; overflow-x: scroll;">
                         <table class="table-borderless table-sm text-center table-striped m-0 w-100" >
-                            <thead>
+                            <thead style="color: white;">
                                 <tr>
-                                    <th class="text-muted"><b>Order Number</b></th>
-                                    <th class="text-muted"><b>Date Ordered</b></th>
-                                    <th class="text-muted"><b>Actions</b></th>
+                                    <th><b>Order Number</b></th>
+                                    <th><b>Date Ordered</b></th>
+                                    <th><b>Actions</b></th>
                                 </tr>
                             </thead>
                             <tbody id="ordersTable"></tbody>
@@ -234,7 +234,7 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fa-solid fa-times me-1"></i>Cancel
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="saveAddressChanges()">
+                    <button type="button" class="btn" style="background-color: #f2d067;" onclick="saveAddressChanges()">
                         <i class="fa-solid fa-save me-1"></i>Save Changes
                     </button>
                 </div>

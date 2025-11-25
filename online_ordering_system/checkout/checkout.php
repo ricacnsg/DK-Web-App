@@ -141,6 +141,7 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
                     </div>
                     <form class="ms-4 me-4">
                         <div class="form-group">
+                            <div id="street-header"></div>
                             <label for="street" class="labels">Street</label>
                             <input type="text" class="form-control rounded border-2" id="street" name="streetAddress">
                         </div>
@@ -163,9 +164,7 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
                         <p class="section-header">Payment Details</p>
                     </div>
                     <div class="ms-4 me-4">
-                        <form class="ms-4 me-4">
-                            <input type="radio" id="gcash" value="GCash" name="paymentOption">
-                            <label for="gcash">GCash</label>
+                        <form style="margin-left: -27px">
                             <input type="radio" id="cod" value="Cash On Delivery" name="paymentOption" class="ms-5">
                             <label for="cod">Cash On Delivery</label>
                         </form>
@@ -175,19 +174,19 @@ if (!isset($_SESSION['visited_get_order']) && !isset($_SESSION['visited_view_car
                     <div class="ms-4 me-4" id="checkoutItems">
                         <hr>
                         <div class="d-flex justify-content-between mt-3">
-                            <p><span>Subtotal: </span></p>
+                            <p><span style="font-size: clamp(10px, 5vw, 20px);">Subtotal: </span></p>
                             <p><span id="checkoutSubtotal">0.00</span></p>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <p><span>Delivery Fee: </span></p>
+                            <p><span style="font-size: clamp(10px, 5vw, 20px);">Delivery Fee: </span></p>
                             <p><span id="checkoutDeliveryFee">₱0.00</span></p>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <p><span>Total: </span></p>
+                            <p><span style="font-size: clamp(10px, 5vw, 20px);">Total: </span></p>
                             <p><span id="checkoutTotal">₱0.00</span></p>
                         </div>
                         <div class="d-flex justify-content-center">
-                            <button type="button" class="rounded-pill" id="checkoutBtn">Checkout</button>
+                            <button class="rounded-pill checkout-btn p-2 w-50" id="checkoutBtn"><b>Checkout<b></button>
                         </div>
                     </div>
                 </div>

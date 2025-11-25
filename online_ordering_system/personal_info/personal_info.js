@@ -369,8 +369,8 @@ function loadCustomerAddresses() {
                                    class="form-control" 
                                    value="${address.full_address || 'N/A'}" 
                                    readonly>
-                            <button class="btn btn-primary" onclick="editAddress(${address.locationID})" title="Edit Address">
-                                <i class="fa-solid fa-pencil"></i>
+                            <button class="btn" style="background-color: #062970;" onclick="editAddress(${address.locationID})" title="Edit Address">
+                                <i class="fa-solid fa-pencil" style="color: white;"></i>
                             </button>
                             <button class="btn btn-danger" onclick="deleteAddress(${address.locationID})" title="Delete Address">
                                 <i class="fa-solid fa-xmark"></i>
@@ -698,7 +698,7 @@ function loadOrders() {
                     <td class="date-column">${order.date_ordered}</td>
                     <td class="d-flex justify-content-center gap-2">
                         <button class="btn btn-sm btn-warning view">
-                            <i class="fa-solid fa-eye"></i>
+                            <i class="fa-solid fa-receipt me-1"></i>
                         </button>
                         <button class="btn btn-sm btn-primary track">
                             <i class="fa-solid fa-location-dot"></i>
@@ -799,6 +799,14 @@ document.getElementById('receiptSection')?.addEventListener('click', function(e)
     }
 });
 
+const statusDescriptions = {
+    "Pending": "Your order has been received and is waiting to be processed.",
+    "Preparing": "Our kitchen is preparing your delicious meal.",
+    "Ready": "Your order is ready and waiting for delivery.",
+    "Out for Delivery": "Your order is on its way to you!",
+    "Delivered": "Your order has been successfully delivered. Enjoy!"
+};
+
 function trackOrder(orderData) {
     console.log("trackOrder called with:", orderData);
     
@@ -836,7 +844,10 @@ function trackOrder(orderData) {
         html += `
             <div class="status-item">
                 <div class="checkpoint ${isCompleted ? 'completed' : ''}"></div>
-                <div class="status-label ${isCompleted ? 'completed' : ''}">${status}</div>
+                <div>
+                    <div class="status-label ${isCompleted ? 'completed' : ''}">${status}</div>
+                    <div class="status-description">${statusDescriptions[status]}</div>
+                </div>
                 ${showLine ? `<div class="connecting-line ${index < currentStep ? 'completed' : ''}"></div>` : ''}
             </div>
         `;

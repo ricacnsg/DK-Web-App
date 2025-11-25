@@ -70,6 +70,26 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
+$stmt = $conn->prepare("SELECT customerID, username, password, isVerified, recipientName, phoneNumber, email 
+                        FROM customer WHERE username = ? LIMIT 1");
+$stmt->bind_param('s', $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$stmt->close();
+
+if (!$user) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Invalid username or password']);
+    exit;
+}
+
+// Check if the user has verified their email
+if ($user['isVerified'] == 0) {
+    echo json_encode(['success' => false, 'message' => 'Please verify your email before logging in.']);
+    exit;
+}
+
 if ($user && password_verify($password, $user['password'])) {
     session_regenerate_id(true);
 

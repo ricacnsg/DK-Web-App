@@ -14,16 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   selectedItems.forEach(item => {
     const itemRow = `
       <div class="d-flex justify-content-between">
-        <span>${item.name} x ${item.quantity}</span>
-        <span>₱${(item.price * item.quantity).toFixed(2)}</span>
+        <span><b>${item.name} x ${item.quantity}</b></span>
+        <span>Php${(item.price * item.quantity).toFixed(2)}</span>
       </div>
     `;
     checkoutItemsContainer.insertAdjacentHTML('afterbegin', itemRow);
   });
 
-  subtotalElement.textContent = `₱${subtotal.toFixed(2)}`;
-  deliveryFeeElement.textContent = `₱${deliveryFee.toFixed(2)}`;
-  totalElement.textContent = `₱${total.toFixed(2)}`;
+  subtotalElement.textContent = `Php${subtotal.toFixed(2)}`;
+  deliveryFeeElement.textContent = `Php${deliveryFee.toFixed(2)}`;
+  totalElement.textContent = `Php${total.toFixed(2)}`;
 
   // ============================
   // BACK TO MENU BUTTON
@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!addresses.error && Array.isArray(addresses) && addresses.length > 0) {
           // Create address dropdown
+          const streetLabel = document.getElementById('street-header');
           const streetInput = document.getElementById('street');
           const addressDropdown = document.createElement('select');
           addressDropdown.id = 'savedAddressSelect';
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           
           // Insert dropdown before street input
-          streetInput.parentNode.insertBefore(addressDropdown, streetInput.previousElementSibling.nextSibling);
+          streetLabel.parentNode.insertBefore(addressDropdown, streetLabel);
           
           // Handle address selection
           addressDropdown.addEventListener('change', function() {

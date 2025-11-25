@@ -143,15 +143,6 @@ body, html {
   background-color: white;
 }
 
-
-.search-filter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
 .search-input, .filter-select {
     background-color: white; 
     border: none;
@@ -163,6 +154,7 @@ body, html {
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
     width: 100%;
+    border: 2px solid #2e2b2b;
 }
 
 .icon {

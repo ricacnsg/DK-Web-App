@@ -23,7 +23,7 @@ $order = $result->fetch_assoc();
 $orderNo = $order['orderNo'];
 
 // Mark order as verified
-$update = $conn->prepare("UPDATE orders SET isVerified = 1, orderStatus = 'Verified' WHERE orderNo = ?");
+$update = $conn->prepare("UPDATE orders SET isVerified = 1, orderStatus = 'Verified', verificationToken = NULL WHERE orderNo = ?");
 $update->bind_param("s", $orderNo);
 $update->execute();
 
