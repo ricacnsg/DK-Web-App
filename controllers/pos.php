@@ -31,7 +31,12 @@ switch ($action) {
 function getMenuItems() {
     global $conn;
     
-    $category = $_GET['category'] ?? '';
+    $category = strtolower(trim($_GET['category'] ?? ''));
+    $validCategories = ['bento','rice','pulutan','wings','burger','beverages'];
+    if ($category && !in_array($category, $validCategories)) {
+        echo json_encode(['success'=>false,'message'=>'Invalid category']);
+        return;
+    }
     
     try {
         if ($category) {
@@ -75,63 +80,86 @@ function getMenuItems() {
 
 function placeOrder() {
     global $conn;
-    
+
     try {
         $input = json_decode(file_get_contents('php://input'), true);
-        
-        $customerName = $input['customerName'] ?? 'Walk-in Customer';
-        $orderType = $input['orderType'] ?? 'dine-in';
-        $tableNumber = $input['tableNumber'] ?? null;
-        $paymentMethod = $input['paymentMethod'] ?? 'cash';
-        $totalAmount = $input['totalAmount'] ?? 0;
-        $items = $input['items'] ?? [];
-        
+
+        $customerNameRaw  = $input['customerName']  ?? 'Walk-in Customer';
+        $orderTypeRaw     = $input['orderType']     ?? 'dine-in';
+        $tableNumberRaw   = $input['tableNumber']   ?? null;
+        $paymentMethodRaw = $input['paymentMethod'] ?? 'cash';
+        $totalAmountRaw   = $input['totalAmount']   ?? 0;
+        $itemsRaw         = $input['items']         ?? [];
+
+        $allowedOrderTypes     = ['dine-in', 'walk-in', 'take-out'];
+        $allowedPaymentMethods = ['cash', 'gcash', 'card'];
+
+        $customerName  = trim($customerNameRaw);
+        $orderType     = in_array($orderTypeRaw, $allowedOrderTypes) ? $orderTypeRaw : 'dine-in';
+        $paymentMethod = in_array($paymentMethodRaw, $allowedPaymentMethods) ? $paymentMethodRaw : 'cash';
+        $tableNumber   = ($tableNumberRaw !== null && is_numeric($tableNumberRaw)) ? intval($tableNumberRaw) : null;
+        $totalAmount   = is_numeric($totalAmountRaw) ? floatval($totalAmountRaw) : 0.00;
+        $items         = is_array($itemsRaw) ? $itemsRaw : [];
+
         if (empty($items)) {
             echo json_encode(['success' => false, 'message' => 'No items in order']);
             return;
         }
-        
+
         $now = new DateTime();
-        $dateStr = $now->format('Ymd'); // e.g., 20251119
+        $dateStr = $now->format('Ymd'); // e.g., 20251125
         $randomSuffix = rand(10000, 99999);
         $orderNumber = $dateStr . $randomSuffix;
-        // Start transaction
+
         $conn->begin_transaction();
-        
-        // Insert into orders table
-        $stmt = $conn->prepare("INSERT INTO orders (orderNo, walkInName, totalPrice, paymentStatus, orderStatus, createdAT) VALUES (?, ?, ?, 'Paid', 'Walk In', NOW())");
+
+        $stmt = $conn->prepare("
+            INSERT INTO orders (orderNo, walkInName, totalPrice, paymentStatus, orderStatus, createdAT)
+            VALUES (?, ?, ?, 'Paid', 'Walk In', NOW())
+        ");
         $stmt->bind_param("ssd", $orderNumber, $customerName, $totalAmount);
         $stmt->execute();
         $stmt->close();
-        
-        // Insert items ordered
-        $stmt = $conn->prepare("INSERT INTO itemsordered (orderNo, menuItemID, quantity) VALUES (?, ?, ?)");
+
+        $stmt = $conn->prepare("
+            INSERT INTO itemsordered (orderNo, menuItemID, quantity)
+            VALUES (?, ?, ?)
+        ");
         foreach ($items as $item) {
-            $stmt->bind_param("sii", $orderNumber, $item['id'], $item['quantity']);
+            $menuItemID = isset($item['id']) && is_numeric($item['id']) ? intval($item['id']) : 0;
+            $quantity   = isset($item['quantity']) && is_numeric($item['quantity']) ? intval($item['quantity']) : 0;
+
+            if ($menuItemID <= 0 || $quantity <= 0) continue; // Skip invalid items
+
+            $stmt->bind_param("sii", $orderNumber, $menuItemID, $quantity);
             $stmt->execute();
         }
         $stmt->close();
-        
-        // Insert payment record
-        $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, amountPAId, changeAmount, paymentDate) VALUES (?, ?, ?, 0, NOW())");
+
+        $stmt = $conn->prepare("
+            INSERT INTO payment (orderNo, paymentMethod, amountPAId, changeAmount, paymentDate)
+            VALUES (?, ?, ?, 0, NOW())
+        ");
         $stmt->bind_param("ssd", $orderNumber, $paymentMethod, $totalAmount);
         $stmt->execute();
         $stmt->close();
-        
-        // Commit transaction
+
+        // --- 8. Commit transaction ---
         $conn->commit();
-        
+
+        // --- 9. Return success ---
         echo json_encode([
-            'success' => true, 
+            'success' => true,
             'message' => 'Order placed successfully',
             'orderNo' => $orderNumber
         ]);
-        
+
     } catch (Exception $e) {
         $conn->rollback();
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
+
 
 function getOrderHistory() {
     global $conn;

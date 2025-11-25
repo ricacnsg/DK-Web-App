@@ -84,10 +84,10 @@ function getMenuItems() {
         }
 
         $id = (int)$row['menuItemID'];
-        $name = htmlspecialchars($row['menuItemName'], ENT_QUOTES, 'UTF-8');
-        $desc = htmlspecialchars($row['menuItemDescription'], ENT_QUOTES, 'UTF-8');
+        $name = $row['menuItemName'];
+        $desc = $row['menuItemDescription'];
         $price = floatval($row['menuItemPrice']);
-        $cat = htmlspecialchars($row['menuItemCategory'], ENT_QUOTES, 'UTF-8');
+        $cat = $row['menuItemCategory'];
         $img = $row['menuItemImage'];
 
         $index = count($menuItems);
@@ -116,9 +116,9 @@ function getMenuItems() {
 
             $menuItems[$index]['ingredients'][] = [
                 'itemID' => (int)$ingredientRow['itemID'],
-                'itemName' => htmlspecialchars($ingredientRow['itemName'], ENT_QUOTES, 'UTF-8'),
-                'quantity' => (int)$ingredientRow['quantity'],
-                'unit' => htmlspecialchars($ingredientRow['unitOfMeasurement'], ENT_QUOTES, 'UTF-8')
+                'itemName' => $ingredientRow['itemName'],
+                'quantity' => (float)$ingredientRow['quantity'],
+                'unit' => $ingredientRow['unitOfMeasurement']
             ];
         }
 
@@ -148,7 +148,7 @@ function addMenuItem() {
 
             $sanitizedIngredient['ingredient_id'] = isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0;
 
-            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (int)$ingredient['quantity'] : 0;
+            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (float)$ingredient['quantity'] : 0.0;
 
             $ingredients[] = $sanitizedIngredient;
         }
@@ -189,7 +189,7 @@ function addMenuItem() {
                 INSERT INTO menuitemingredients (menuItemID, itemID, quantity)
                 VALUES (?, ?, ?)
             ");
-            $stmt2->bind_param("iii", $menuItemID, $ingredientID, $qty);
+            $stmt2->bind_param("iid", $menuItemID, $ingredientID, $qty);
             if (!$stmt2->execute()) {
                 $response['success'] = false;
                 $response['message'] = 'Failed to add ingredient: ' . $stmt2->error;
@@ -230,7 +230,7 @@ function updateMenuItem() {
 
             $sanitizedIngredient['ingredient_id'] = isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0;
 
-            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (int)$ingredient['quantity'] : 0;
+            $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (float)$ingredient['quantity'] : 0.0;
 
             $ingredients[] = $sanitizedIngredient;
         }
@@ -279,7 +279,7 @@ function updateMenuItem() {
             // Already exists → update quantity if different
             if ($currentIngredientsDB[$ingredientID] != $qty) {
                 $stmt2 = $conn->prepare("UPDATE menuitemingredients SET quantity=? WHERE menuItemID=? AND itemID=?");
-                $stmt2->bind_param("iii", $qty, $id, $ingredientID);
+                $stmt2->bind_param("dii", $qty, $id, $ingredientID);
                 $stmt2->execute();
                 $stmt2->close();
             }
@@ -288,7 +288,7 @@ function updateMenuItem() {
         } else {
             // New ingredient → insert
             $stmt2 = $conn->prepare("INSERT INTO menuitemingredients (menuItemID, itemID, quantity) VALUES (?, ?, ?)");
-            $stmt2->bind_param("iii", $id, $ingredientID, $qty);
+            $stmt2->bind_param("iid", $id, $ingredientID, $qty);
             $stmt2->execute();
             $stmt2->close();
         }
@@ -367,8 +367,8 @@ function getIngredients() {
 
     $ingredients = [];
     while ($row = $result->fetch_assoc()) {
-        $row['itemName'] = htmlspecialchars($row['itemName'], ENT_QUOTES, 'UTF-8');
-        $row['unitOfMeasurement'] = htmlspecialchars($row['unitOfMeasurement'], ENT_QUOTES, 'UTF-8');
+        $row['itemName'] = $row['itemName'];
+        $row['unitOfMeasurement'] = $row['unitOfMeasurement'];
 
         $ingredients[] = $row;
     }

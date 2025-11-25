@@ -47,20 +47,14 @@ function addNewItem($conn){
 
     foreach($requiredFields as $field){
         if (empty($field)) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Fill up the missing field.'
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Fill up the missing field.']);
             exit;
         }
     }
     
     foreach($numOnly as $field){
         if(!is_numeric($field)){
-            echo json_encode([
-                'success' => false,
-                'message' => 'Input in stocks, reorder level, and unit cost should be numeric.'
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Input in stocks, reorder level, and unit cost should be numeric.']);
             exit;
         }
     }
@@ -153,11 +147,9 @@ function displayItems($conn) {
     }
 
     if (!empty($data)) {
-        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        echo json_encode($data);
     } else {
-        echo json_encode(['success' => false, 'message' => 'No record found'],
-        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-        );
+        echo json_encode(['success' => false, 'message' => 'No record found']);
     }
     $stmt->close();
 }

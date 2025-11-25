@@ -12,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 $input = json_decode(file_get_contents('php://input'), true);
-$username = htmlspecialchars(trim($input['staff_username'] ?? ''), ENT_QUOTES, 'UTF-8');
-$password = trim($input['staff_password'] ?? '');
+$username = isset($input["staff_username"]) ? trim(strip_tags($input["staff_username"])) : '';
+$password = isset($input["staff_password"]) ? $input["staff_password"] : '';
 
 if ($username === '' || $password === '') {
     http_response_code(400);

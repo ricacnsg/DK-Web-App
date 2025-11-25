@@ -352,7 +352,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="itemsContainer">
+                <tbody>
                 </tbody>
             </table>
         </div>
@@ -420,7 +420,6 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
             </form>
         </div>
     </div>
-
         <!-- Edit Ingredients Item -->
         <div class='modal' id='editItemModal'>
             <div class='modal-content'>
@@ -474,32 +473,31 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
 </div>
 
     <div id="orders" class="page">
-        <div class="header"><h1>Order History</h1></div>
-        <!-- <p>Content for Order History...</p> -->
+        <div class="header">
+            <h1>Order History</h1>
+            <div class="history-buttons">
+                <button class="history-btn" onclick="exportData()">EXPORT</button>
+                <button class="history-btn" onclick="printData()">PRINT</button>
+            </div>
+        </div>
 
-                    <!-- Order History View -->
             <div id="historyView" class="order-history justify-content-center">
                 <div class="history-background mt-2 mb-2">
                     <div class="history-header">
-                        <!-- <div class="history-title">Order History</div> -->
                         <div class="history-controls">
                             <span class="search-label">Search Order</span>
                             <input type="text" class="history-search" placeholder="Enter Order ID" id="searchOrderId" onkeyup="searchOrders()">
                             
                             <div class="filter-group">
-                                <select class="filter-select" id="filterType" onchange="updateFilterOptions()">
+                                <select class="filter-select" id="filterType" onchange='updateFilterOptions()'>
+                                    <option value="">Filter By</option>
                                     <option value="month">Filter By Month</option>
                                     <option value="day">Filter By Day</option>
                                     <option value="year">Filter By Year</option>
                                 </select>
                                 
-                                <select class="filter-select" id="filterValue" onchange="filterOrders()">
+                                <select class="filter-select" id="filterValue" >
                                 </select>
-                            </div>
-                            
-                            <div class="history-buttons">
-                                <button class="history-btn" onclick="exportData()">EXPORT</button>
-                                <button class="history-btn" onclick="printData()">PRINT</button>
                             </div>
                         </div>
                     </div>
@@ -525,6 +523,127 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
             </div>
     </div>
 
+        <!-- Receipt Section -->
+    <div id="receiptSection" style="display: none;" class="receiptOverlay">
+        <div class="d-flex justify-content-center">
+            <div class="card receipt-card m-5" id="receiptCard">
+                <div class="align-self-center p-3">
+                    <div class="overall-header mr-3 mb-2">
+                        <span class="davens-receipt-header fw-bold" style="line-height:1; display:block; position:relative;">
+                            Daven's
+                            <img src="/assets/image/davens_logo.png" alt="Daven's Logo" class="davens-receipt-logo">
+                        </span>
+                        <span class="davens-receipt-header fw-bold" style="line-height:1; display:block;">Kitchenette</span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <p class="contact-header justify-content-center">146 Consuelo St. Brgy 8, <br>
+                            Nasugbu, 4231, Batangas <br>
+                            0967 622 1293
+                        </p>
+                    </div>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="d-flex justify-content-between ms-3 me-3">
+                    <span id="orderNumber" class="details">Order No:</span>
+                    <span id="orderDate" class="details">Date | Time</span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3">
+                    <p id="recipient" class="details">Customer Name: </p>
+                    <p id="contactNumber" class="details">Contact Number: </p>
+                    <p id="emailAddress" class="details">Email Address: </p>
+                    <p id="deliveryAddress" class="details">Delivery Address: </p>
+                </div>
+                <div class="dashed-line opacity-50" style="margin-top: -5px;"></div>
+                <div class="ms-3 me-3">
+                    <p style="font-size: 12px; line-height: .8;"><b>Order Summary</b></p>
+                    <div id="itemsContainer"></div>
+                </div>
+                <div class="solid-line opacity-50"></div>
+                <div class="ms-3 me-3 d-flex justify-content-between">
+                    <span class="payment">Subtotal: </span><span id="subtotal" class="details"><b></b></span>
+                </div>
+                <div class="ms-3 me-3 d-flex justify-content-between align-items-center">
+                    <span class="payment">Delivery Fee: </span><span id="deliveryFee" class="details"><b></b></span>
+                </div>
+                <div class="solid-line opacity-50"></div>
+                <div class="ms-3 me-3 d-flex justify-content-between align-items-center">
+                    <span style="font-size: 13px;" class="">TOTAL: </span><span id="total" class="details"><b></b></span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3">
+                    <span id="paymentMethod" class="details">Payment Method: </span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3 text-center footer-section py-1">
+                    <p class="fw-bold mb-2" style="font-size: .7rem;">Thank you for Ordering!</p>
+                    <p class="text-muted mb-0" style="font-size: 0.6rem; line-height: 1;">
+                        You can screenshot this receipt. Use<br>
+                        your Order Number to track your order anytime.
+                    </p>
+                    <p class="fw-bold mt-3 mb-0" style="font-size: 0.7rem;">Track your order @</p>
+                    <p class="mb-0" style="font-size: 0.7rem;">www.davenskitchenette.ph/track</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Walk In receipt -->
+    <div id="walkInReceiptSection" style="display: none;" class="receiptOverlay">
+        <div class="d-flex justify-content-center">
+            <div class="card receipt-card m-5" id="walkInReceiptCard">
+                <div class="align-self-center p-3">
+                    <div class="overall-header mr-3 mb-2">
+                        <span class="davens-receipt-header fw-bold" style="line-height:1; display:block; position:relative;">
+                            Daven's
+                            <img src="/assets/image/davens_logo.png" alt="Daven's Logo" class="davens-receipt-logo">
+                        </span>
+                        <span class="davens-receipt-header fw-bold" style="line-height:1; display:block;">Kitchenette</span>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <p class="contact-header justify-content-center">146 Consuelo St. Brgy 8, <br>
+                            Nasugbu, 4231, Batangas <br>
+                            0967 622 1293
+                        </p>
+                    </div>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="d-flex justify-content-between ms-3 me-3">
+                    <span id="walkInOrderNumber" class="details">Order No:</span>
+                    <span id="walkInOrderDate" class="details">Date | Time</span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3">
+                    <p id="walkInName" class="details">Walk In Name: </p>
+                </div>
+                <div class="dashed-line opacity-50" style="margin-top: -5px;"></div>
+                <div class="ms-3 me-3">
+                    <p style="font-size: 12px; line-height: .8;"><b>Order Summary</b></p>
+                    <div id="walkInItemsContainer"></div>
+                </div>
+                <div class="solid-line opacity-50"></div>
+                <div class="ms-3 me-3 d-flex justify-content-between">
+                    <span class="payment">Subtotal: </span><span id="walkInSubtotal" class="details"><b></b></span>
+                </div>
+                <div class="solid-line opacity-50"></div>
+                <div class="ms-3 me-3 d-flex justify-content-between align-items-center">
+                    <span style="font-size: 13px;" class="">TOTAL: </span><span id="walkInTotal" class="details"><b></b></span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3">
+                    <span id="walkInPaymentMethod" class="details">Payment Method: </span>
+                </div>
+                <div class="dashed-line opacity-50"></div>
+                <div class="ms-3 me-3 text-center footer-section py-1">
+                    <p class="fw-bold mb-2" style="font-size: .7rem;">Thank you for your order!</p>
+                    <p class="text-muted mb-0" style="font-size: 0.6rem; line-height: 1;">
+                        Keep this receipt for your records.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="staff" class="page">
         <div class="staff-management-container">
             <div class="header">
@@ -537,9 +656,10 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                         <input type="text" id='searchInput' placeholder="Search Staff" class="search-input" />
                         <select class="filter-select" id='filterStaff'>
                             <option value=''>All Staff</option>
-                            <option value='admin' >Admin</option>
+                            <option value='admin'>Admin</option>
                             <option value='cashier'>Cashier</option>
-                            <option value='kitchen_staff'>Kitchen Staff</option>
+                            <option value='kitchen staff'>Kitchen Staff</option>
+                            <option value='delivery rider'>Delivery Rider</option>
                         </select>
                     </div>
                     <div class='stafftable-wrapper'>
@@ -562,9 +682,6 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                     <div class="modal-content">
                         <h2>Edit Account</h2>
                         <form id="editForm">
-                            <!-- TO DO: Gawing csrf token 'tong hidden input -->
-                            <input type='hidden' id='staffID' name='staffID'>
-
                             <label for="editFullname">Fullname</label>
                             <input type="text" id="editFullname" required>
                             <label for="editContact">Contact Number</label>
@@ -618,6 +735,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
 
                         <label for="role">Role</label>
                         <select id="role" name="role">
+                            <option value=""disabled selected >Select Staff Role</option>
                             <option value="admin">Admin</option>
                             <option value="kitchen staff">Kitchen Staff</option>
                             <option value="cashier">Cashier</option>
@@ -626,7 +744,6 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
 
                         <label for="username">Username</label>
                         <input type="text" placeholder="Enter username" id="username"required/>
-                        <p id='validationMessage'></p>
 
                         <div class="mb-4 position-relative">
                             <label for="password">Password</label>
@@ -634,9 +751,8 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                             <button type="button" class="position-absolute togglePassword" id="togglePassword">
                                     <i class="fa-solid fa-eye-slash" id='hide'></i>
                             </button>
-                            <p id='validationPass'></p>
                         </div>
-
+                                <p id='validationMessage' class='text-center' style='color: red; margin-top: -15px;'></p>
                                 <button type="submit" class="save-btn" id="createaccbtn">Create Account</button>
                             </form>
                         </div>

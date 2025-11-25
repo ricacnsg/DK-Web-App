@@ -317,135 +317,130 @@ document.addEventListener('DOMContentLoaded', () => {
     const ingredientInput = document.getElementById('newIngredientInput');
     const selectIngredientTable = document.querySelector('#selectIngredientsTable tbody');
     let debounceTimer;
+
     async function fetchIngredients() {
         const keyword = ingredientInput.value.trim();
 
-        const response = await fetch(`${API_BASE}?action=getIngredients&keyword=${keyword}`);
-        const data = await response.json();
+        try {
+            const response = await fetch(`${API_BASE}?action=getIngredients&keyword=${encodeURIComponent(keyword)}`);
+            const data = await response.json();
 
-        selectIngredientTable.innerHTML = "";
-        if(data.success){
-            data.data.forEach(item => {
-            const row = document.createElement("tr");
+            selectIngredientTable.innerHTML = "";
+            if (data.success && data.data.length > 0) {
+                data.data.forEach(item => {
+                    const row = document.createElement("tr");
 
-            row.dataset.id = item.itemID;
-            row.dataset.name = item.itemName;
-            row.dataset.unit = item.unitOfMeasurement;
+                    row.dataset.id = item.itemID;
+                    row.dataset.name = item.itemName;
+                    row.dataset.unit = item.unitOfMeasurement;
 
-            let saved = currentIngredients.find(i => i.id == item.itemID);
-            let qty = saved ? saved.quantity : 0;
+                    // Check if already selected
+                    let saved = currentIngredients.find(i => i.id == item.itemID);
+                    let qty = saved ? saved.quantity : 0;
 
-            row.innerHTML = `
-                <td>${escapeHTML(item.itemName)}</td>
-                <td>
-                    <button type='button'class="btn qty-minus">-</button>
-                    <span class="qty-number">${escapeHTML(qty)}</span>
-                    <button type='button' class="btn qty-plus">+</button>
-                </td>
-            `;
+                    row.innerHTML = `
+                        <td>${escapeHTML(item.itemName)}</td>
+                        <td>
+                            <button type='button' class="btn qty-minus">-</button>
+                            <input type="text" class="qty-number" value="${qty}" style="width: 2cm;">
+                            <button type='button' class="btn qty-plus">+</button>
+                        </td>
+                    `;
 
-            const minusBtn = row.querySelector(".qty-minus");
-            const plusBtn = row.querySelector(".qty-plus");
-            const qtyDisplay = row.querySelector(".qty-number");
+                    const minusBtn = row.querySelector(".qty-minus");
+                    const plusBtn = row.querySelector(".qty-plus");
+                    const qtyInput = row.querySelector(".qty-number");
 
-            minusBtn.addEventListener("click", () => {
-                if (qty > 0) {
-                    qty--;
-                    qtyDisplay.textContent = qty;
-                }
-            });
+                    // Update currentIngredients and summary
+                    function updateIngredient(quantity) {
+                        const id = row.dataset.id;
+                        const name = row.dataset.name;
+                        const unit = row.dataset.unit;
 
-            plusBtn.addEventListener("click", () => {
-                qty++;
-                qtyDisplay.textContent = qty;
-            });
+                        quantity = Math.max(0, quantity); // prevent negative
+                        qtyInput.value = quantity;
 
-            selectIngredientTable.appendChild(row);
-            });
-        }
-        else {
-            selectIngredientTable.innerHTML = `
-            <tr><td colspan="2">No results found</td></tr>
-        `;
+                        let existing = currentIngredients.find(i => i.id == id);
+                        if (!existing) {
+                            if (quantity > 0) currentIngredients.push({ id, name, quantity, unit });
+                        } else {
+                            existing.quantity = quantity;
+                            if (quantity === 0) {
+                                currentIngredients = currentIngredients.filter(i => i.id != id);
+                            }
+                        }
+
+                        renderIngredients();
+                    }
+
+                    // Button click handlers
+                    minusBtn.addEventListener("click", () => {
+                        let currentQty = parseFloat(qtyInput.value) || 0;
+                        currentQty--;
+                        updateIngredient(currentQty);
+                    });
+
+                    plusBtn.addEventListener("click", () => {
+                        let currentQty = parseFloat(qtyInput.value) || 0;
+                        currentQty++;
+                        updateIngredient(currentQty);
+                    });
+
+                    // Manual typing
+                    qtyInput.addEventListener("input", () => {
+                        let currentQty = parseFloat(qtyInput.value);
+                        if (isNaN(currentQty) || currentQty < 0) currentQty = 0;
+                        updateIngredient(currentQty);
+                    });
+
+                    selectIngredientTable.appendChild(row);
+                });
+            } else {
+                selectIngredientTable.innerHTML = `
+                    <tr><td colspan="2" style="text-align:center; color:#999;">No results found</td></tr>
+                `;
+            }
+        } catch (err) {
+            console.error("Error fetching ingredients:", err);
         }
     }
+
     ingredientInput.addEventListener('input', () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(fetchIngredients, 300);
-        });
+    });
     fetchIngredients();
 
-    const renderIngredients = () => {
+    // Render summary div
+    function renderIngredients() {
         ingredientsList.innerHTML = '';
-
-        currentIngredients.forEach((ingredient) => {
+        currentIngredients.forEach(ingredient => {
             if (ingredient.quantity === 0) return;
-
             const item = document.createElement('span');
             item.className = 'ingredient-item';
-
-            item.innerHTML = `
-                ${ingredient.name} (x${ingredient.quantity} ${ingredient.unit})
-            `;
-
+            item.textContent = `${ingredient.name} (x${ingredient.quantity} ${ingredient.unit})`;
             ingredientsList.appendChild(item);
         });
-    };
-
-    document.addEventListener("click", (e) => {
-        if (e.target.classList.contains("qty-plus") ||
-            e.target.classList.contains("qty-minus")) {
-            
-            const row = e.target.closest("tr");
-
-            const id = row.dataset.id;
-            const name = row.dataset.name;
-            const unit = row.dataset.unit;
-
-            const qtyDisplay = row.querySelector(".qty-number");
-
-            let item = currentIngredients.find(i => i.id == id);
-
-            if (!item) {
-                item = { id, name, quantity: 0, unit };
-                currentIngredients.push(item);
-            }
-
-            if (e.target.classList.contains("qty-plus")) {
-                item.quantity++;
-            }
-
-            if (e.target.classList.contains("qty-minus")) {
-                if (item.quantity > 0) item.quantity--;
-            }
-
-            qtyDisplay.textContent = item.quantity;
-
-            if (item.quantity === 0) {
-                currentIngredients = currentIngredients.filter(i => i.id != id);
-            }
-            addIngredient(row); 
-        }
-    });
-
-    function addIngredient(row) {
-        const id = row.dataset.id;
-        const name = row.dataset.name;
-        const unit = row.dataset.unit;
-
-        const qtyDisplay = row.querySelector(".qty-number");
-        let quantity = parseInt(qtyDisplay.textContent);
-
-        let existing = currentIngredients.find(i => i.id == id);
-
-        if (!existing) {
-            currentIngredients.push({ id, name, quantity, unit });
-        } else {
-            existing.quantity = quantity;
-        }
-
-        renderIngredients(); // update the div
     }
+
+    // function addIngredient(row) {
+    //     const id = row.dataset.id;
+    //     const name = row.dataset.name;
+    //     const unit = row.dataset.unit;
+
+    //     const qtyDisplay = row.querySelector(".qty-number");
+    //     let quantity = parseInt(qtyDisplay.textContent);
+
+    //     let existing = currentIngredients.find(i => i.id == id);
+
+    //     if (!existing) {
+    //         currentIngredients.push({ id, name, quantity, unit });
+    //     } else {
+    //         existing.quantity = quantity;
+    //     }
+
+    //     renderIngredients(); // update the div
+    // }
 
     // Handle Open Add Modal
     addNewItemCard.addEventListener('click', () => {
@@ -975,84 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
 //STAFF ACCOUNT MANAGEMENT
 document.addEventListener("DOMContentLoaded", () => {
 
-    const username = document.getElementById('username');
     const message = document.getElementById('validationMessage');
-    const pass = document.getElementById('password');
-    const messagePass = document.getElementById('validationPass');
-    const createBtn = document.getElementById('createaccbtn');
-    
-    //validation 1: check if username is unique - DONE
-    username.addEventListener('input', () => {
-        fetch("../controllers/staff.php?action=usernames", {
-                method: 'GET'
-            })
-        .then(res => res.json())
-        .then(data => {
-            const user = username.value.trim().toLowerCase();
-            const exists = data.some(row => row.staffUsername.toLowerCase() === user);
-            if(user === ''){
-                message.textContent = '';
-                return;
-            }
-
-            if (exists){
-                message.textContent = '❌ Username is already taken.';
-                message.style.fontSize = '12px';
-                message.style.marginLeft = '10px'
-
-            }
-            else{
-                message.textContent = '✅ Username is available.';
-                message.style.fontSize = '12px';
-                message.style.marginLeft = '10px';
-            }
-
-            //validation 2: username should have no space - DONE
-            if (/\s/.test(username.value)){
-                message.textContent = '❌ Username should not contain spaces.';
-                message.style.fontSize = '12px';
-                message.style.marginLeft = '10px';
-            }      
-            
-            if(/\s/.test(username.value) || exists){
-                createBtn.disabled = true;
-                createBtn.style.backgroundColor = 'gray';
-            }
-            else {
-                createBtn.disabled = false;
-                createBtn.style.backgroundColor = '#062970';
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-    
-    pass.addEventListener('input', () => {
-        const hasUpperCase = /[A-Z]/.test(pass.value);
-        const hasLowerCase = /[a-z]/.test(pass.value);
-        const hasSpecialChar = /[!@#$%^&*()_+-=<>?:{|,.:;'"}1234567890]/.test(pass.value);
-
-        //validation 3: check if password is secure - DONE
-        if(pass.value === ''){
-            messagePass.textContent = '';
-            return;
-        }
-
-        if(pass.value.length < 8){
-            messagePass.textContent = '❌ Password should contain atleast 8 characters.';
-            messagePass.style.fontSize = '12px';
-            messagePass.style.marginLeft = '10px';
-        }
-        else if(hasUpperCase && hasLowerCase && hasSpecialChar){
-            messagePass.textContent = '✅ Password is now secure.';
-            messagePass.style.fontSize = '12px';
-            messagePass.style.marginLeft = '10px';
-        }
-        else {
-            messagePass.textContent = '❌ Password should include uppercase, lowercase, numbers, and special characters';
-            messagePass.style.fontSize = '9px';
-            messagePass.style.marginLeft = '10px';
-        }
-    });
 
     // show/hide password button - DONE
     const passwordInput = document.getElementById('password');
@@ -1068,7 +986,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     //add staff account - DONE
-    document.getElementById('addStaffForm').addEventListener('submit', function(e) {
+    document.getElementById('addStaffForm').addEventListener('submit', async(e) => {
         e.preventDefault();
 
         const fullname = document.getElementById('fullname').value;
@@ -1077,77 +995,125 @@ document.addEventListener("DOMContentLoaded", () => {
         const staff_username = document.getElementById('username').value;
         const staff_password = document.getElementById('password').value;
 
-        const formData = new FormData();
-        formData.append('fullname', fullname);
-        formData.append('contactno', contactno);
-        formData.append('role', role);
-        formData.append('username', staff_username);
-        formData.append('password', staff_password);
+        const formData = {
+            fullname: fullname,
+            contactno: contactno,
+            role: role,
+            username: staff_username,
+            password: staff_password
+        };
 
-        fetch("../controllers/staff.php?action=createAcc", {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success){
-                Swal.fire({
-                    position: "center",
-                    icon: "success",
-                    title: "Account created successfully.",
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+        try{
+            const response = await fetch('../controllers/staff.php',{
+                method: 'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            const result = await response.json();
+                if(result.success){
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: "Account created successfully.",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
 
-                displayStaffAccounts();
+                    displayStaffAccounts();
 
-                document.getElementById('addStaffForm').reset();
-                document.getElementById('validationMessage').textContent = '';
-                document.getElementById('validationPass').textContent = '';
-            }
-            else {
-                console.log("⚠️ " + data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+                    document.getElementById('addStaffForm').reset();
+                    document.getElementById('validationMessage').textContent = '';
+                }
+                else {
+                    message.textContent = result.message;
+                    message.style.fontSize = '12px';
+                }
+        }
+        catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Something went wrong. Please try again.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
     });
 
     let rowStaff = [];
+    let debounceTimer;
 
     //display staff accounts - DONE
-    function displayStaffAccounts(){
-        fetch("../controllers/staff.php?action=accounts", {
-            method: 'GET'
-        })
-        .then(res => res.json())
-        .then(data => {
-            const tableBody = document.getElementById('staffTable').querySelector('tbody');
-            tableBody.innerHTML = '';
-            rowStaff = data;
-            if(rowStaff.length === 0){
-                tableBody = `<tr><td colspan="4">No record found.</td></tr>`;
-                return;
+    async function displayStaffAccounts(){
+        const searchBox = document.getElementById('searchInput').value;
+        const filterRole = document.getElementById('filterStaff').value.trim();
+        try{
+            const response = await fetch(`../controllers/staff.php?&role=${encodeURIComponent(filterRole)}&search=${encodeURIComponent(searchBox)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type':'application/json'
+                }
+            })
+            const result = await response.json();
+            if(result.success){
+                const tableBody = document.getElementById('staffTable').querySelector('tbody');
+                tableBody.innerHTML = '';
+                rowStaff = result.data;
+                if(rowStaff.length === 0){
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td colspan="2" style="text-align:center;">No record found.</td>`;
+                    tableBody.appendChild(tr);
+                    return;
+                }
+                
+                rowStaff.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${escapeHTML(row.staffFullname)}</td>
+                                    <td>${escapeHTML(row.staffRole)}</td>
+                                    <td>
+                                        <button class="edit-btn" data-id="${escapeHTML(row.staffID)}">Edit</button>
+                                        <button class="delete-btn" data-id="${escapeHTML(row.staffID)}">Delete</button>
+                                    </td>`;
+                    tableBody.appendChild(tr);
+                });
             }
-            
-            rowStaff.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${row.staffFullname}</td>
-                                <td>${row.staffRole}</td>
-                                <td>
-                                    <button class="edit-btn" data-id="${row.staffID}">Edit</button>
-                                    <button class="delete-btn" data-id="${row.staffID}">Delete</button>
-                                </td>`;
-                tableBody.appendChild(tr);
+            else{
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: 'Error',
+                    text: result.message,
+                    showConfirmButton: false,
+                    timer: 1700
+                });
+            }
+        }catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Something went wrong. Please try again.',
+                showConfirmButton: false,
+                timer: 1500
             });
-        })
-        .catch(error => console.error('Error:', error));
+        }
     }
+
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(displayStaffAccounts, 300);
+    });
+    
+    document.getElementById('filterStaff').addEventListener('change', displayStaffAccounts);
     displayStaffAccounts();
     
 
     //edit staff accounts - DONE
     const table = document.getElementById('staffTable');
-    const form = document.getElementById('editForm');
+    const editForm = document.getElementById('editForm');
 
     const editModal = document.getElementById('editaccModal');
     const deleteModal = document.getElementById('deleteaccModal');
@@ -1194,37 +1160,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     let currentUserId = null;
-    fetch('../controllers/islogin.php')
-    .then(res => res.json())
-    .then(data => {
-        currentUserId = data.staff_id;
-    })
-    .catch(err => console.error('Error fetching session:', err));
+    let currentStaffData = null;
 
     //retrieve data to editForm - DONE
     const tableBody = document.querySelector('#staffTable tbody');
     tableBody.addEventListener('click', async (e) => {
         if (e.target.classList.contains('edit-btn')) {
-            const id = e.target.dataset.id;
+            currentUserId = e.target.dataset.id;
+            currentStaffData = rowStaff.find(i => i.staffID == currentUserId);
 
-            const res = await fetch(`../controllers/staff.php?action=staffinfos&staffID=${encodeURIComponent(id)}`);
-            const data = await res.json();
+            fullnameInput.value = currentStaffData.staffFullname;
+            contactnoInput.value = currentStaffData.contactno;
+            usernameInput.value = currentStaffData.staffUsername;
+            roleInput.value = currentStaffData.staffRole;
 
-            data.forEach(row => {
-                document.getElementById('staffID').value = row.staffID;
-                fullnameInput.value = row.staffFullname;
-                contactnoInput.value = row.contactNumber;
-                usernameInput.value = row.staffUsername;
-                roleInput.value = row.staffRole;
-                // id.value = row.id;
-
-                fullnameInput.dataset.original = row.staffFullname;
-                contactnoInput.dataset.original = row.contactNumber;
-                usernameInput.dataset.original = row.staffUsername;
-                roleInput.dataset.original = row.staffRole;
-                passInput.dataset.original = '';
-                passConfirm.dataset.original = '';
-            });
+            //original values
+            fullnameInput.dataset.original = currentStaffData.staffFullname;
+            contactnoInput.dataset.original = currentStaffData.contactno;
+            usernameInput.dataset.original = currentStaffData.staffUsername;
+            roleInput.dataset.original = currentStaffData.staffRole;
+            passInput.dataset.original = '';
+            passConfirm.dataset.original = '';
 
             saveBtn.disabled = true;
 
@@ -1252,131 +1208,679 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         //delete staff accounts
         else if(e.target.classList.contains('delete-btn')){
-            const id = e.target.dataset.id;
+            currentUserId = e.target.dataset.id;
 
-            confirmDeleteBtn.addEventListener('click', () => {
-                const formData = new FormData();
-                formData.append('staff_id', id);
-
-                fetch('../controllers/staff.php?action=deleteAcc', {
-                    method: 'POST',
-                    body: formData
+            confirmDeleteBtn.addEventListener('click', async(e) => {
+                e.preventDefault();
+            
+            try{
+                const response = await fetch('../controllers/staff.php', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({staff_id: currentUserId})
                 })
-                .then(res => res.json())
-                .then(data =>{
-                    if(data.success){
-                        if(parseInt(id) === parseInt(currentUserId)){
-                            fetch('../controllers/logout.php')
-                            window.location.href = "login.php";
-                        }
-                        else {
-                            document.getElementById('deleteaccModal').classList.remove('active');
-                            Swal.fire({
-                                position: "center",
-                                icon: "success",
-                                title: "Account successfully deleted.",
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                        displayStaffAccounts();
-                        }
-                        
-                    }
-                    else{
-                        console.log("⚠️ " + data.message);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+                const result = await response.json();
+                if(result.success){
+                    document.getElementById('deleteaccModal').classList.remove('active');
+                    Swal.fire({
+                        position: "center",
+                        icon: "success",
+                        title: "Account successfully deleted.",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    displayStaffAccounts();
+                }
+                else{
+                    Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: 'Error',
+                    text: result.message,
+                    showConfirmButton: false,
+                    timer: 1700
+                });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: 'Something went wrong. Please try again.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
             });
         }
     });
 
     //edit staff account
-    form.addEventListener('submit', function(e) {
+    editForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        //To Do: ayusin ang staff ID
-            const id = document.getElementById('staffID').value;
-            const formData = new FormData();
-            formData.append('staff_id', id);
-            formData.append('newFullname', fullnameInput.value);
-            formData.append('newUsername', usernameInput.value);
-            formData.append('newContactno', contactnoInput.value);
-            formData.append('newRole', roleInput.value);
-            
+       const formData = {
+            staff_id: currentUserId,
+            newFullname: fullnameInput.value,
+            newUsername: usernameInput.value,
+            newContactno: contactnoInput.value,
+            newRole: roleInput.value,
+            newPassword: passInput.value,
+            confirmPass: passConfirm.value
+        }
+        try{
+            const response = await fetch("../controllers/staff.php", {
+                method: 'PUT',
+                header: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            const result = await response.json();
 
-            if(passInput.value !== passConfirm.value){
+            if(result.success){
+                Swal.fire({
+                    title: "Success!",
+                    text: "Save changes.",
+                    icon: "success"
+                });;
+                passInput.value = '';
+                passConfirm.value = '';
+                displayStaffAccounts();
+            }
+            else{
                 Swal.fire({
                     position: "center",
                     icon: "warning",
-                    title: "Confirm your password correctly.",
+                    title: 'Error',
+                    text: result.errors,
+                    showConfirmButton: false,
+                    timer: 1700
+                });
+                passInput.value = '';
+                passConfirm.value = '';
+            }
+        } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    position: "center",
+                    icon: "warning",
+                    title: 'Something went wrong. Please try again.',
                     showConfirmButton: false,
                     timer: 1500
                 });
-                return;
             }
-            else {
-                formData.append('newPassword', passConfirm.value);
-            }
-        
-            fetch("../controllers/staff.php?action=editAcc", {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success){
-                    Swal.fire({
-                        title: "Success!",
-                        text: "Save changes.",
-                        icon: "success"
-                    });;
-                    displayStaffAccounts();
-                }
-                else{
-                    console.log("⚠️ " + data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-
             editModal.classList.remove('active');
     });
-    
-    //filter and search staff
-    const searchBox = document.getElementById('searchInput');
-    const filterRole = document.getElementById('filterStaff');
-    let debounceTimer;
-    function fetchData(){
-            const searchVal = searchBox.value.trim();
-            const roleVal = filterRole.value;
+});
 
-            fetch(`../controllers/staff.php?action=search&search=${encodeURIComponent(searchVal)}&role=${encodeURIComponent(roleVal)}`)
-            .then(res => res.json())
-            .then(data => {
-                document.querySelector('#staffTable tbody').innerHTML = ''; 
 
-                if (data.length > 0) {
-                    data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${row.staffFullname}</td>
-                                    <td>${row.staffRole}</td>
-                                    <td>
-                                        <button class="edit-btn" data-id="${row.staffID}">Edit</button>
-                                        <button class="delete-btn" data-id="${row.staffID}">Delete</button>
-                                    </td>`;
-                    tableBody.appendChild(tr);
-                });
-                }
-            })
-            .catch(err => console.error('Error:', err));
+//ORDER HISTORY
+let orderHistory = [];
+let allOrderHistory = [];
+
+// Populate order history
+async function populateOrderHistory() {
+    try {
+        const response = await fetch('../controllers/pos.php?action=getOrderHistory');
+        const result = await response.json();
+        
+        if (result.success) {
+            orderHistory = result.data;
+            allOrderHistory = [...result.data]; // Store original
+            renderOrderHistory(orderHistory);
+        } else {
+            console.error('Failed to load order history:', result.message);
+        }
+    } catch (error) {
+        console.error('Error loading order history:', error);
     }
+}
 
-    searchBox.addEventListener('input', () => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(fetchData, 300);
+// Render order history
+function renderOrderHistory(data = orderHistory) {
+    const tableBody = document.getElementById('orderTableBody');
+    
+    if (!tableBody) {
+        console.error('orderTableBody not found!');
+        return;
+    }
+    
+    tableBody.innerHTML = '';
+    
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
+        return;
+    }
+    
+    data.forEach((order) => {
+        const row = document.createElement('tr');
+        
+        // Store order data directly on the row element
+        row.dataset.orderId = order.id;
+        row.dataset.customerName = order.customerName;
+        row.dataset.items = order.items;
+        row.dataset.amount = order.amount;
+        row.dataset.method = order.method;
+        row.dataset.date = order.date;
+        row.dataset.status = order.status;
+        
+        row.innerHTML = `
+            <td>${escapeHTML(order.id)}</td>
+            <td>${escapeHTML(order.items)}</td>
+            <td>${escapeHTML(order.amount)}</td>
+            <td>${escapeHTML(order.method)}</td>
+            <td>${escapeHTML(order.date)}</td>
+            <td><span class="status-badge">${escapeHTML(order.status)}</span></td>
+            <td>
+                <button class="btn btn-sm view-history-receipt m-2" type="button">
+                    <i class="fa-solid fa-eye text-muted"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Update filter options
+function updateFilterOptions() {
+    const filterType = document.getElementById('filterType');
+    const filterValue = document.getElementById('filterValue');
+    
+    if (!filterType || !filterValue) return;
+    
+    filterValue.innerHTML = '';
+
+    // Add default "Select" option FIRST
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = filterType.value === '' ? 'Select Value' :
+                                filterType.value === 'month' ? 'Select Month' : 
+                                filterType.value === 'day' ? 'Select Day' : 
+                                filterType.value === 'year' ? 'Select Year' : 
+                                'Select Value';
+    filterValue.appendChild(defaultOption);
+    
+    if (filterType.value === 'month') {
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
+            option.textContent = month;
+            filterValue.appendChild(option);
+        });
+    } else if (filterType.value === 'day') {
+        for (let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString().padStart(2, '0'); // "01", "02", etc.
+            option.textContent = i;
+            filterValue.appendChild(option);
+        }
+    } else if (filterType.value === 'year') {
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear; i >= currentYear - 5; i--) {
+            const option = document.createElement('option');
+            option.value = i.toString();
+            option.textContent = i;
+            filterValue.appendChild(option);
+        }
+    }
+    
+    // Reset to show all data when filter type changes
+    renderOrderHistory(allOrderHistory);
+}
+
+// Search orders
+function searchOrders() {
+    const searchInput = document.getElementById('searchOrderId');
+    if (!searchInput) return;
+    
+    const searchValue = searchInput.value.toLowerCase().trim();
+    
+    // If search is empty, apply current filter or show all
+    if (!searchValue) {
+        filterOrders();
+        return;
+    }
+    
+    // Filter from all orders
+    const filtered = allOrderHistory.filter(order => {
+        const orderId = order.id ? order.id.toString().toLowerCase() : '';
+        return orderId.includes(searchValue);
     });
     
-    filterRole.addEventListener('change', fetchData);
+    renderOrderHistory(filtered);
+}
 
-    fetchData();
+// Filter orders
+function filterOrders() {
+    const filterType = document.getElementById('filterType');
+    const filterValue = document.getElementById('filterValue');
+    
+    if (!filterType || !filterValue || !filterValue.value) {
+        renderOrderHistory(allOrderHistory);
+        return;
+    }
+    
+    const filtered = allOrderHistory.filter(order => {
+        if (!order.date) return false;
+        
+        const dateText = order.date.trim();
+        const dateParts = dateText.split('-');
+        
+        if (dateParts.length !== 3) {
+            return false;
+        }
+        
+        // Parse date parts - assuming format is MM-DD-YYYY or M-D-YYYY
+        const month = dateParts[0].padStart(2, '0');
+        const day = dateParts[1].padStart(2, '0');
+        const year = dateParts[2];
+        
+        let match = false;
+        
+        if (filterType.value === 'month') {
+            match = month === filterValue.value;
+        } else if (filterType.value === 'day') {
+            match = day === filterValue.value;
+        } else if (filterType.value === 'year') {
+            match = year === filterValue.value;
+        }
+        
+        return match;
+    });
+    
+    renderOrderHistory(filtered);
+}
 
+// Export data
+function exportData() {
+    const visibleRows = document.querySelectorAll('#orderTableBody tr:not([style*="display: none"])');
+    
+    if (visibleRows.length === 0 || (visibleRows.length === 1 && visibleRows[0].cells.length === 1)) {
+        alert('No data to export');
+        return;
+    }
+    
+    let csv = 'Order ID,Item Order,Total Amount,Payment Method,Order Date,Status\n';
+    
+    // Get currently displayed orders
+    const currentData = [];
+    visibleRows.forEach(row => {
+        if (row.dataset.orderId) {
+            const order = {
+                id: row.dataset.orderId,
+                items: row.dataset.items,
+                amount: row.dataset.amount,
+                method: row.dataset.method,
+                date: row.dataset.date,
+                status: row.dataset.status
+            };
+            currentData.push(order);
+        }
+    });
+    
+    currentData.forEach(order => {
+        csv += `${order.id},"${order.items}",${order.amount},${order.method},${order.date},${order.status}\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `order_history_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Print data
+function printData() {
+    const table = document.querySelector('.order-table');
+    if (!table) return;
+    
+    // Clone the table
+    const tableClone = table.cloneNode(true);
+    
+    // Remove hidden rows from clone
+    const rows = tableClone.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (row.style.display === 'none') {
+            row.remove();
+        }
+    });
+    
+    // Remove action column
+    const headers = tableClone.querySelectorAll('th');
+    if (headers.length > 0) {
+        headers[headers.length - 1].remove();
+    }
+    
+    const cells = tableClone.querySelectorAll('tbody td:last-child');
+    cells.forEach(cell => cell.remove());
+    
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Order History - ${new Date().toLocaleDateString()}</title>
+                <style>
+                    body { 
+                        font-family: Arial, sans-serif;
+                        padding: 20px;
+                    }
+                    h1 {
+                        text-align: center;
+                        color: #0052cc;
+                        margin-bottom: 20px;
+                    }
+                    table { 
+                        border-collapse: collapse;
+                        width: 100%;
+                        margin-top: 20px;
+                    }
+                    th, td { 
+                        border: 1px solid #ddd;
+                        padding: 12px;
+                        text-align: left;
+                    }
+                    th {
+                        background-color: #0052cc;
+                        color: white;
+                        font-weight: bold;
+                    }
+                    tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+                    .print-date {
+                        text-align: right;
+                        color: #666;
+                        margin-bottom: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="print-date">Printed: ${new Date().toLocaleString()}</div>
+                <h1>Order History</h1>
+                ${tableClone.outerHTML}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Fetch and show online receipt
+async function fetchAndShowOnlineReceipt(orderId) {
+    try {
+        const response = await fetch(`../controllers/get_online_order.php?order_id=${orderId}`);
+        const text = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch(e) {
+            console.error("JSON parse error:", e);
+            alert('Failed to load order details');
+            return;
+        }
+        
+        if (data.error) {
+            console.error("Server error:", data.error);
+            alert('Failed to load order details: ' + data.error);
+            return;
+        }
+        
+        if (data && data.length > 0) {
+            const order = data[0];
+            showReceipt(order);
+        } else {
+            alert('This order does not have online order details.');
+        }
+        
+    } catch (error) {
+        console.error("Error fetching online order:", error);
+        alert('Failed to load order details');
+    }
+}
+
+// Show receipt for walk in customers
+function showWalkInReceipt(order) {
+    const receiptSection = document.getElementById('walkInReceiptSection');
+    
+    if (!receiptSection) {
+        console.error('walkInReceiptSection not found!');
+        return;
+    }
+    
+    // Hide online receipt if visible
+    const onlineReceipt = document.getElementById('receiptSection');
+    if (onlineReceipt) {
+        onlineReceipt.style.display = 'none';
+    }
+    
+    // Show walk-in receipt with flex display
+    receiptSection.style.display = 'flex';
+    
+    try {
+        const orderNumEl = document.getElementById('walkInOrderNumber');
+        if (orderNumEl) {
+            orderNumEl.innerHTML = `Order No: <b>${order.id || 'N/A'}</b>`;
+        }
+        
+        const orderDateEl = document.getElementById('walkInOrderDate');
+        if (orderDateEl) {
+            orderDateEl.innerHTML = `<b>${order.date || 'N/A'}</b>`;
+        }
+        
+        const nameEl = document.getElementById('walkInName');
+        if (nameEl) {
+            nameEl.innerHTML = `Walk In Name: <b>${order.customerName || 'Walk-in Customer'}</b>`;
+        }
+        
+        const totalAmount = order.amount || '₱0.00';
+        
+        const subtotalEl = document.getElementById('walkInSubtotal');
+        if (subtotalEl) {
+            subtotalEl.innerHTML = `<b>${totalAmount}</b>`;
+        }
+        
+        const totalEl = document.getElementById('walkInTotal');
+        if (totalEl) {
+            totalEl.innerHTML = `<b>${totalAmount}</b>`;
+        }
+        
+        const methodEl = document.getElementById('walkInPaymentMethod');
+        if (methodEl) {
+            methodEl.innerHTML = `Payment Method: <b>${order.method || 'Cash'}</b>`;
+        }
+
+        const itemsContainer = document.getElementById('walkInItemsContainer');
+        
+        if (itemsContainer) {
+            itemsContainer.innerHTML = '';
+            
+            if (order.items && order.items.trim() !== '' && order.items !== 'No items') {
+                // Parse items like "1x coke" or "2x burger, 1x fries"
+                const itemsList = order.items.split(', ');
+                
+                itemsList.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'details mb-1';
+                    
+                    // Try to parse format like "1x coke" or "2x burger"
+                    const match = item.match(/(\d+)x\s*(.+)/i);
+                    
+                    if (match) {
+                        const qty = match[1];
+                        const name = match[2];
+                        div.innerHTML = `<span><b>${qty} ×</b> ${name}</span>`;
+                    } else {
+                        // If format doesn't match, just display as is
+                        div.innerHTML = `<span>${item}</span>`;
+                    }
+                    
+                    itemsContainer.appendChild(div);
+                });
+            } else {
+                itemsContainer.innerHTML = '<p class="details">No items found</p>';
+            }
+        }
+        
+    } catch (error) {
+        console.error("Error populating walk-in receipt:", error);
+    }
+}
+
+// Show receipt for online orders
+function showReceipt(order) {
+    const receiptSection = document.getElementById('receiptSection');
+    if (!receiptSection) {
+        console.error('receiptSection not found!');
+        return;
+    }
+    
+    // Hide walk-in receipt if visible
+    const walkInReceipt = document.getElementById('walkInReceiptSection');
+    if (walkInReceipt) {
+        walkInReceipt.style.display = 'none';
+    }
+    
+    // Show online receipt with flex display
+    receiptSection.style.display = 'flex';
+    
+    document.getElementById('orderNumber').innerHTML = `Order No: <b>${order.order_number || 'N/A'}</b>`;
+    document.getElementById('orderDate').innerHTML = `<b>${order.date_ordered || 'N/A'}</b>`;
+    document.getElementById('recipient').innerHTML = `Customer Name: <b>${order.recipient_name || 'N/A'}</b>`;
+    document.getElementById('contactNumber').innerHTML = `Contact Number: <b>${order.phone_number || 'N/A'}</b>`;
+    document.getElementById('emailAddress').innerHTML = `Email Address: <b>${order.email || 'N/A'}</b>`;
+    document.getElementById('deliveryAddress').innerHTML = `Delivery Address: <b>${order.delivery_address || 'N/A'}</b>`;
+    
+    const subtotal = parseFloat(order.subtotal) || 0;
+    const deliveryFee = parseFloat(order.delivery_fee) || 0;
+    const total = subtotal + deliveryFee;
+    
+    document.getElementById('subtotal').innerHTML = `<b>₱${subtotal.toFixed(2)}</b>`;
+    document.getElementById('deliveryFee').innerHTML = `<b>₱${deliveryFee.toFixed(2)}</b>`;
+    document.getElementById('total').innerHTML = `<b>₱${total.toFixed(2)}</b>`;
+    document.getElementById('paymentMethod').innerHTML = `Payment Method: <b>${order.payment_method || 'N/A'}</b>`;
+
+    const itemsContainer = document.getElementById('itemsContainer');
+    itemsContainer.innerHTML = '';
+    
+    if (order.items_ordered && order.items_ordered.trim() !== '') {
+        const items = order.items_ordered.split(', ');
+        items.forEach(item => {
+            const span = document.createElement('div');
+            span.className = 'details mb-1 d-flex justify-content-between w-100';
+
+            const parts = item.split(" x");
+            const name = parts[0] || "Item";
+
+            const qtyAndPrice = (parts[1] || "").split(" @");
+            const qty = parseInt(qtyAndPrice[0]) || 0;
+            const price = parseFloat(qtyAndPrice[1]) || 0;
+
+            const itemSubtotal = qty * price;
+
+            span.innerHTML = `
+                <span><b>${qty} ×</b> ${name}</span>
+                <span><b>₱${itemSubtotal.toFixed(2)}</b></span>
+            `;
+
+            itemsContainer.appendChild(span);
+        });
+    } else {
+        const p = document.createElement('p');
+        p.className = 'details';
+        p.textContent = 'No items found';
+        itemsContainer.appendChild(p);
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Load order history
+    populateOrderHistory();
+    
+    // Setup event listener for search input
+    const searchInput = document.getElementById('searchOrderId');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', searchOrders);
+    }
+    
+    // Setup event listener for filter type
+    const filterType = document.getElementById('filterType');
+    if (filterType) {
+        filterType.addEventListener('change', updateFilterOptions);
+    }
+    
+    // Setup event listener for filter value
+    const filterValue = document.getElementById('filterValue');
+    if (filterValue) {
+        filterValue.addEventListener('change', filterOrders);
+    }
+    
+    // Setup event listener for export button
+    const exportBtn = document.querySelector('.history-btn[onclick="exportData()"]');
+    if (exportBtn) {
+        exportBtn.removeAttribute('onclick');
+        exportBtn.addEventListener('click', exportData);
+    }
+    
+    // Setup event listener for print button
+    const printBtn = document.querySelector('.history-btn[onclick="printData()"]');
+    if (printBtn) {
+        printBtn.removeAttribute('onclick');
+        printBtn.addEventListener('click', printData);
+    }
+
+    document.getElementById('receiptSection').addEventListener('click', function(e) {
+        const receiptCard = document.getElementById('receiptCard');
+        if (!receiptCard.contains(e.target)) {
+            this.style.display = 'none';
+        }
+    });
+
+    document.getElementById('walkInReceiptSection').addEventListener('click', function(e) {
+        const walkInCard = document.getElementById('walkInReceiptCard');
+        if (!walkInCard.contains(e.target)) {
+            this.style.display = 'none';
+        }
+    });
+    
+    // Setup event listener for view receipt buttons
+    const orderTableBody = document.getElementById("orderTableBody");
+    if (orderTableBody) {
+        orderTableBody.addEventListener("click", function(e) {
+            const viewButton = e.target.closest(".view-history-receipt");
+            
+            if (!viewButton) return;
+            
+            const row = viewButton.closest("tr");
+            if (!row) return;
+            
+            const order = {
+                id: row.dataset.orderId,
+                customerName: row.dataset.customerName,
+                items: row.dataset.items,
+                amount: row.dataset.amount,
+                method: row.dataset.method,
+                date: row.dataset.date,
+                status: row.dataset.status
+            };
+
+            const isWalkIn = order.status && order.status.toLowerCase() === 'walk in';
+            
+            if (isWalkIn) {
+                showWalkInReceipt(order);
+            } else {
+                fetchAndShowOnlineReceipt(order.id);
+            }
+        });
+    }
 });
