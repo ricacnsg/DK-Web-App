@@ -217,7 +217,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                                         <th class="text-muted" scope="col"><b>Order Number</b></th>
                                         <th class="text-muted" scope="col"><b>Date Ordered</b></th>
                                         <th class="text-muted" scope="col"><b>Subtotal</b></th>
-                                        <th class="text-muted" scope="col"><b>Payment Status</b></th>
+                                        <th class="text-muted" scope="col"><b>Delivery Rider</b></th>
                                         <th class="text-muted" scope="col"><b>Order Status</b></th>
                                         <th class="text-muted" scope="col"><b>Actions</b></th>
                                     </tr>

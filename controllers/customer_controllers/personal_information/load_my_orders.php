@@ -33,12 +33,14 @@ try {
                     CONCAT(m.menuItemName, ' x', io.quantity, ' @', m.menuItemPrice)
                     ORDER BY io.itemsOrderedID 
                     SEPARATOR ', '
-                ) AS items_ordered
+                ) AS items_ordered, 
+                s.staffFullname AS rider_name
             FROM orders o
             INNER JOIN customer c ON o.customerID = c.customerID
             LEFT JOIN location l ON o.orderNo = l.orderNo
             LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
             LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
+            LEFT JOIN staff s ON o.riderID = s.staffID
             WHERE o.customerID = ?";
     
     $params = [$customerID];
@@ -52,7 +54,7 @@ try {
     
     $sql .= " GROUP BY o.orderNo, o.createdAT, o.totalPrice, o.deliveryFee, o.orderStatus, 
                      o.paymentMethod, o.paymentStatus, c.recipientName, c.email, c.phoneNumber, 
-                     l.street, l.barangay, l.municipality, l.locationRemark
+                     l.street, l.barangay, l.municipality, l.locationRemark, s.staffFullname
             ORDER BY o.createdAT DESC";
     
     $stmt = $conn->prepare($sql);

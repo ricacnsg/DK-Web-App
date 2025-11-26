@@ -82,12 +82,12 @@ if ($stmt->execute()) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-        $mail->Password = 'mnjw bdtn tqoq wyce';
+        $mail->Username = ''; // your Gmail
+        $mail->Password = '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
 
-        $mail->setFrom('tariaobernadette@gmail.com', 'Davens Kitchenette');
+        $mail->setFrom('', 'Davens Kitchenette');
         $mail->addAddress($email);
 
         $mail->isHTML(true);

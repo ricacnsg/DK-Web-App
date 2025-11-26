@@ -1200,9 +1200,24 @@ td {
     color: #004a86;
 }
 
-.accepted {
+.in-transit {
     background-color: #d0f9bb;
     color: #2a7305;
+}
+
+.completed {
+    background-color: #fae5cb;
+    color: #b78241;
+}
+
+
+.preparing {
+    background-image: linear-gradient(to right, #F09819 0%, #EDDE5D  51%, #F09819  100%)
+}
+
+.ready {
+    background-color: #edcbfa;
+    color: #9135ad;
 }
 
 .cancel {

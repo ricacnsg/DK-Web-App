@@ -125,10 +125,10 @@ try {
     $stmt->close();
 
     // Insert payment
-    $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, paymentDate VALUES (?, ?, NOW())");
-    $stmt->bind_param("ss", $orderNumber, $paymentMethod);
-    $stmt->execute();
-    $stmt->close();
+    // $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, paymentDate VALUES (?, ?, NOW())");
+    // $stmt->bind_param("ss", $orderNumber, $paymentMethod);
+    // $stmt->execute();
+    // $stmt->close();
 
     $conn->commit();
 
@@ -146,8 +146,8 @@ try {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-        $mail->Password = 'mnjw bdtn tqoq wyce';
+        $mail->Username = ''; // your Gmail
+        $mail->Password = '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->SMTPOptions = [
@@ -158,7 +158,7 @@ try {
             ]
         ];
 
-        $mail->setFrom('tariaobernadette@gmail.com', 'Davens Kitchenette');
+        $mail->setFrom('', 'Davens Kitchenette');
         $mail->addAddress($email, $recipientName);
 
         $mail->isHTML(true);

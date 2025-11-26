@@ -925,13 +925,23 @@ function loadOrders() {
                     case "accepted": statusClass = "accepted"; break;
                     case "rejected": statusClass = "rejected"; break;
                     case "pending": statusClass = "pending"; break;
+                    case "preparing": statusClass = "btn-info"; break;
+                    case "ready": statusClass = "ready"; break;
+                    case "in transit": statusClass = "in-transit"; break;
+                    case "completed": statusClass = "completed"; break;
                     case "canceled": statusClass = "btn-danger"; break;
                     default: statusClass = "btn-secondary";
                 }
 
+                // Check if order can be rejected
+                const nonRejectableStatuses = ['preparing', 'ready', 'in transit', 'completed', 'rejected', 'canceled'];
+                const canReject = !nonRejectableStatuses.includes(statusText.toLowerCase());
+
                 let actionButtonHTML = '';
+                
+                // Show delivery button only for verified orders
                 if (statusText.toLowerCase() === "verified") {
-                    actionButtonHTML = `
+                    actionButtonHTML += `
                         <span>
                             <button class="btn btn-sm delivery">
                                 <i class="fa-solid fa-truck-fast"></i>
@@ -940,12 +950,37 @@ function loadOrders() {
                     `;
                 }
 
+                if (statusText.toLowerCase() === "ready") {
+                    actionButtonHTML += `
+                        <span>
+                            <button class="btn btn-sm btn-warning assign-rider" title="Assign Rider">
+                                <i class="fa-solid fa-motorcycle"></i>
+                            </button>
+                        </span>
+                    `;
+                }
+                
+                // Show cancel button only if order can be rejected
+                const cancelButtonHTML = canReject ? `
+                    <span>
+                        <button class="btn btn-sm cancel">
+                            <i class="fa-solid fa-x"></i>
+                        </button>
+                    </span>
+                ` : `
+                    <span>
+                        <button class="btn btn-sm cancel" disabled style="opacity: 0.3; cursor: not-allowed;" title="Cannot reject orders in this status">
+                            <i class="fa-solid fa-x"></i>
+                        </button>
+                    </span>
+                `;
+
                 tableBody.innerHTML += `
                     <tr data-order='${JSON.stringify(order).replace(/'/g, "&apos;")}'>
                         <td><b>${order.order_number}</b></td>
                         <td class="date-column">${order.date_ordered}</td>
                         <td>₱${parseFloat(order.subtotal).toFixed(2)}</td>
-                        <td>${order.payment_status || 'N/A'}</td>
+                        <td>${order.rider_name || 'Unassigned'}</td>
                         <td>
                             <button class="btn btn-sm rounded-pill ${statusClass}">
                                 ${statusText}
@@ -957,11 +992,7 @@ function loadOrders() {
                                     <i class="fa-solid fa-eye text-muted"></i>
                                 </button>
                             </span>
-                            <span>
-                                <button class="btn btn-sm cancel">
-                                    <i class="fa-solid fa-x"></i>
-                                </button>
-                            </span>
+                            ${cancelButtonHTML}
                             ${actionButtonHTML} 
                         </td>
                     </tr>
@@ -1271,6 +1302,23 @@ document.getElementById('setFeeSection').addEventListener('click', function(e) {
 
 // Reject order function
 function rejectOrder(order) {
+    // Define statuses that cannot be rejected
+    const nonRejectableStatuses = ['preparing', 'ready', 'in transit', 'completed'];
+    
+    // Check if the order status is in the non-rejectable list
+    const currentStatus = (order.order_status || '').toLowerCase().trim();
+    
+    if (nonRejectableStatuses.includes(currentStatus)) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cannot Reject',
+            text: `Orders with status "${order.order_status}" cannot be rejected. The order is already being processed or has been completed.`,
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+    
+    // Proceed with rejection confirmation
     Swal.fire({
         title: 'Reject Order?',
         text: `Are you sure you want to reject order ${order.order_number}?`,
@@ -1340,9 +1388,9 @@ function searchOnlineOrders() {
 // Filter online orders by date
 function filterOnlineOrders() {
     const type = document.getElementById('onlineFilterType').value;
-    const val = document.getElementById('onlineFilterValue').value;
+    let val = document.getElementById('onlineFilterValue').value;  // ← FIXED
 
-        if (type === "day" && val === "1") {
+    if (type === "day" && val === "1") {
         val = new Date().getDate().toString();
         document.getElementById('onlineFilterValue').value = val; 
     }
@@ -1373,6 +1421,7 @@ function filterOnlineOrders() {
         row.style.display = show ? "" : "none";
     });
 }
+
 
 // Initialize online order search and filters
 function initializeOnlineOrderSearch() {
@@ -1463,3 +1512,136 @@ function parseOnlineOrderDate(dateStr) {
         return new Date();
     }
 }
+
+// Fetch available riders from database
+async function fetchAvailableRiders() {
+    try {
+        const response = await fetch('../../controllers/delivery_controllers/get_riders.php');
+        const result = await response.json();
+        
+        if (result.success) {
+            return result.data;
+        } else {
+            console.error('Failed to fetch riders:', result.message);
+            return [];
+        }
+    } catch (error) {
+        console.error('Error fetching riders:', error);
+        return [];
+    }
+}
+
+// Show assign rider modal
+async function showAssignRiderModal(order) {
+    console.log('Showing assign rider modal for order:', order);
+    
+    // Fetch available riders
+    const riders = await fetchAvailableRiders();
+    
+    if (riders.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Riders Available',
+            text: 'There are no riders available to assign at the moment.',
+            confirmButtonColor: '#3085d6'
+        });
+        return;
+    }
+    
+    // Create options for the select dropdown
+    const riderOptions = riders.map(rider => 
+        `<option value="${rider.staff_id}">${rider.staff_name} (ID: ${rider.staff_id})</option>`
+    ).join('');
+    
+    Swal.fire({
+        title: 'Assign Rider',
+        html: `
+            <div style="text-align: left;">
+                <p><strong>Order Number:</strong> ${order.order_number}</p>
+                <p><strong>Delivery Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                <hr>
+                <label for="riderSelect" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                    Select Rider:
+                </label>
+                <select id="riderSelect" class="swal2-input" style="width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 4px;">
+                    <option value="">-- Select a Rider --</option>
+                    ${riderOptions}
+                </select>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0052cc',
+        cancelButtonColor: '#999',
+        confirmButtonText: 'Assign Rider',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            const selectedRiderId = document.getElementById('riderSelect').value;
+            if (!selectedRiderId) {
+                Swal.showValidationMessage('Please select a rider');
+                return false;
+            }
+            return selectedRiderId;
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            assignRiderToOrder(order.order_number, result.value);
+        }
+    });
+}
+
+// Assign rider to order
+function assignRiderToOrder(orderNumber, riderId) {
+    fetch('../../controllers/delivery_controllers/assign_rider.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            order_number: orderNumber,
+            rider_id: riderId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Rider Assigned!',
+                text: 'The rider has been successfully assigned to this order.',
+                confirmButtonColor: '#0052cc'
+            }).then(() => {
+                loadOrders(); // Reload orders to update the table
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Assignment Failed',
+                text: data.message || 'Failed to assign rider to order',
+                confirmButtonColor: '#d33'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error assigning rider:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while assigning the rider',
+            confirmButtonColor: '#d33'
+        });
+    });
+}
+
+document.addEventListener("click", function (e) {
+    if (e.target.closest(".assign-rider")) {
+        const row = e.target.closest("tr");
+        if (!row) return;
+
+        const orderData = row.getAttribute("data-order");
+        if (!orderData) return;
+
+        const order = JSON.parse(orderData);
+        showAssignRiderModal(order);
+    }
+});
