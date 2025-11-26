@@ -5,6 +5,7 @@ header('Access-Control-Allow-Origin: *'); // papalitan ang '*' pag inihost na
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 require_once '../database/connect.php';
+include 'admin_loghelper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -113,6 +114,18 @@ function createStaffAccount($conn) {
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Account created successfully.']);
+
+        //for logging
+        $staffID = $stmt->insert_id;
+        $new_data = json_encode([
+            'fullname' => $fullname,
+            'contactno' => $contactno,
+            'username' => $user,
+            'password' => $hash_password,
+            'role' => $role
+        ]);
+
+        logAction($conn, $_SESSION['staff_id'], 'staff', 'ADD', $staffID, "Add new staff: $fullname", null, $new_data);
     } else {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
     }

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../database/connect.php';
+include 'admin_loghelper.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); // palitan pag ilalagay na sa production ang '*'
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -203,6 +204,16 @@ function addMenuItem() {
             echo json_encode(['success' => true, 'message' => 'Menu item created with ingredients!', 'id'=> $menuItemID]);
         }
 
+        $new_data = json_encode([
+            'menuItemName' => (string)$name,
+            'menuItemDescription' => (string)$description,
+            'menuItemPrice' => (float)$price,
+            'menuItemCategory' => (string)$category,
+            'menuItemImage' => null
+        ]);
+
+        logAction($conn, $_SESSION['staff_id'], 'menu management', 'ADD', $menuItemID, "Add new menu item: $name", null, $new_data);
+
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to add menu item: ' . $stmt->error]);
     }
@@ -240,6 +251,17 @@ function updateMenuItem() {
         echo json_encode(['success' => false, 'message' => 'Invalid menu item ID']);
         return;
     }
+
+    // Fetch current menu item for logging
+    $resOld = $conn->prepare("SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemCategory, menuItemImage 
+                            FROM menuitem 
+                            WHERE menuItemID = ?");
+    $resOld->bind_param("i", $id);
+    $resOld->execute();
+    $result = $resOld->get_result();
+    $oldData = $result->fetch_assoc();
+    $resOld->close();
+
 
     if (!empty($imageData) && strpos($imageData, 'data:image') === 0) {
         $base64 = explode(',', $imageData)[1];
@@ -302,6 +324,22 @@ function updateMenuItem() {
         $stmt2->close();
     }
 
+    $newData = [
+        'menuItemID' => $id,
+        'menuItemName' => $name,
+        'menuItemDescription' => $description,
+        'menuItemPrice' => $price,
+        'menuItemCategory' => $category,
+        'menuItemImage' => !empty($imageData) ? 'UPDATED' : 'UNCHANGED', // optional placeholder
+        'ingredients' => $ingredients
+    ];
+
+    $newDataJson = json_encode($newData);
+    $oldDataJson = json_encode($oldData);
+
+    logAction($conn, $_SESSION['staff_id'], 'menu management', 'UPDATE', $id, "Update menu item: $name", $oldDataJson, $newDataJson);
+
+
     echo json_encode(['success' => true, 'message' => 'Menu item and ingredients updated successfully']);
 }
 
@@ -316,11 +354,22 @@ function deleteMenuItem() {
         return;
     }
 
+    //fetch latest data before deleting (for log)
+    $stmtOld = $conn->prepare("SELECT * FROM menuitem WHERE menuItemID = ?");
+    $stmtOld->bind_param("i", $id); 
+    $stmtOld->execute();
+
+    $result = $stmtOld->get_result();
+    $oldData = $result->fetch_assoc();
+
+    $stmtOld->close();
+
     $stmt = $conn->prepare("DELETE FROM menuitem WHERE menuItemID = ?");
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Menu item deleted successfully']);
+        logAction($conn, $_SESSION['staff_id'], 'menu management', 'DELETE', $id, "Deleted menu item: " . $oldData['menuItemName'], json_encode($oldData), null);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to delete menu item: ' . $stmt->error]);
     }

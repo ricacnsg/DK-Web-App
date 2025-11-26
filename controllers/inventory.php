@@ -5,6 +5,7 @@ header('Access-Control-Allow-Origin: *'); // palitan pag ilalagay na sa producti
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 require_once '../database/connect.php';
+include 'admin_loghelper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -89,6 +90,18 @@ function addNewItem($conn){
     else {
         echo json_encode(['success' => true, 'message' => 'Item added successfully.']);
     }
+    $itemID = $stmt->insert_id;
+    $new_data = json_encode([
+        'itemName' => (string)$itemName,
+        'quantity' => (float)$stocks,
+        'unitOfMeasurement' => (string)$measurement,
+        'pricePerQuantity' => (float)$unitCost,
+        'itemCategory' => (string)$itemCategory,
+        'reorderLevel' => (int)$reorder
+    ]);
+
+    logAction($conn, $_SESSION['staff_id'], 'inventory', 'ADD', $itemID, "Add new item: $itemName", null, $new_data);
+
     $stmt->close();
 }
 
@@ -226,6 +239,16 @@ function editItem($conn){
       exit;
   }
 
+      // Fetch current item for logging
+    $resOld = $conn->prepare("SELECT itemName, quantity, unitOfMeasurement, itemCategory, pricePerQuantity, reorderLevel
+                            FROM item 
+                            WHERE itemID = ?");
+    $resOld->bind_param("i", $id);
+    $resOld->execute();
+    $result = $resOld->get_result();
+    $oldData = $result->fetch_assoc();
+    $resOld->close();
+
   $sql = "UPDATE item SET " . implode(", ", $updates) . " WHERE itemID = ?";
   $stmt = $conn->prepare($sql);
 
@@ -235,6 +258,19 @@ function editItem($conn){
 
   if ($stmt->execute()) {
       echo json_encode(['success' => true, 'message' => 'Item updated successfully']);
+
+      //for logging
+      $newData = [
+        'quantity' => (float)$input['quantity'],
+        'unitOfMeasurement' => (string)$input['unitOfMeasurement'],
+        'pricePerQuantity' => (float)$input['unitCost'],
+        'reorderLevel' => (int)$input['reorder']
+       ];
+
+    $newDataJson = json_encode($newData);
+    $oldDataJson = json_encode($oldData);
+
+    logAction($conn, $_SESSION['staff_id'], 'inventory', 'UPDATE', $id, "Updated item", $oldDataJson, $newDataJson);
   } else {
       http_response_code(500);
       echo json_encode(['error' => 'Failed to update item']);
@@ -289,11 +325,21 @@ function deleteItem($conn){
       exit;
   }
 
+    $stmtOld = $conn->prepare("SELECT * FROM item WHERE itemID = ?");
+    $stmtOld->bind_param("i", $id); 
+    $stmtOld->execute();
+
+    $result = $stmtOld->get_result();
+    $oldData = $result->fetch_assoc();
+
+    $stmtOld->close();
+
   $stmt = $conn->prepare("DELETE FROM item WHERE itemID= ?");
   $stmt->bind_param("i", $id);
 
   if($stmt->execute()){
     echo json_encode(['success' => true, 'message' => 'Item deleted successfully']);
+    logAction($conn, $_SESSION['staff_id'], 'inventory', 'DELETE', $id, "Deleted menu item: " . $oldData['itemName'], json_encode($oldData), null);
   }
   else{
     http_response_code(500);
