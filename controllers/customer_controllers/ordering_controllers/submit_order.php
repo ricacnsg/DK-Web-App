@@ -124,6 +124,12 @@ try {
     $stmt->execute();
     $stmt->close();
 
+    // Insert payment
+    $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, paymentDate VALUES (?, ?, NOW())");
+    $stmt->bind_param("ss", $orderNumber, $paymentMethod);
+    $stmt->execute();
+    $stmt->close();
+
     $conn->commit();
 
     // Clear session flags after successful order
