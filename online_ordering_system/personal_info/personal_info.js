@@ -703,6 +703,9 @@ function loadOrders() {
                         <button class="btn btn-sm btn-primary track">
                             <i class="fa-solid fa-location-dot"></i>
                         </button>
+                        <button class="btn btn-sm btn-danger cancel">
+                            <i class="fa-solid fa-x"></i>
+                        </button>
                     </td>
                 `;
                 
@@ -725,6 +728,15 @@ function loadOrders() {
                     trackOrder(orderData);
                 });
             });
+
+            document.querySelectorAll(".cancel").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const row = this.closest("tr");
+                    const orderData = JSON.parse(row.dataset.order);
+                    cancelOrder(orderData.order_number, row);
+                });
+            });
+
         })
         .catch(error => {
             console.error("Fetch error:", error);
@@ -817,11 +829,22 @@ function trackOrder(orderData) {
     
     document.getElementById('trackSection').style.display = 'flex';
     
+    const trackStatusElem = document.getElementById('trackStatus');
+    const currentStatus = (orderData.order_status || '').trim(); 
+
     document.getElementById('trackOrderNo').textContent = orderData.order_number;
     document.getElementById('trackOrderDate').textContent = orderData.date_ordered;
-    
-    const currentStatus = orderData.order_status;
-    console.log("Current order status:", currentStatus);
+    document.getElementById('trackDeliveryRider').textContent = orderData.rider_name || 'Unassigned';
+
+    if (currentStatus === "Canceled" || currentStatus === "Rejected") {
+        trackStatusElem.textContent = currentStatus;
+        trackStatusElem.style.color = currentStatus === "Canceled" ? "red" : "orange";
+        document.getElementById('statusTracker').innerHTML = '';
+        return; // stop here, skip normal tracker
+    } else {
+        trackStatusElem.textContent = '';
+    }
+
     
     const statuses = [
         "Pending",
@@ -894,6 +917,67 @@ document.addEventListener('DOMContentLoaded', () => {
         changePasswordBtn.addEventListener('click', changePassword);
     }
 });
+
+
+// ============================
+// Cancel Order
+// ============================
+function cancelOrder(orderNumber, tableRow) {
+    Swal.fire({
+        title: `Cancel Order #${orderNumber}?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Call PHP API to cancel order
+            fetch("../../../controllers/customer_controllers/personal_information/cancel_order.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ order_number: orderNumber })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cancelled!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // Update row visually
+                    if (tableRow) {
+                        const orderData = JSON.parse(tableRow.dataset.order);
+                        orderData.order_status = "Cancelled";
+                        tableRow.dataset.order = JSON.stringify(orderData);
+
+                        tableRow.querySelectorAll("button").forEach(btn => btn.disabled = true);
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: data.message
+                    });
+                }
+            })
+            .catch(err => {
+                console.error("Cancel order error:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to cancel order. Check console for details.'
+                });
+            });
+        }
+    });
+}
+
 
 // ============================
 // Exit My Profile

@@ -6,6 +6,7 @@
     <title>Daven's Kitchenette - Food Delivery Tracker</title>
     <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
     <link rel="stylesheet" href="delivery_tracker.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 </head>
 <body>
     <!-- Header Navigation -->
@@ -52,30 +53,6 @@
                             <p class="delivery-address" id="deliveryAddress">123 Main St.</p>
                         </div>
 
-                        <!-- Mini Map -->
-                         <div class="mini-map" id="miniMapContainer">
-                            <svg width="140" height="90" viewBox="0 0 140 90" preserveAspectRatio="xMidYMid meet">
-
-                                <!-- White rounded background -->
-                                <rect width="140" height="90" rx="15" fill="#ffffff" />
-
-                                <!-- Faint gray grid lines (map effect) -->
-                                <path d="M10 20 L130 20 M10 45 L130 45 M10 70 L130 70" 
-                                      stroke="#e5e7eb" stroke-width="3" opacity="0.4"/>
-                                <path d="M40 5 L40 85 M80 5 L80 85" 
-                                      stroke="#e5e7eb" stroke-width="3" opacity="0.4"/>
-
-                                <!-- Blue route -->
-                                <path d="M 35 60 Q 60 45 80 40 Q 100 35 110 25" 
-                                      stroke="#3b82f6" stroke-width="6" fill="none" stroke-linecap="round"/>
-
-                                <!-- Red start point -->
-                                <circle cx="35" cy="60" r="8" fill="#ef4444"/>
-
-                                <!-- Green destination -->
-                                <circle cx="110" cy="25" r="8" fill="#22c55e"/>
-                            </svg>
-                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -133,5 +110,6 @@
     </main>
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
     <script src="delivery_tracker.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

@@ -1,86 +1,101 @@
-
-//papalitan pa 'tong mga data na 'to dapat sa database manggagaling
-const ordersData = [
-    {
-        id: "1234",
-        customer: "Customer Name",
-        address: "123 Main St.",
-        status: "not_complete",
-        items: [
-            { name: "Item 1", quantity: 2, price: 150 },
-            { name: "Item 2", quantity: 1, price: 200 }
-        ],
-        mapKey: "map1"
-    },
-    {
-        id: "7284",
-        customer: "Another Customer",
-        address: "101 Main St.",
-        status: "completed",
-        items: [],
-        mapKey: "map2"
-    },
-    {
-        id: "3145",
-        customer: "Third Customer",
-        address: "312 Main St.",
-        status: "return",
-        items: [
-            { name: "Adobo", quantity: 1, price: 120 },
-            { name: "Rice", quantity: 2, price: 30 }
-        ],
-        mapKey: "map3"
-    }
-];
-
 // ============================================
-// SVG MINI MAPS
+// GLOBAL STATE
 // ============================================
-const miniMaps = {
-    map1: `
-        <svg width="140" height="90" viewBox="0 0 140 90">
-            <rect width="140" height="90" rx="15" fill="#ffffff"/>
-            <path d="M15 65 Q45 45 90 40 Q110 35 120 20"
-                  stroke="#3b82f6" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <circle cx="15" cy="65" r="8" fill="#ef4444"/>
-            <circle cx="120" cy="20" r="8" fill="#22c55e"/>
-        </svg>
-    `,
-    map2: `
-        <svg width="140" height="90" viewBox="0 0 140 90">
-            <rect width="140" height="90" rx="15" fill="#ffffff"/>
-            <path d="M30 25 Q60 50 90 55 Q110 60 125 70"
-                  stroke="#3b82f6" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <circle cx="30" cy="25" r="8" fill="#ef4444"/>
-            <circle cx="125" cy="70" r="8" fill="#22c55e"/>
-        </svg>
-    `,
-    map3: `
-        <svg width="140" height="90" viewBox="0 0 140 90">
-            <rect width="140" height="90" rx="15" fill="#ffffff"/>
-            <path d="M25 70 Q50 60 70 40 Q100 20 120 15"
-                  stroke="#3b82f6" stroke-width="6" fill="none" stroke-linecap="round"/>
-            <circle cx="25" cy="70" r="8" fill="#ef4444"/>
-            <circle cx="120" cy="15" r="8" fill="#22c55e"/>
-        </svg>
-    `
-};
+let ordersData = [];
+let currentOrderId = null;
 
 // ============================================
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    loadOrders();
-    loadCurrentOrder();
+    loadOrdersFromBackend();
     setupEventListeners();
 });
 
 // ============================================
-// LOAD AND DISPLAY ORDERS
+// FETCH ORDERS FROM BACKEND
 // ============================================
-function loadOrders() {
+async function loadOrdersFromBackend() {
+    try {
+        showLoadingState();
+        
+        const response = await fetch('../controllers/delivery_controllers/get_ready.php');
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch orders');
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Filter only "Ready" status orders for delivery
+        ordersData = data.filter(order => order.order_status === 'Ready');
+        
+        // Transform backend data to match frontend structure
+        ordersData = ordersData.map(order => ({
+            id: order.order_number,
+            customer: order.recipient_name,
+            address: order.delivery_address,
+            email: order.email,
+            phone: order.phone_number,
+            status: 'not_complete', // Default status for ready orders
+            dateOrdered: order.date_ordered,
+            subtotal: parseFloat(order.subtotal),
+            deliveryFee: parseFloat(order.delivery_fee),
+            totalPrice: parseFloat(order.subtotal) + parseFloat(order.delivery_fee),
+            paymentMethod: order.payment_method,
+            paymentStatus: order.payment_status,
+            items: parseOrderItems(order.items_ordered)
+        }));
+        
+        displayOrders();
+        loadCurrentOrder();
+        
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        showErrorState(error.message);
+    }
+}
+
+// ============================================
+// PARSE ORDER ITEMS FROM STRING
+// ============================================
+function parseOrderItems(itemsString) {
+    if (!itemsString) return [];
+    
+    // Format: "Item Name x2 @150.00, Item Name 2 x1 @200.00"
+    const items = itemsString.split(', ');
+    
+    return items.map(itemStr => {
+        // Extract: name, quantity, price
+        const match = itemStr.match(/^(.+?)\sx(\d+)\s@([\d.]+)$/);
+        
+        if (match) {
+            return {
+                name: match[1].trim(),
+                quantity: parseInt(match[2]),
+                price: parseFloat(match[3])
+            };
+        }
+        
+        return null;
+    }).filter(item => item !== null);
+}
+
+// ============================================
+// DISPLAY ORDERS IN LIST
+// ============================================
+function displayOrders() {
     const ordersList = document.getElementById('ordersList');
     ordersList.innerHTML = '';
+    
+    if (ordersData.length === 0) {
+        ordersList.innerHTML = '<p class="text-center text-muted py-5">No orders ready for delivery</p>';
+        return;
+    }
 
     ordersData.forEach(order => {
         const orderRow = createOrderRow(order);
@@ -101,7 +116,7 @@ function createOrderRow(order) {
 
     const orderNumber = document.createElement('span');
     orderNumber.className = 'order-number';
-    orderNumber.textContent = "Order " + order.id;
+    orderNumber.textContent = `Order #${order.id}`;
 
     const orderLocation = document.createElement('span');
     orderLocation.className = 'order-location';
@@ -130,36 +145,39 @@ function createOrderRow(order) {
     orderRow.appendChild(orderInfo);
     orderRow.appendChild(statusBadge);
 
-    // CLICK EVENT: load order details + map
+    // CLICK EVENT: load order details
     orderRow.addEventListener('click', function() {
-        loadOrderDetails(order.id);
+        displayCurrentOrder(order);
     });
 
     return orderRow;
 }
 
 // ============================================
-// LOAD CURRENT ORDER
+// LOAD CURRENT ORDER (DEFAULT TO FIRST)
 // ============================================
 function loadCurrentOrder() {
-    const currentOrder = ordersData.find(order => order.status === 'not_complete') || ordersData[0];
-    if (currentOrder) displayCurrentOrder(currentOrder);
+    const firstNotComplete = ordersData.find(order => order.status === 'not_complete');
+    const orderToDisplay = firstNotComplete || ordersData[0];
+    
+    if (orderToDisplay) {
+        displayCurrentOrder(orderToDisplay);
+    } else {
+        showNoOrdersState();
+    }
 }
 
 // ============================================
-// DISPLAY CURRENT ORDER DETAILS + MAP
+// DISPLAY CURRENT ORDER DETAILS
 // ============================================
 function displayCurrentOrder(order) {
-    document.getElementById('currentOrderId').textContent = "Order " + order.id;
+    currentOrderId = order.id;
+    
+    document.getElementById('currentOrderId').textContent = `Order #${order.id}`;
     document.getElementById('customerName').textContent = order.customer;
     document.getElementById('deliveryAddress').textContent = order.address;
-    displayOrderSummary(order.items);
-
-    // UPDATE MINI MAP
-    const miniMapContainer = document.getElementById('miniMapContainer');
-    if (miniMapContainer) {
-        miniMapContainer.innerHTML = miniMaps[order.mapKey] || miniMaps.map1;
-    }
+    
+    displayOrderSummary(order);
 
     // Highlight selected row
     document.querySelectorAll('.order-item-row').forEach(row => {
@@ -171,61 +189,82 @@ function displayCurrentOrder(order) {
 }
 
 // ============================================
-// DISPLAY ORDER SUMMARY
+// DISPLAY ORDER SUMMARY WITH ITEMS
 // ============================================
-function displayOrderSummary(items) {
+function displayOrderSummary(order) {
     const orderSummary = document.getElementById('orderSummary');
     orderSummary.innerHTML = '';
 
-    if (!items || items.length === 0) {
+    if (!order.items || order.items.length === 0) {
         orderSummary.innerHTML = '<p class="text-center text-muted">No items in this order</p>';
         return;
     }
 
-    let total = 0;
-    items.forEach(item => {
+    // Display items
+    order.items.forEach(item => {
         const orderItem = document.createElement('div');
         orderItem.className = 'order-item';
 
         const itemName = document.createElement('span');
         itemName.className = 'item-name';
-        itemName.textContent = item.name + item.quantity;
+        itemName.textContent = `${item.name} x${item.quantity}`;
 
         const itemPrice = document.createElement('span');
         itemPrice.className = 'item-price';
         const itemTotal = item.price * item.quantity;
-        itemPrice.textContent = "₱" + itemTotal.toFixed(2);
+        itemPrice.textContent = `₱${itemTotal.toFixed(2)}`;
 
         orderItem.appendChild(itemName);
         orderItem.appendChild(itemPrice);
         orderSummary.appendChild(orderItem);
-
-        total += itemTotal;
     });
 
-    const totalRow = document.createElement('div');
-    totalRow.className = 'order-item mt-2 pt-2';
-    totalRow.style.borderTop = '2px solid #1e3a8a';
+    // Subtotal
+    const subtotalRow = createSummaryRow('Subtotal:', order.subtotal);
+    orderSummary.appendChild(subtotalRow);
 
-    const totalLabel = document.createElement('span');
-    totalLabel.className = 'item-name';
-    totalLabel.innerHTML = '<strong>Total:</strong>';
+    // Delivery Fee
+    const deliveryRow = createSummaryRow('Delivery Fee:', order.deliveryFee);
+    orderSummary.appendChild(deliveryRow);
 
-    const totalPrice = document.createElement('span');
-    totalPrice.className = 'item-price';
-    totalPrice.innerHTML = `<strong>₱${total.toFixed(2)}</strong>`;
-
-    totalRow.appendChild(totalLabel);
-    totalRow.appendChild(totalPrice);
+    // Total
+    const totalRow = createSummaryRow('Total:', order.totalPrice, true);
     orderSummary.appendChild(totalRow);
+
+    // Payment Info
+    const paymentInfo = document.createElement('div');
+    paymentInfo.className = 'mt-3 pt-3';
+    paymentInfo.style.borderTop = '1px solid #ddd';
+    paymentInfo.innerHTML = `
+        <small class="text-muted d-block">Payment: ${order.paymentMethod}</small>
+        <small class="text-muted d-block">Status: ${order.paymentStatus}</small>
+    `;
+    orderSummary.appendChild(paymentInfo);
 }
 
 // ============================================
-// LOAD ORDER DETAILS BY ID
+// CREATE SUMMARY ROW
 // ============================================
-function loadOrderDetails(orderId) {
-    const order = ordersData.find(o => o.id === orderId);
-    if (order) displayCurrentOrder(order);
+function createSummaryRow(label, amount, isBold = false) {
+    const row = document.createElement('div');
+    row.className = 'order-item mt-2';
+    if (isBold) {
+        row.classList.add('pt-2');
+        row.style.borderTop = '2px solid #1e3a8a';
+    }
+
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'item-name';
+    labelSpan.innerHTML = isBold ? `<strong>${label}</strong>` : label;
+
+    const priceSpan = document.createElement('span');
+    priceSpan.className = 'item-price';
+    priceSpan.innerHTML = isBold ? `<strong>₱${amount.toFixed(2)}</strong>` : `₱${amount.toFixed(2)}`;
+
+    row.appendChild(labelSpan);
+    row.appendChild(priceSpan);
+    
+    return row;
 }
 
 // ============================================
@@ -233,13 +272,15 @@ function loadOrderDetails(orderId) {
 // ============================================
 function setupEventListeners() {
     document.getElementById('btnCompleted').addEventListener('click', function() {
-        const orderId = document.getElementById('currentOrderId').textContent.replace('Order #', '');
-        markOrderAsCompleted(orderId);
+        if (currentOrderId) {
+            markOrderAsCompleted(currentOrderId);
+        }
     });
 
     document.getElementById('btnReturn').addEventListener('click', function() {
-        const orderId = document.getElementById('currentOrderId').textContent.replace('Order #', '');
-        markOrderAsReturn(orderId);
+        if (currentOrderId) {
+            markOrderAsReturn(currentOrderId);
+        }
     });
 
     document.querySelector('.btn-logout').addEventListener('click', function() {
@@ -248,29 +289,217 @@ function setupEventListeners() {
 }
 
 // ============================================
-// MARK ORDER AS COMPLETED / RETURN
+// MARK ORDER AS COMPLETED
 // ============================================
-function markOrderAsCompleted(orderId) {
-    const order = ordersData.find(o => o.id === orderId);
-    if (order) order.status = 'completed';
-    loadOrders();
-    loadCurrentOrder();
-    alert("Order" + orderId + " marked for completed!");
+async function markOrderAsCompleted(orderId) {
+    // Show confirmation dialog
+    const result = await Swal.fire({
+        title: 'Mark as Completed?',
+        text: `Are you sure you want to mark Order #${orderId} as completed?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, mark as completed',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) {
+        return;
+    }
+
+    // Show loading
+    Swal.fire({
+        title: 'Processing...',
+        text: 'Updating order status',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        // Update backend status to "Completed"
+        const response = await fetch('../controllers/delivery_controllers/delivery_update_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_number: orderId,
+                status: 'Completed'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update local data
+            const order = ordersData.find(o => o.id === orderId);
+            if (order) order.status = 'completed';
+            
+            displayOrders();
+            loadCurrentOrder();
+            
+            // Show success message
+            await Swal.fire({
+                title: 'Success!',
+                text: `Order #${orderId} has been marked as completed`,
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                timer: 2000
+            });
+        } else {
+            throw new Error(data.message || 'Failed to update order');
+        }
+        
+    } catch (error) {
+        console.error('Error updating order:', error);
+        
+        // Show error message
+        Swal.fire({
+            title: 'Error!',
+            text: error.message || 'Failed to mark order as completed. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#ef4444'
+        });
+    }
 }
 
-function markOrderAsReturn(orderId) {
-    const order = ordersData.find(o => o.id === orderId);
-    if (order) order.status = 'return';
-    loadOrders();
-    loadCurrentOrder();
-    alert("Order" + orderId + " marked for return!");
+// ============================================
+// MARK ORDER AS RETURN
+// ============================================
+async function markOrderAsReturn(orderId) {
+    // Show confirmation dialog
+    const result = await Swal.fire({
+        title: 'Mark for Return?',
+        text: `Are you sure you want to mark Order #${orderId} for return?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e0b',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, mark for return',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) {
+        return;
+    }
+
+    // Show loading
+    Swal.fire({
+        title: 'Processing...',
+        text: 'Updating order status',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    
+    try {
+        // Update backend status to "Returned"
+        const response = await fetch('../controllers/delivery_controllers/delivery_update_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_number: orderId,
+                status: 'Returned'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update local data
+            const order = ordersData.find(o => o.id === orderId);
+            if (order) order.status = 'return';
+            
+            displayOrders();
+            loadCurrentOrder();
+            
+            // Show success message
+            await Swal.fire({
+                title: 'Success!',
+                text: `Order #${orderId} has been marked for return`,
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                timer: 2000
+            });
+        } else {
+            throw new Error(data.message || 'Failed to update order');
+        }
+        
+    } catch (error) {
+        console.error('Error updating order:', error);
+        
+        // Show error message
+        Swal.fire({
+            title: 'Error!',
+            text: error.message || 'Failed to mark order for return. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#ef4444'
+        });
+    }
+}
+
+// ============================================
+// UI STATE HANDLERS
+// ============================================
+function showLoadingState() {
+    const ordersList = document.getElementById('ordersList');
+    ordersList.innerHTML = '<p class="text-center text-muted py-5">Loading orders...</p>';
+    
+    const orderSummary = document.getElementById('orderSummary');
+    orderSummary.innerHTML = '<p class="text-center text-muted">Loading...</p>';
+}
+
+function showErrorState(message) {
+    const ordersList = document.getElementById('ordersList');
+    ordersList.innerHTML = `
+        <div class="alert alert-danger m-3" role="alert">
+            <strong>Error:</strong> ${message}
+            <button class="btn btn-sm btn-outline-danger mt-2 d-block" onclick="loadOrdersFromBackend()">
+                Retry
+            </button>
+        </div>
+    `;
+    
+    // Also show SweetAlert error
+    Swal.fire({
+        title: 'Error Loading Orders',
+        text: message,
+        icon: 'error',
+        confirmButtonColor: '#ef4444'
+    });
+}
+
+function showNoOrdersState() {
+    document.getElementById('currentOrderId').textContent = 'No Active Order';
+    document.getElementById('customerName').textContent = '-';
+    document.getElementById('deliveryAddress').textContent = '-';
+    document.getElementById('orderSummary').innerHTML = '<p class="text-center text-muted">No orders available</p>';
 }
 
 // ============================================
 // HANDLE LOGOUT
 // ============================================
-function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-        alert('Logout functionality - redirect to login page');
+async function handleLogout() {
+    const result = await Swal.fire({
+        title: 'Logout',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (result.isConfirmed) {
+        window.location.href = '../logout.php';
     }
 }

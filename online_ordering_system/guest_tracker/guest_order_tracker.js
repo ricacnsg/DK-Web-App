@@ -5,7 +5,7 @@ const statusDescriptions = {
     "Preparing": "Our kitchen is preparing your delicious meal.",
     "Ready": "Your order is ready and waiting for delivery.",
     "Out for Delivery": "Your order is on its way to you!",
-    "Delivered": "Your order has been successfully delivered. Enjoy!"
+    "Completed": "Your order has been successfully delivered. Enjoy!"
 };
 
 document.getElementById('trackingForm').addEventListener('submit', function(e) {
@@ -77,7 +77,7 @@ function displayOrderStatus(order) {
         "Preparing", 
         "Ready",
         "Out for Delivery",
-        "Delivered"
+        "Completed"
     ];
 
     const currentStatus = order.order_status;

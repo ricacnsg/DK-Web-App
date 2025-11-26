@@ -175,10 +175,12 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
             <button onclick="closeTrackOrder()" style="position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
             
             <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Track Order</h2>
+            <h1 style="text-align: center; margin-bottom: 20px; color: red; font-size: 20px;" id="trackStatus"><strong></strong></h1>
             
             <div id="orderInfo" style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                 <p style="margin: 5px 0; font-size: 14px;"><strong>Order #:</strong> <span id="trackOrderNo"></span></p>
                 <p style="margin: 5px 0; font-size: 14px;"><strong>Date:</strong> <span id="trackOrderDate"></span></p>
+                <p style="margin: 5px 0; font-size: 14px;"><strong>Delivery Rider:</strong> <span id="trackDeliveryRider"></span></p>
             </div>
             
             <div id="statusTracker" style="padding: 0 10px;">

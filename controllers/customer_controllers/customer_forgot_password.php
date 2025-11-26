@@ -160,8 +160,8 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-    $mail->Password = 'mnjw bdtn tqoq wyce';
+    $mail->Username = ''; // your Gmail
+    $mail->Password = '';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
     
@@ -174,7 +174,7 @@ try {
         )
     );
 
-    $mail->setFrom('tariaobernadette@gmail.com', "Daven's Kitchenette");
+    $mail->setFrom('', "Daven's Kitchenette");
     $mail->addAddress($user['email']);
     
     // Prevent email injection
@@ -199,7 +199,6 @@ try {
             <p>You requested to reset your password for your account at Daven's Kitchenette.</p>
             <p><a href='$resetLink' style='display:inline-block;padding:10px 20px;background-color:#007bff;color:#ffffff;text-decoration:none;border-radius:5px;'>Reset Password</a></p>
             <p>Or copy and paste this link into your browser:</p>
-            <p>$resetLink</p>
             <p><strong>This link will expire in 1 hour.</strong></p>
             <p>If you did not request this password reset, please ignore this email. Your password will remain unchanged.</p>
             <p><small>Remaining password reset attempts today: $remainingAttempts</small></p>
