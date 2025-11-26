@@ -355,4 +355,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMenu();
     initializeSmoothScrolling();
     loadTestimonials();
+
+    const menuButtons = document.querySelectorAll('.menu-button');
+    menuButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (button.getAttribute('data-filter') === 'all') {
+                window.location.href = '../online_ordering_system/get_order/get_order.php';
+            }
+        });
+    });
 });
