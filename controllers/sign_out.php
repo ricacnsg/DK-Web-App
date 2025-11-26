@@ -13,6 +13,6 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Redirect to landing page
-header("Location: /landing_page/landing.html");
+header("Location: /landing_page/landing.php");
 exit;
 ?>

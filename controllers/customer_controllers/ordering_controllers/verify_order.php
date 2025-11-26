@@ -32,7 +32,7 @@ if ($update->affected_rows > 0) {
     <div style='text-align:center; font-family:Arial; margin-top:50px;'>
         <h1>✅ Order Verified Successfully!</h1>
         <p>Thank you! Your order <strong>$orderNo</strong> has been verified and is now being processed.</p>
-        <a href='http://localhost:3000/landing_page/landing.html' style='color:white; background-color:#04276c; padding:10px 20px; text-decoration:none; border-radius:5px;'>Return to Homepage</a>
+        <a href='http://localhost:3000/landing_page/landing.php' style='color:white; background-color:#04276c; padding:10px 20px; text-decoration:none; border-radius:5px;'>Return to Homepage</a>
     </div>";
 
     // 1. Get all menuItemID for the given order number

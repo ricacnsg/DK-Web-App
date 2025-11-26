@@ -165,7 +165,7 @@ document.getElementById("backButton").addEventListener("click", function() {
     });
   } else {
     // If NOT logged in → normal back button (go to landing page)
-    window.location.href = "../../landing_page/landing.html";
+    window.location.href = "../../landing_page/landing.php";
   }
 });
 
