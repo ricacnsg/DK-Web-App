@@ -173,12 +173,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // MENU MANAGEMENT CORE LOGIC
-    const showNotification = (message) => {
-        notification.textContent = message;
-        notification.classList.add('show');
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
+    const showNotification = (message, type = 'success') => {
+        const icon = type === 'success' ? 'success' : 'error';
+        const title = type === 'success' ? 'Success' : 'Error';
+        
+        Swal.fire({
+            position: "center",
+            icon: icon,
+            title: message,
+            showConfirmButton: false,
+            timer: 1500
+        });
     };
 
     const closeModal = (modalId) => {
@@ -203,11 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderMenuItems(category);
             } else {
                 console.error('Failed to load menu items:', result.message);
-                showNotification('Failed to load menu items');
+                showNotification('Failed to load menu items', 'error');
             }
         } catch (error) {
             console.error('Error loading menu items:', error);
-            showNotification('Error loading menu items');
+            showNotification('Error loading menu items', 'error');
         }
     };
 
@@ -582,15 +587,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (result.success) {
-                showNotification(`Item "${formData.name}" successfully ${isEditing ? 'updated' : 'added'}!`);
+                showNotification(`Item "${formData.name}" successfully ${isEditing ? 'updated' : 'added'}!`, 'success');
                 closeModal('addEditModal');
                 loadMenuItems(formData.category);
             } else {
-                showNotification(`Failed to ${isEditing ? 'update' : 'add'} item: ${result.message}`);
+                showNotification(`Failed to ${isEditing ? 'update' : 'add'} item: ${result.message}`, 'error');
             }
         } catch (error) {
             console.error('Error saving menu item:', error);
-            showNotification('Error saving menu item');
+            showNotification('Error saving menu item', 'error');
         }
     });
 
@@ -611,15 +616,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 
                 if (result.success) {
-                    showNotification(`Item "${deletedItem.name}" successfully deleted!`);
+                    showNotification(`Item "${deletedItem.name}" successfully deleted!`, 'success');
                     closeModal('deleteModal');
                     loadMenuItems(deletedItem.category);
                 } else {
-                    showNotification(`Failed to delete item: ${result.message}`);
+                    showNotification(`Failed to delete item: ${result.message}`, 'error');
                 }
             } catch (error) {
                 console.error('Error deleting menu item:', error);
-                showNotification('Error deleting menu item');
+                showNotification('Error deleting menu item', 'error')
             }
         }
     });
