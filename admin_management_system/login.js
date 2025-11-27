@@ -22,7 +22,7 @@ document.getElementById("staffLogin").addEventListener("submit", async (e) => {
         window.location.href = 'cashier_pos.php';
       }
       else if (data.role === 'kitchen staff') {
-        window.location.href = 'kitchen_staff.php';
+        window.location.href = 'kitchen_staff/kitchen_staff.php';
       } 
       else if (data.role === 'delivery rider') {
         window.location.href = 'kitchen_staff.php';

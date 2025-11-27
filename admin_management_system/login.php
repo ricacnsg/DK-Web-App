@@ -11,6 +11,10 @@ if (isset($_SESSION['staff_username'])) {
             header("Location: cashier_pos.php");
             exit;
         }
+        else if($_SESSION['staff_role'] == 'kitchen staff'){
+            header("Location: kitchen_staff/kitchen_staff.php");
+            exit;
+        }
     }
 }
 ?>

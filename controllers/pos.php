@@ -91,36 +91,47 @@ function placeOrder() {
         $totalAmountRaw   = $input['totalAmount']   ?? 0;
         $itemsRaw         = $input['items']         ?? [];
 
-        $allowedOrderTypes     = ['dine-in', 'walk-in', 'take-out'];
+        // Validation
+        $allowedOrderTypes     = ['dine-in', 'take-out', 'takeout'];
         $allowedPaymentMethods = ['cash', 'gcash', 'card'];
 
         $customerName  = trim($customerNameRaw);
-        $orderType     = in_array($orderTypeRaw, $allowedOrderTypes) ? $orderTypeRaw : 'dine-in';
         $paymentMethod = in_array($paymentMethodRaw, $allowedPaymentMethods) ? $paymentMethodRaw : 'cash';
         $tableNumber   = ($tableNumberRaw !== null && is_numeric($tableNumberRaw)) ? intval($tableNumberRaw) : null;
         $totalAmount   = is_numeric($totalAmountRaw) ? floatval($totalAmountRaw) : 0.00;
         $items         = is_array($itemsRaw) ? $itemsRaw : [];
+
+        // Map order type to database enum values
+        $orderTypeMap = [
+            'dine-in' => 'dine in',
+            'take-out' => 'takeout',
+            'takeout' => 'takeout'
+        ];
+        $orderType = isset($orderTypeMap[$orderTypeRaw]) ? $orderTypeMap[$orderTypeRaw] : 'dine in';
 
         if (empty($items)) {
             echo json_encode(['success' => false, 'message' => 'No items in order']);
             return;
         }
 
+        // Generate order number
         $now = new DateTime();
-        $dateStr = $now->format('Ymd'); // e.g., 20251125
+        $dateStr = $now->format('Ymd');
         $randomSuffix = rand(10000, 99999);
         $orderNumber = $dateStr . $randomSuffix;
 
         $conn->begin_transaction();
 
+        // 1. Insert order WITHOUT payment info
         $stmt = $conn->prepare("
-            INSERT INTO orders (orderNo, walkInName, totalPrice, paymentStatus, orderStatus, createdAT)
-            VALUES (?, ?, ?, 'Paid', 'Walk In', NOW())
+            INSERT INTO orders (orderNo, walkInName, orderType, totalPrice, orderStatus, createdAT)
+            VALUES (?, ?, ?, ?, 'Reviewed', NOW())
         ");
-        $stmt->bind_param("ssd", $orderNumber, $customerName, $totalAmount);
+        $stmt->bind_param("sssd", $orderNumber, $customerName, $orderType, $totalAmount);
         $stmt->execute();
         $stmt->close();
 
+        // 2. Insert ordered items
         $stmt = $conn->prepare("
             INSERT INTO itemsordered (orderNo, menuItemID, quantity)
             VALUES (?, ?, ?)
@@ -129,22 +140,22 @@ function placeOrder() {
             $menuItemID = isset($item['id']) && is_numeric($item['id']) ? intval($item['id']) : 0;
             $quantity   = isset($item['quantity']) && is_numeric($item['quantity']) ? intval($item['quantity']) : 0;
 
-            if ($menuItemID <= 0 || $quantity <= 0) continue; // Skip invalid items
+            if ($menuItemID <= 0 || $quantity <= 0) continue;
 
             $stmt->bind_param("sii", $orderNumber, $menuItemID, $quantity);
             $stmt->execute();
         }
         $stmt->close();
 
+        // 3. Insert payment record separately
         $stmt = $conn->prepare("
-            INSERT INTO payment (orderNo, paymentMethod, amountPAId, changeAmount, paymentDate)
-            VALUES (?, ?, ?, 0, NOW())
+            INSERT INTO payment (orderNo, paymentMethod, amountPaid, changeAmount, paymentDate, paymentStatus)
+            VALUES (?, ?, ?, 0, NOW(), 'Paid')
         ");
         $stmt->bind_param("ssd", $orderNumber, $paymentMethod, $totalAmount);
         $stmt->execute();
         $stmt->close();
 
-        // --- 8. Commit transaction ---
         $conn->commit();
 
     // 1. Get all menuItemID for the given order number
@@ -185,7 +196,7 @@ function placeOrder() {
         echo json_encode([
             'success' => true,
             'message' => 'Order placed successfully',
-            'orderNo' => $orderNumber
+            'orderNumber' => $orderNumber
         ]);
 
     } catch (Exception $e) {
@@ -193,7 +204,6 @@ function placeOrder() {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
-
 
 function getOrderHistory() {
     global $conn;

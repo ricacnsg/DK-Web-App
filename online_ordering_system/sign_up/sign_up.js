@@ -32,18 +32,26 @@ document.getElementById('signupform').addEventListener('submit', async(e) => {
         const result = await response.json();
 
         if(result.success){
+            // First modal: Account created
             Swal.fire({
-                title: "Account created Successfully!",
+                title: "Account Created!",
                 text: result.message,
                 icon: "success",
                 confirmButtonText: "OK",
-                confirmButtonColor: "#efc858" 
-            }).then((response) => {
-                if (response.isConfirmed) {
-                    window.location.href = '../../landing_page/landing.php';
-                }
+                confirmButtonColor: "#efc858"
+            }).then(() => {
+                // Second modal: Check your Gmail
+                Swal.fire({
+                    title: "Verify Your Email",
+                    html: "Please check your Gmail inbox to activate your account.<br><a href='https://mail.google.com/' target='_blank' style='color:#04276c; font-weight:bold;'>Go to Gmail</a>",
+                    icon: "info",
+                    confirmButtonText: "Close",
+                    confirmButtonColor: "#04276c"
+                });
+
+                // Reset form
+                document.getElementById('signupform').reset();
             });
-            document.getElementById('signupform').reset();
         }
         else{
             Swal.fire({

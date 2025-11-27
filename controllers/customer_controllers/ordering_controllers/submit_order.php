@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// DEBUG: Log session data
 error_log("=== SESSION DEBUG ===");
 error_log("Session ID: " . session_id());
 error_log("Customer ID in session: " . ($_SESSION['customer_id'] ?? 'NOT SET'));
@@ -100,9 +99,13 @@ try {
     // Generate verification token
     $verificationToken = bin2hex(random_bytes(32));
 
-    // Insert order 
-    $stmt = $conn->prepare("INSERT INTO orders (orderNo, customerID, paymentMethod, totalPrice, paymentStatus, orderStatus, isVerified, verificationToken, createdAT) VALUES (?, ?, ?, ?, 'Pending', 'Pending', 0, ?, NOW())");
-    $stmt->bind_param("sisss", $orderNumber, $customerID, $paymentMethod, $total, $verificationToken);
+    // Insert order with orderType = 'delivery' (no payment info here)
+    $orderType = 'delivery';
+    $stmt = $conn->prepare("
+        INSERT INTO orders (orderNo, customerID, orderType, totalPrice, orderStatus, isVerified, verificationToken, createdAT) 
+        VALUES (?, ?, ?, ?, 'Pending', 0, ?, NOW())
+    ");
+    $stmt->bind_param("sisds", $orderNumber, $customerID, $orderType, $total, $verificationToken);
     $stmt->execute();
     $stmt->close();
 
@@ -124,11 +127,14 @@ try {
     $stmt->execute();
     $stmt->close();
 
-    // Insert payment
-    // $stmt = $conn->prepare("INSERT INTO payment (orderNo, paymentMethod, paymentDate VALUES (?, ?, NOW())");
-    // $stmt->bind_param("ss", $orderNumber, $paymentMethod);
-    // $stmt->execute();
-    // $stmt->close();
+    // Insert payment record separately with 'Pending' status
+    $stmt = $conn->prepare("
+        INSERT INTO payment (orderNo, paymentMethod, paymentStatus, paymentDate) 
+        VALUES (?, ?, 'Pending', NOW())
+    ");
+    $stmt->bind_param("ss", $orderNumber, $paymentMethod);
+    $stmt->execute();
+    $stmt->close();
 
     $conn->commit();
 
@@ -146,8 +152,8 @@ try {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = ''; // your Gmail
-        $mail->Password = '';
+        $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
+        $mail->Password = 'anvq dzkd xomc yaas';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->SMTPOptions = [
@@ -158,7 +164,7 @@ try {
             ]
         ];
 
-        $mail->setFrom('', 'Davens Kitchenette');
+        $mail->setFrom('tariaobernadette@gmail.com', 'Davens Kitchenette');
         $mail->addAddress($email, $recipientName);
 
         $mail->isHTML(true);

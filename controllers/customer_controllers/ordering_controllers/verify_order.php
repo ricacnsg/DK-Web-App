@@ -59,7 +59,7 @@ if ($update->affected_rows > 0) {
 
             // 3. Deduct quantity from the item table
             $stmt3 = $conn->prepare("UPDATE item SET quantity = quantity - ? WHERE itemID = ?");
-            $stmt3->bind_param("ii", $deductQty, $itemID);
+            $stmt3->bind_param("di", $deductQty, $itemID);
             $stmt3->execute();
             $stmt3->close();
         }

@@ -34,7 +34,7 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
             <li><a id="link-address" onclick="showSection('address')"><i class="fa-solid fa-location-dot"></i> My Addresses</a></li>
             <li><a id="link-history" onclick="showSection('history')"><i class="fa-solid fa-clock-rotate-left"></i> Order History</a></li>
             <li><a id="exitBtn"><i class="fa-solid fa-angle-left"></i> Exit My Profile</a></li>
-            <li><a><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+            <li><a id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
         </ul>
     </div>
 

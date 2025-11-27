@@ -1,55 +1,59 @@
 let activeOrders = [];
 let refreshInterval;
+let errorCount = 0;
+const MAX_ERRORS = 3;
 
 // Update API_BASE to match your project structure
-const API_BASE = '../controllers/kitchen_staff.php';
+const API_BASE = '../../controllers/kitchen_staff.php';
 
 // Load orders and stats on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Kitchen Staff Interface Loading...');
     loadOrders();
     loadStats();
     
     // Refresh every 10 seconds
     refreshInterval = setInterval(() => {
-        loadOrders();
-        loadStats();
+        if (errorCount < MAX_ERRORS) {
+            loadOrders();
+            loadStats();
+        }
     }, 10000);
 });
 
 async function loadOrders() {
     try {
-        console.log('Loading active orders from:', `${API_BASE}?action=getActiveOrders`);
         const response = await fetch(`${API_BASE}?action=getActiveOrders`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const result = await response.json();
-        console.log('Orders response:', result);
+        const text = await response.text();
+        const result = JSON.parse(text);
         
         if (result.success) {
             activeOrders = result.data;
             displayOrders(result.data);
+            errorCount = 0; // Reset error count on success
         } else {
-            showError('Failed to load orders: ' + result.message);
+            handleError('Failed to load orders: ' + result.message);
         }
     } catch (error) {
         console.error('Error loading orders:', error);
-        showError('Error loading orders. Please check if the server is running.');
+        handleError('Error loading orders. Check console for details.');
     }
 }
 
 async function loadStats() {
     try {
         const response = await fetch(`${API_BASE}?action=getOrderStats`);
+        const text = await response.text();
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const result = await response.json();
+        const result = JSON.parse(text);
         
         if (result.success) {
             document.getElementById('totalOrders').textContent = result.data.total;
@@ -58,6 +62,31 @@ async function loadStats() {
         }
     } catch (error) {
         console.error('Error loading stats:', error);
+    }
+}
+
+function handleError(message) {
+    errorCount++;
+    
+    const container = document.getElementById('ordersContainer');
+    container.innerHTML = `
+        <div class="loading" style="color: #ef4444;">
+            <div style="font-size: 48px; margin-bottom: 20px;">⚠️</div>
+            <div>${message}</div>
+            <div style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Check browser console for details</div>
+            ${errorCount >= MAX_ERRORS ? `
+                <div style="margin-top: 20px;">
+                    <button onclick="location.reload()" style="padding: 10px 20px; background: #3b82f6; border: none; border-radius: 8px; color: white; cursor: pointer;">
+                        Reload Page
+                    </button>
+                </div>
+                <div style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Auto-refresh stopped after ${MAX_ERRORS} errors</div>
+            ` : ''}
+        </div>
+    `;
+    
+    if (errorCount >= MAX_ERRORS && refreshInterval) {
+        clearInterval(refreshInterval);
     }
 }
 
@@ -78,7 +107,7 @@ function displayOrders(orders) {
     container.innerHTML = orders.map(order => `
         <div class="order-card" data-order-id="${order.id}">
             <div class="order-header">
-                <span class="order-number">#${order.id}</span>
+                <span class="order-number">${order.orderNumber}</span>
                 <span class="table-badge">${getTableDisplay(order)}</span>
             </div>
             <div class="order-body">
@@ -98,7 +127,7 @@ function displayOrders(orders) {
                 <div class="status-label">Current Status</div>
                 <span class="status-badge status-${order.status}">${capitalizeFirst(order.status)}</span>
             </div>
-            ${getActionButton(order.status, order.id)}
+            ${getActionButton(order.status, order.id, order.orderType)}
         </div>
     `).join('');
     
@@ -154,32 +183,51 @@ function formatOrderType(orderType) {
     }
 }
 
-function getActionButton(status, orderId) {
-    switch(status) {
-        case 'pending':
-            return `<button class="action-btn btn-start" data-order-id="${orderId}">
-                <span>▶</span>
-                <span>Start Preparing</span>
-            </button>`;
-        case 'preparing':
-            return `<button class="action-btn btn-mark-ready" data-order-id="${orderId}">
-                <span>✖</span>
-                <span>Mark Ready</span>
-            </button>`;
-        case 'ready':
-            return `<button class="action-btn btn-complete" data-order-id="${orderId}">
-                <span>✓</span>
-                <span>Complete</span>
-            </button>`;
-        default:
-            return '';
+function getActionButton(status, orderNo, orderType) {  
+    if (status === 'reviewed') {
+        return `<button class="action-btn btn-start" data-order-no="${orderNo}">
+            <span>Start Preparing</span>
+        </button>`;
     }
+
+    if (status === 'preparing') {
+        return `<button class="action-btn btn-mark-ready" data-order-no="${orderNo}">
+            <span>Mark Ready</span>
+        </button>`;
+    }
+
+    // If status = ready
+    if (status === 'ready') {
+
+        if (orderType === 'delivery') {
+            return `<button class="action-btn btn-in-transit" data-order-no="${orderNo}">
+                <span>In Transit</span>
+            </button>`;
+        }
+
+        // Dine-in / Takeout → normal complete
+        return `<button class="action-btn btn-complete" data-order-no="${orderNo}">
+            <span>✓</span>
+            <span>Complete</span>
+        </button>`;
+    }
+
+    // Delivery second stage: in_transit → complete delivery
+    if (status === 'in_transit') {
+        return `<button class="action-btn btn-complete-delivery" data-order-no="${orderNo}">
+            <span>✓</span>
+            <span>Complete Delivery</span>
+        </button>`;
+    }
+
+    return '';
 }
+
 
 function attachButtonListeners() {
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-order-id');
+            const orderNo = this.getAttribute('data-order-no'); // Changed from data-order-id
             const card = this.closest('.order-card');
             const orderNumber = card.querySelector('.order-number').textContent;
             
@@ -190,7 +238,7 @@ function attachButtonListeners() {
                     'question',
                     'Yes, Start Preparing',
                     'preparing',
-                    orderId
+                    orderNo
                 );
             } else if (this.classList.contains('btn-mark-ready')) {
                 showConfirmDialog(
@@ -199,23 +247,34 @@ function attachButtonListeners() {
                     'question',
                     'Yes, Mark Ready',
                     'ready',
-                    orderId
+                    orderNo
                 );
-            } else if (this.classList.contains('btn-complete')) {
+            } else if (this.classList.contains('btn-in-transit')) {
                 showConfirmDialog(
-                    'Complete Order',
-                    `Has ${orderNumber} been served/completed?`,
+                    'Mark as In Transit',
+                    `Is ${orderNumber} now being delivered?`,
+                    'info',
+                    'Yes, Mark In Transit',
+                    'in_transit',
+                    orderNo
+                );
+            }
+
+            else if (this.classList.contains('btn-complete-delivery')) {
+                showConfirmDialog(
+                    'Complete Delivery',
+                    `Has ${orderNumber} been delivered successfully?`,
                     'success',
-                    'Yes, Complete',
+                    'Yes, Complete Delivery',
                     'completed',
-                    orderId
+                    orderNo
                 );
             }
         });
     });
 }
 
-function showConfirmDialog(title, text, icon, confirmText, status, orderId) {
+function showConfirmDialog(title, text, icon, confirmText, status, orderNo) {
     Swal.fire({
         title: title,
         text: text,
@@ -232,38 +291,41 @@ function showConfirmDialog(title, text, icon, confirmText, status, orderId) {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            updateOrderStatus(orderId, status);
+            updateOrderStatus(orderNo, status);
         }
     });
 }
 
-async function updateOrderStatus(orderId, newStatus) {
+async function updateOrderStatus(orderNo, newStatus) {
     try {
         const response = await fetch(`${API_BASE}?action=updateOrderStatus`, {
             method: 'POST',
             headers: {
-    'Content-Type': 'application/json'
-},
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                orderID: orderId,
+                orderNo: orderNo, // Changed from orderID
                 status: newStatus
             })
         });
+        
+        const text = await response.text();
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const result = await response.json();
+        const result = JSON.parse(text);
         
         if (result.success) {
             showSuccess(`Order status updated successfully!`);
             
             if (newStatus === 'completed') {
                 // Remove the order card with animation
-                const card = document.querySelector(`[data-order-id="${orderId}"]`);
+                const card = document.querySelector(`[data-order-id="${orderNo}"]`);
                 if (card) {
                     card.style.opacity = '0';
+                    card.style.transition = 'opacity 0.3s';
                     setTimeout(() => {
                         card.remove();
                         loadStats(); // Update stats after removal
@@ -363,3 +425,51 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.btn-in-transit')) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Access Denied',
+            text: "You don't have the privilege to update this order to 'In Transit'.",
+            confirmButtonText: 'OK'
+        });
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    logoutBtn.addEventListener("click", () => {
+
+        Swal.fire({
+            title: 'Are you sure you want to logout?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f2d067',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, logout',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetch("../../controllers/logout.php", {
+                    method: "POST"
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("✅ " + data.message);
+                        window.location.href = "../login.php";
+                    } else {
+                        console.log("⚠️ " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                });
+
+            }
+        });
+    });
+});

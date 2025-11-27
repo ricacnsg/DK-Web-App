@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'kitchen staff') {
+  header("Location: ../login.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +14,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daven's Kitchenette</title>
     <link rel="stylesheet" href="kitchen_staff.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700,800" rel="stylesheet" />
+    <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
 </head>
 <body>
     <div class="header">
@@ -25,6 +36,9 @@
                 <span class="stat-number" id="readyOrders">0</span>
                 <span class="stat-label">Ready</span>
             </div>
+            <div class="d-flex align-items-center">
+                <span style="color: white;" id="logoutBtn">Log Out</span>
+            </div>
         </div>
     </div>
 
@@ -33,7 +47,7 @@
             <h1 class="title">Active Orders</h1>
             <div class="filters">
                 <button class="filter-btn active-all">All Orders</button>
-                <button class="filter-btn">Pending</button>
+                <button class="filter-btn">Reviewed</button>
                 <button class="filter-btn">Preparing</button>
                 <button class="filter-btn">Ready</button>
             </div>

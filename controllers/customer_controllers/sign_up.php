@@ -37,19 +37,30 @@ if (empty($email) || empty($user) || empty($pass) || empty($contactno)) {
     exit;
 }
 
+// PASSWORD VALIDATION - FIXED
 $errors = [];
-
-// PASSWORD VALIDATION
-if (strlen($pass) < 8) $errors = "Password must be at least 8 characters.";
-if (!preg_match("/[A-Z]/", $pass)) $errors = "Password must contain at least one uppercase letter.";
-if (!preg_match("/[a-z]/", $pass)) $errors = "Password must contain at least one lowercase letter.";
-if (!preg_match("/[0-9]/", $pass)) $errors = "Password must contain at least one number.";
-if (!preg_match("/[\W]/", $pass)) $errors = "Password must contain at least one special character.";
+if (strlen($pass) < 8) $errors[] = "Password must be at least 8 characters.";
+if (!preg_match("/[A-Z]/", $pass)) $errors[] = "Password must contain at least one uppercase letter.";
+if (!preg_match("/[a-z]/", $pass)) $errors[] = "Password must contain at least one lowercase letter.";
+if (!preg_match("/[0-9]/", $pass)) $errors[] = "Password must contain at least one number.";
+if (!preg_match("/[\W]/", $pass)) $errors[] = "Password must contain at least one special character.";
 
 if (!empty($errors)) {
-    echo json_encode(['success' => false, 'message' => $errors]);
+    echo json_encode(['success' => false, 'message' => implode(' ', $errors)]);
     exit;
 }
+
+// CHECK EMAIL DUPLICATE (ADDED - Important!)
+$stmt = $conn->prepare("SELECT customerID FROM customer WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$stmt->store_result();
+
+if ($stmt->num_rows > 0) {
+    echo json_encode(['success' => false, 'message' => 'Email already exists.']);
+    exit;
+}
+$stmt->close();
 
 // CHECK USERNAME DUPLICATE
 $stmt = $conn->prepare("SELECT customerID FROM customer WHERE username = ?");
@@ -73,6 +84,9 @@ VALUES (?, ?, ?, ?, ?, ?, 0)");
 $stmt->bind_param("ssssss", $email, $contactno, $hashedPassword, $user, $createdAt, $verificationToken);
 
 if ($stmt->execute()) {
+    
+    // Log successful insertion
+    error_log("✅ New customer created: $user (Email: $email)");
 
     // SEND EMAIL VERIFICATION
     $verifyLink = "http://localhost:3000/controllers/customer_controllers/verify_customer.php?token=$verificationToken";
@@ -82,29 +96,43 @@ if ($stmt->execute()) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = ''; // your Gmail
-        $mail->Password = '';
+        $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
+        $mail->Password = 'anvq dzkd xomc yaas';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
 
-        $mail->setFrom('', 'Davens Kitchenette');
-        $mail->addAddress($email);
+        $mail->setFrom('tariaobernadette@gmail.com', 'Davens Kitchenette');
+        $mail->addAddress($email, $user);
 
         $mail->isHTML(true);
         $mail->Subject = 'Verify Your Davens Kitchenette Account';
         $mail->Body = "
-            <div style='font-family: Arial;'>
-                <h2>Welcome to Davens Kitchenette!</h2>
-                <p>Please verify your email to activate your account.</p>
-                <a href='$verifyLink'
-                    style='background:#04276c;color:#fff;padding:12px 20px;text-decoration:none;border-radius:5px;'>
-                    VERIFY ACCOUNT
-                </a>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                <h2 style='color: #04276c;'>Welcome to Davens Kitchenette!</h2>
+                <p>Hi <strong>$user</strong>,</p>
+                <p>Thank you for signing up! Please verify your email to activate your account.</p>
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='$verifyLink'
+                        style='display: inline-block; background:#04276c; color:#fff; padding:15px 30px; text-decoration:none; border-radius:5px; font-weight: bold;'>
+                        VERIFY ACCOUNT
+                    </a>
+                </div>
+                <p style='color: #666; font-size: 12px;'>If you didn't create this account, please ignore this email.</p>
             </div>
         ";
 
         $mail->send();
-    } catch (Exception $e) {}
+        error_log("✅ Verification email sent to: $email");
+    } catch (Exception $e) {
+        error_log("❌ Email send failed: " . $mail->ErrorInfo);
+    }
 
     echo json_encode([
         'success' => true,
@@ -112,8 +140,10 @@ if ($stmt->execute()) {
     ]);
 
 } else {
+    error_log("❌ Database insert failed: " . $stmt->error);
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
 }
 
+$stmt->close();
 $conn->close();
 ?>

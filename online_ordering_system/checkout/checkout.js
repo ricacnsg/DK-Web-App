@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================
   // PRE-FILL CUSTOMER INFO & LOAD ADDRESSES
   // ============================
-  if (window.userData.isLoggedIn) {
+  if (window.userData && window.userData.isLoggedIn) {
     // Load customer details
     fetch('../../../controllers/customer_controllers/personal_information/load_my_details.php')
       .then(response => response.json())
@@ -220,69 +220,105 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       body: JSON.stringify(orderData)
     })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Response:', data);
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Order Placed!',
-          html: `
-            <p><strong>Order Number:</strong> ${data.orderNumber}</p>
-            <hr>
-            <p>📧 <strong>Check your email!</strong></p>
-            <p>We've sent a verification link to <strong>${email}</strong></p>
-            <p>Please click the link in the email to confirm your order.</p>
-            <hr>
-            <p style="font-size: 14px; color: #666;">
-              ⚠️ Your order will only be processed after email verification.
-            </p>
-            <p style="font-size: 14px; color: #666;">
-              ⚠️ Delivery fee and Order total will update once reviewed by admin.
-            </p>
-          `,
-          confirmButtonText: 'OK',
-          allowOutsideClick: false
-        }).then(() => {
-          // Clear cart items
-          sessionStorage.removeItem('selectedItems');
-          sessionStorage.removeItem('cartSubtotal');
-          sessionStorage.removeItem('cartTotal');
-          sessionStorage.removeItem('deliveryFee');
-          
-          // Redirect to menu or home
-          window.location.href = '../get_order/get_order.php';
-        });
-      } else {
+    .then(response => {
+      // First check if response is OK
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
+      
+      // Get the raw text first to see what we're dealing with
+      return response.text();
+    })
+    .then(text => {
+      console.log('Raw response:', text);
+      
+      // Try to parse as JSON
+      try {
+        const data = JSON.parse(text);
+        console.log('Parsed response:', data);
+        
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Order Placed!',
+            html: `
+              <p><strong>Order Number:</strong> ${data.orderNumber}</p>
+              <hr>
+              <p>📧 <strong>Check your email!</strong></p>
+              <p>We've sent a verification link to <strong>${email}</strong></p>
+              <p>Please click the link in the email to confirm your order.</p>
+              <hr>
+              <p style="font-size: 14px; color: #666;">
+                ⚠️ Your order will only be processed after email verification.
+              </p>
+              <p style="font-size: 14px; color: #666;">
+                ⚠️ Delivery fee and Order total will update once reviewed by admin.
+              </p>
+            `,
+            confirmButtonText: 'OK',
+            allowOutsideClick: false
+          }).then(() => {
+            // Clear cart items
+            sessionStorage.removeItem('selectedItems');
+            sessionStorage.removeItem('cartSubtotal');
+            sessionStorage.removeItem('cartTotal');
+            sessionStorage.removeItem('deliveryFee');
+            
+            // Redirect to menu or home
+            window.location.href = '../get_order/get_order.php';
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Order Failed',
+            text: data.message || 'Failed to place order. Please try again.'
+          });
+        }
+      } catch (parseError) {
+        // Response wasn't valid JSON - show what was returned
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response was:', text);
+        
         Swal.fire({
           icon: 'error',
-          title: 'Order Failed',
-          text: data.message || 'Failed to place order. Please try again.'
+          title: 'Server Error',
+          html: `
+            <p>The server returned an invalid response.</p>
+            <details style="text-align: left; margin-top: 10px;">
+              <summary style="cursor: pointer; color: #666;">Click to see error details</summary>
+              <pre style="max-height: 300px; overflow: auto; background: #f5f5f5; padding: 10px; margin-top: 10px; font-size: 12px;">${text.substring(0, 1000)}</pre>
+            </details>
+          `,
+          confirmButtonText: 'OK'
         });
       }
     })
     .catch(error => {
-      console.error('Error:', error);
+      console.error('Fetch Error:', error);
       Swal.fire({
         icon: 'error',
         title: 'Connection Error',
-        text: 'Failed to connect to server. Please check your internet connection.'
+        html: `
+          <p>Failed to connect to server.</p>
+          <p style="font-size: 14px; color: #666;">${error.message}</p>
+        `
       });
     });
   });
-});
 
-// ============================
+  // ============================
   // Profile button - redirect to profile page
   // ============================
   const myProfileBtn = document.getElementById('myProfile');
   if (myProfileBtn) {
     myProfileBtn.addEventListener('click', () => {
       // Get customer ID from session data (made available in the PHP file)
-      const customerID = window.userData.customerID;
+      const customerID = window.userData?.customerID;
       
-      // Option 2: Store in sessionStorage (uncomment if preferred)
-      sessionStorage.setItem('customer_id', customerID);
+      // Store in sessionStorage
+      if (customerID) {
+        sessionStorage.setItem('customer_id', customerID);
+      }
       window.location.href = '../personal_info/personal_info.php';
     });
   }
@@ -291,13 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (profileRedirect) {
     profileRedirect.addEventListener('click', () => {
       // Get customer ID from session data (made available in the PHP file)
-      const customerID = window.userData.customerID;
+      const customerID = window.userData?.customerID;
       
-      sessionStorage.setItem('customer_id', customerID);
+      if (customerID) {
+        sessionStorage.setItem('customer_id', customerID);
+      }
       window.location.href = '../personal_info/personal_info.php';
     });
   }
-
 
   // ============================
   // Logout
@@ -330,3 +367,4 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = '../sign_in/sign_in.php?return=view_cart';
     });
   }
+});
