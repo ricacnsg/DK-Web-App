@@ -125,7 +125,12 @@ function createStaffAccount($conn) {
             'role' => $role
         ]);
 
-        logAction($conn, $_SESSION['staff_id'], 'staff', 'ADD', $staffID, "Add new staff: $fullname", null, $new_data);
+        try {
+            logAction($conn, $_SESSION['staff_id'], 'staff', 'ADD', $staffID, "Add new staff: $fullname", null, $new_data);
+        } catch (Exception $e) {
+            // Log failed, but continue
+        }
+
     } else {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
     }
@@ -270,17 +275,45 @@ function editStaffAccount($conn) {
         $checkStmt->close();
     }
 
+    $resOld = $conn->prepare("SELECT staffFullname, staffUsername, contactNumber, staffRole, staffPassword 
+                    FROM staff 
+                    WHERE staffID = ?");
+    $resOld->bind_param("i", $staffId);
+    $resOld->execute();
+    $result = $resOld->get_result();
+    $oldData = $result->fetch_assoc();
+    $resOld->close();
+
     if ($passwordChanged) {
         $hash_newpassword = password_hash($newPassword, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("UPDATE staff SET staffFullname=?, staffUsername=?, contactNumber=?, staffRole=?, staffPassword=?, editedAt=? WHERE staffID=?");
         $stmt->bind_param("ssssssi", $newFullname, $newUsername, $newContactno, $newRole, $hash_newpassword, $editedAt, $staffId);
     } else {
+        $hash_newpassword = $oldData['staffPassword'];
         $stmt = $conn->prepare("UPDATE staff SET staffFullname=?, staffUsername=?, contactNumber=?, staffRole=?, editedAt=? WHERE staffID=?");
         $stmt->bind_param("sssssi", $newFullname, $newUsername, $newContactno, $newRole, $editedAt, $staffId);
     }
 
     if ($stmt->execute()) {
         echo json_encode(['success'=>true,'message'=>'Account edited successfully.']);
+
+        $newData = [
+            'fullname' => $newFullname,
+            'contactno' => $newContactno,
+            'username' => $newUsername,
+            'password' => $hash_newpassword,
+            'role' => $newRole
+        ];
+
+        $newDataJson = json_encode($newData);
+        $oldDataJson = json_encode($oldData);
+
+        try {
+            logAction($conn, $_SESSION['staff_id'], 'staff', 'UPDATE', $staffId, "Update staff: $newFullname", $oldDataJson, $newDataJson);
+        } catch (Exception $e) {
+            // Log failed, but continue
+        }
+
     } else {
         echo json_encode(['success'=>false,'errors'=>['Database error: '.$stmt->error]]);
     }
@@ -303,11 +336,25 @@ function deleteStaffAccount($conn) {
     return;
   }
 
+    $stmtOld = $conn->prepare("SELECT * FROM staff WHERE staffID = ?");
+    $stmtOld->bind_param("i", $staffId); 
+    $stmtOld->execute();
+
+    $result = $stmtOld->get_result();
+    $oldData = $result->fetch_assoc();
+    $stmtOld->close();
+
   $stmt = $conn->prepare("DELETE FROM staff WHERE staffID = ?");
   $stmt->bind_param("i", $staffId);
 
   if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'Account deleted successfully.']);
+
+    try{
+        logAction($conn, $_SESSION['staff_id'], 'staff', 'DELETE', $staffId, "Deleted staff: " . $oldData['staffFullname'], json_encode($oldData), null);
+    } catch (Exception $e){
+        //log failed, but continue deleting
+    }
   } else {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
   }

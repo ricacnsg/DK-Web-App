@@ -100,7 +100,11 @@ function addNewItem($conn){
         'reorderLevel' => (int)$reorder
     ]);
 
-    logAction($conn, $_SESSION['staff_id'], 'inventory', 'ADD', $itemID, "Add new item: $itemName", null, $new_data);
+    try {
+        logAction($conn, $_SESSION['staff_id'], 'inventory', 'ADD', $itemID, "Add new item: $itemName", null, $new_data);
+    } catch (Exception $e){
+        //log failed, but continue adding
+    }
 
     $stmt->close();
 }
@@ -179,11 +183,12 @@ function editItem($conn){
 
   $id = intval($input['id']);
 
-  $stmt = $conn->prepare("SELECT * FROM item WHERE itemID= ?");
-  $stmt->bind_param("i", $id);
-  $stmt->execute();
-  $result = $stmt->get_result();
+  $stmtOld = $conn->prepare("SELECT * FROM item WHERE itemID= ?");
+  $stmtOld->bind_param("i", $id);
+  $stmtOld->execute();
+  $result = $stmtOld->get_result();
   $item = $result->fetch_assoc();
+  $stmtOld->close();
 
   if (!$item) {
       http_response_code(404);
@@ -270,7 +275,12 @@ function editItem($conn){
     $newDataJson = json_encode($newData);
     $oldDataJson = json_encode($oldData);
 
-    logAction($conn, $_SESSION['staff_id'], 'inventory', 'UPDATE', $id, "Updated item", $oldDataJson, $newDataJson);
+    try {
+        logAction($conn, $_SESSION['staff_id'], 'inventory', 'UPDATE', $id, "Updated item", $oldDataJson, $newDataJson);
+    } catch (Exception $e){
+        //log failed, but continue updating
+    }
+
   } else {
       http_response_code(500);
       echo json_encode(['error' => 'Failed to update item']);
@@ -339,7 +349,12 @@ function deleteItem($conn){
 
   if($stmt->execute()){
     echo json_encode(['success' => true, 'message' => 'Item deleted successfully']);
-    logAction($conn, $_SESSION['staff_id'], 'inventory', 'DELETE', $id, "Deleted menu item: " . $oldData['itemName'], json_encode($oldData), null);
+
+    try {
+        logAction($conn, $_SESSION['staff_id'], 'inventory', 'DELETE', $id, "Deleted menu item: " . $oldData['itemName'], json_encode($oldData), null);
+    } catch (Exception $e){
+        //log failed, but continue deleting
+    }
   }
   else{
     http_response_code(500);
