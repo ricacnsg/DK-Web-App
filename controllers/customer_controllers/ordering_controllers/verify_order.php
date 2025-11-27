@@ -36,7 +36,7 @@ if ($update->affected_rows > 0) {
     </div>";
 
     // 1. Get all menuItemID for the given order number
-    $stmt1 = $conn->prepare("SELECT menuItemID FROM itemsordered WHERE orderNo = ?");
+    $stmt1 = $conn->prepare("SELECT menuItemID, quantity FROM itemsordered WHERE orderNo = ?");
     $stmt1->bind_param("s", $orderNo);
     $stmt1->execute();
     $menuItemsResult = $stmt1->get_result();
@@ -44,6 +44,7 @@ if ($update->affected_rows > 0) {
     while ($menuRow = $menuItemsResult->fetch_assoc()) {
 
         $menuItemID = $menuRow['menuItemID'];
+        $menuItemQty = $menuRow['quantity'];
 
         // 2. Get all ingredients for this menu item
         $stmt2 = $conn->prepare("SELECT itemID, quantity FROM menuitemingredients WHERE menuItemID = ?");
@@ -54,7 +55,7 @@ if ($update->affected_rows > 0) {
         while ($ingredientRow = $ingredientsResult->fetch_assoc()) {
 
             $itemID = $ingredientRow['itemID'];
-            $deductQty = $ingredientRow['quantity'];
+            $deductQty = $ingredientRow['quantity'] * $menuItemQty;
 
             // 3. Deduct quantity from the item table
             $stmt3 = $conn->prepare("UPDATE item SET quantity = quantity - ? WHERE itemID = ?");

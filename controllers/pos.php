@@ -147,6 +147,40 @@ function placeOrder() {
         // --- 8. Commit transaction ---
         $conn->commit();
 
+    // 1. Get all menuItemID for the given order number
+    $stmt1 = $conn->prepare("SELECT menuItemID, quantity FROM itemsordered WHERE orderNo = ?");
+    $stmt1->bind_param("s", $orderNumber);
+    $stmt1->execute();
+    $menuItemsResult = $stmt1->get_result();
+
+    while ($menuRow = $menuItemsResult->fetch_assoc()) {
+
+        $menuItemID = $menuRow['menuItemID'];
+        $menuItemQty = $menuRow['quantity'];
+
+        // 2. Get all ingredients for this menu item
+        $stmt2 = $conn->prepare("SELECT itemID, quantity FROM menuitemingredients WHERE menuItemID = ?");
+        $stmt2->bind_param("i", $menuItemID);
+        $stmt2->execute();
+        $ingredientsResult = $stmt2->get_result();
+
+        while ($ingredientRow = $ingredientsResult->fetch_assoc()) {
+
+            $itemID = $ingredientRow['itemID'];
+            $deductQty = $ingredientRow['quantity'] * $menuItemQty;
+
+            // 3. Deduct quantity from the item table
+            $stmt3 = $conn->prepare("UPDATE item SET quantity = quantity - ? WHERE itemID = ?");
+            $stmt3->bind_param("ii", $deductQty, $itemID);
+            $stmt3->execute();
+            $stmt3->close();
+        }
+
+        $stmt2->close();
+    }
+
+    $stmt1->close();
+
         // --- 9. Return success ---
         echo json_encode([
             'success' => true,

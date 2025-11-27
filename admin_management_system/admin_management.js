@@ -167,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (printButton) {
             printButton.addEventListener('click', e => {
                 e.stopPropagation();
-                alert('Printing summary... (In a real app, this would trigger print logic)');
             });
         }
     }
@@ -1508,7 +1507,14 @@ function exportData() {
     const visibleRows = document.querySelectorAll('#orderTableBody tr:not([style*="display: none"])');
     
     if (visibleRows.length === 0 || (visibleRows.length === 1 && visibleRows[0].cells.length === 1)) {
-        alert('No data to export');
+        Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: 'Error',
+            text: "No data to export",
+            showConfirmButton: false,
+            timer: 1700
+        });
         return;
     }
     
@@ -1630,13 +1636,27 @@ async function fetchAndShowOnlineReceipt(orderId) {
             data = JSON.parse(text);
         } catch(e) {
             console.error("JSON parse error:", e);
-            alert('Failed to load order details');
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Error',
+                text: "Failed to load order details",
+                showConfirmButton: false,
+                timer: 1700
+            });
             return;
         }
         
         if (data.error) {
             console.error("Server error:", data.error);
-            alert('Failed to load order details: ' + data.error);
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Error',
+                text: 'Failed to load order details: ' + data.error,
+                showConfirmButton: false,
+                timer: 1700
+            });
             return;
         }
         
@@ -1644,12 +1664,26 @@ async function fetchAndShowOnlineReceipt(orderId) {
             const order = data[0];
             showReceipt(order);
         } else {
-            alert('This order does not have online order details.');
+            Swal.fire({
+                position: "center",
+                icon: "warning",
+                title: 'Error',
+                text: 'This order does not have online order details.',
+                showConfirmButton: false,
+                timer: 1700
+            });
         }
         
     } catch (error) {
         console.error("Error fetching online order:", error);
-        alert('Failed to load order details');
+        Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: 'Error',
+            text: 'Failed to load order details',
+            showConfirmButton: false,
+            timer: 1700
+        });
     }
 }
 
