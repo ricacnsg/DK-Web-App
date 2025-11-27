@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/bootstrap5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="sign_up.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Sign Up</title>
+</head>
+<body>
+    <div class="container-fluid mx-0">
+        <div class="block">
+            <div class="overall-header">
+                <span class="davens-header fw-bold" style="line-height:1; display:block; position:relative;">
+                    Daven's
+                    <img src="/assets/image/davens_logo.png"
+                        alt="Daven's Logo"
+                        width="80"
+                        height="70"
+                        class="davens-logo"
+                        style="position:absolute; left:185px; top:-18px;">
+                </span>
+                <span class="davens-header fw-bold" style="line-height:1; display:block;">Kitchenette</span>
+            </div>
+        </div>
+        <div class="wave">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path fill="#fff7d5" fill-opacity="1"
+                d="M0,256L60,240C120,224,240,192,360,197.3C480,203,600,245,720,224C840,203,960,117,1080,117.3C1200,117,1320,203,1380,245.3L1440,288L1440,0L0,0Z">
+            </path>
+            </svg>
+        </div>
+    </div>
+        <div class="lower-block">
+        <div>
+            <div class="lower-header">
+                <h2 class="sign-in">Sign Up</h2>
+                <p class="subhead">Sign up to get started.</p>
+            </div>
+            <form id='signupform'>
+                <div class="form-group d-flex justify-content-center form-block">
+                    <div class="input-container">
+                        <i class="fas fas-solid fa-user icon"></i>
+                        <input type="text" class="form-control form-control-lg border-3" id="customerUsername" placeholder="Username">
+                    </div>
+                </div>
+                <div class="form-group d-flex justify-content-center">
+                    <div class="input-container">
+                        <i class="fas fas-solid fa-phone icon"></i>
+                        <input type="text" class="form-control form-control-lg border-3" id="customerPhone" placeholder="Contact Number">
+                    </div>
+                </div>
+                <div class="form-group d-flex justify-content-center ">
+                    <div class="input-container">
+                        <i class="fas fas-solid fa-envelope icon"></i>
+                        <input type="text" class="form-control form-control-lg border-3" id="customerEmail" placeholder="Email Address">
+                    </div>
+                </div>
+                <div class="form-group d-flex justify-content-center">
+                    <div class="input-container">
+                        <i class="fas fas-solid fa-lock icon"></i>
+                        <input type="password" class="form-control form-control-lg border-3" id="customerPassword" placeholder="Password">
+                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-lg my-button rounded-pill border-2">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center">
+        <span>
+            <p class="redirect">Already have an account?</p>
+        </span>
+        <span>
+            <p><a href="/online_ordering_system/sign_in/sign_in.php" class="link-opacity-25-hover">Sign In</a></p>
+        </span>
+    </div>
+    <script src="sign_up.js"></script>
+</body>
+</html>

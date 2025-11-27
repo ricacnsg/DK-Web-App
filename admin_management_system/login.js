@@ -1,33 +1,53 @@
-console.log("✅ JavaScript connected!");
-
-document.getElementById("staffLogin").addEventListener("submit", function (e) {
+document.getElementById("staffLogin").addEventListener("submit", async (e) => {
   e.preventDefault();
-  console.log("Form submitted!");
 
-  const formData = new FormData(this);
+  const formData = {
+    staff_username: document.getElementById('accountUsername').value,
+    staff_password: document.getElementById('password').value
+  }
 
-  fetch("../controllers/login.php", {
-    method: "POST",
-    body: formData,
-  })
-    .then((res) => res.text())
-    .then((data) => {
-      console.log("Response from PHP:", data);
+  try {
+    const response = await fetch('../controllers/check_credentials.php', {
+      method: 'POST',
+      body: JSON.stringify(formData)
+    });
 
-      if (data.trim() === "success") {
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 1000);
-      } else {
-        Swal.fire({
-            title: "Login Failed",
-            text: "Invalid username or password.",
-            icon: "warning"
-        });;
-        document.getElementById("staffLogin").reset();
+    const data = await response.json();
+
+    if (data.success) {
+      if (data.role === 'admin') {
+        window.location.href = 'admin_management.php';
       }
-    })
-    .catch((err) => console.error(err));
+      else if (data.role === 'cashier') {
+        window.location.href = 'cashier_pos.php';
+      }
+      else if (data.role === 'kitchen staff') {
+        window.location.href = 'kitchen_staff.php';
+      } 
+      else if (data.role === 'delivery rider') {
+        window.location.href = 'kitchen_staff.php';
+      }
+      else {
+        alert('Login successful but unknown role: ' + data.role);
+      }
+    } else {
+      Swal.fire({
+            position: "center",
+            icon: "warning",
+            title: data.message,
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }
+  } catch (error) {
+    Swal.fire({
+        position: "center",
+        icon: "warning",
+        title: 'Something went wrong. Please try again.',
+        showConfirmButton: false,
+        timer: 1500
+    });
+  }
 });
 
 const passwordInput = document.getElementById('password');

@@ -1,0 +1,416 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);
+    min-height: 100vh;
+}
+
+/* Header Styles */
+.navbar-custom {
+    background-color: #1e3a8a;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.brand-title {
+    color: #F4D03F;
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.brand-subtitle {
+    color: white;
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+.btn-logout {
+    background-color: #F4D03F;
+    border: none;
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    color: #1e3a8a;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background-color: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Styles */
+.current-order-card,
+.delivery-list-card {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 1.8rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.card-title {
+    color: #2e2b2b;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin-bottom: 1.2rem;
+}
+
+/* Current Order Card */
+.current-order-card {
+    background: white;
+    padding: 1.8rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+
+.order-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+}
+
+.order-info-left {
+    flex: 1;
+}
+
+.order-id {
+    color: #2e2b2b;
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.customer-name {
+    color: #2e2b2b;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.4rem;
+}
+
+.delivery-address {
+    color: #2e2b2b;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+
+/* Action Buttons */
+.btn-completed {
+    background-color: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.btn-completed:hover {
+    background-color: #16a34a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-return {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.btn-return:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Divider Line */
+.divider-line {
+    width: 100%;
+    height: 3px;
+    background-color: #2e2b2b;
+    margin: 0.8rem 0;
+    border-radius: 2px;
+}
+
+/* Order Summary */
+.order-summary {
+    margin-top: 1rem;
+}
+
+.summary-title {
+    color: #2e2b2b;
+    font-weight: bold;
+    font-size: 1.25rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.summary-content {
+    background-color: rgba(229, 231, 235, 0.6);
+    border-radius: 20px;
+    padding: 1.5rem;
+    min-height: 220px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-name {
+    color: #2e2b2b;
+    font-weight: 500;
+}
+
+.item-price {
+    color: #2e2b2b;
+    font-weight: 600;
+}
+
+/* Delivery Order List */
+.orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar */
+.orders-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.orders-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.orders-container::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+}
+
+.orders-container::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+.order-item-row {
+    background-color: #e5e7eb;
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.order-item-row:hover {
+    background-color: #d1d5db;
+    transform: translateX(5px);
+}
+
+.order-item-row.active {
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 2px solid #3b82f6;
+}
+
+.order-info {
+    display: flex;
+    gap: 2rem;
+    flex: 1;
+}
+
+.order-number {
+    color: #2e2b2b;
+    font-weight: 600;
+    font-size: 1.05rem;
+    min-width: 130px;
+}
+
+.order-location {
+    color: #2e2b2b;
+    font-size: 1.05rem;
+}
+
+/* Status Badges */
+.badge {
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+}
+
+.badge-not-complete {
+    background-color: #ffd700;
+    color: white;
+}
+
+.badge-completed {
+    background-color: #22c55e;
+    color: white;
+}
+
+.badge-return {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1199px) {
+    .brand-title {
+        font-size: 1.5rem;
+    }
+    
+    .brand-subtitle {
+        font-size: 0.95rem;
+    }
+    
+    .btn-logout {
+        font-size: 1rem;
+        padding: 0.45rem 1.3rem;
+    }
+}
+
+@media (max-width: 991px) {
+    .current-order-card {
+        margin-bottom: 2rem;
+    }
+    
+    .order-header-section {
+        flex-direction: row;
+    }
+    
+    .order-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .order-number {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .navbar-custom .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .brand-title {
+        font-size: 1.3rem;
+    }
+    
+    .brand-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .btn-logout {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .current-order-card,
+    .delivery-list-card {
+        padding: 1.5rem;
+    }
+    
+    .order-header-section {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .order-info-left {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .mini-map {
+        margin-top: 1rem;
+    }
+    
+    .order-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+        padding: 1rem;
+    }
+    
+    .order-info {
+        width: 100%;
+    }
+    
+    .badge {
+        align-self: flex-end;
+    }
+    
+    .d-flex.gap-3 {
+        flex-direction: column;
+        gap: 0.8rem !important;
+    }
+    
+    .btn-completed,
+    .btn-return {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .chef-hat-icon svg {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .brand-title {
+        font-size: 1.1rem;
+    }
+    
+    .brand-subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .btn-logout svg {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .card-title {
+        font-size: 1.2rem;
+    }
+    
+    .order-id {
+        font-size: 1.1rem;
+    }
+}
