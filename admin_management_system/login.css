@@ -38,14 +38,24 @@ input.form-control {
     background: #fff;
 }
 
+/* FIXED: Password wrapper for consistent alignment */
+.password-wrapper {
+    position: relative;
+}
+
+/* Password toggle PERFECT alignment */
 .toggle-password {
+    position: absolute;
     top: 70%;
-    right: 1rem;
+    right: 18px;
     transform: translateY(-50%);
     background: none;
     border: none;
     cursor: pointer;
     color: #062970;
+    font-size: 1.25rem;
+    padding: 0;
+    z-index: 10;
 }
 
 .sign-in-btn {
@@ -102,13 +112,14 @@ input.form-control {
 }
 
 .learnmore:hover {
-    color:antiquewhite
+    color: antiquewhite;
 }
 
 ::placeholder {
   color: rgba(0, 0, 0, 0.25);
 }
 
+/* ---------- MEDIUM RESPONSIVE ---------- */
 @media (max-width: 991.98px) {
     .left-panel {
         border-top-right-radius: 120px;
@@ -119,46 +130,109 @@ input.form-control {
     .bg-image {
         width: 45vw;
     }
+
+    .toggle-password {
+    position: absolute;
+    top: 55%;
+    right: 18px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #062970;
+    font-size: 1.25rem;
+    padding: 0;
+    z-index: 10;
+    }
 }
 
+/* ---------- MOBILE ULTRA POLISHED ---------- */
 @media (max-width: 767.98px) {
+
     .wrapper {
         flex-direction: column;
+        margin: 10px;
     }
 
-    .left-panel {
-        border-top-right-radius: 0;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-        padding: 2rem 1rem;
-    }
-
-    .bg-image {
-        position: relative;
-        width: 100%;
-        opacity: 0.08;
-        margin-top: 1rem;
-    }
-
-    .greetings {
-        font-size: clamp(1.25rem, 6.5vw, 2rem);
+    /* HEADER PANEL */
+    .right-panel {
+        order: -1;
+        padding: 1rem 1.5rem 1rem 1.5rem; /* add top padding so logo isn’t cut */
+        min-height: 130px;  /* enough space for logo + greetings */
+        max-height: 270px;  /* prevent stretching */
+        background: linear-gradient(180deg, #062970 0%, #073b9b 100%);
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.25);
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* center vertically */
+        align-items: center;
     }
 
     .logo {
+        width: 75px;
         transform: none;
     }
 
-    .right-panel {
-        padding-bottom: 3rem;
+    .greetings {
+        font-size: clamp(1.3rem, 5vw, 2rem);
+        line-height: 1.2;
+        margin: 0;
+        text-align: center;
+    }
+
+    .bg-image {
+        position: absolute;
+        width: 100%;
+        opacity: 0.06;
+        top: 0;
+        left: 0;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* LOGIN CARD */
+    .left-panel {
+        background: #f2d067;
+        padding: 1.2rem 0.4rem 2rem 1.4rem;
+        color: #062970;
+        border-radius: 25px;
+        margin-top: 20px;
+        margin-right: 30px;
+        box-shadow: 0px 5px 25px rgba(0,0,0,0.18);
+    }
+
+    input.form-control {
+        background: #f5f5f5;
+        border-radius: 20px !important;
+        padding: 0.9rem 1.2rem;
+        font-size: 1rem;
+        border: 1px solid #dadada;
+    }
+
+    /* FIXED: password icon placement in mobile */
+    .toggle-password {
+        bottom: 55px;
+        right: 16px;   
+        font-size: 1.2rem;
+    }
+
+    .sign-in-btn {
+        width: 100%;
+        padding: 0.95rem 1rem;
+        border-radius: 30px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        box-shadow: 0 3px 12px rgba(6,41,112,0.35);
     }
 }
-    
+
 .form-label { 
     color: #062970; 
-    font-weight:700; 
+    font-weight: 700; 
 }
 
 .text-muted { 
     color: rgba(0,0,0,0.45) !important; 
 }
-

@@ -1,3 +1,13 @@
+function escapeHTML(value) {
+    if (typeof value === "number") return value;
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Global variables
 let menuItems = [];
 let allMenuItems = []; // Store all items for search
@@ -39,24 +49,34 @@ function renderMenuItems() {
     menuItems.forEach((item, index) => {
         const menuItemEl = document.createElement('div');
         menuItemEl.className = 'menu-item';
+
+        // If out of stock → add a class
+        let unavailableClass = item.available ? "" : "unavailable-item";
+        let disabledAttr = item.available ? "" : "disabled";
+
         menuItemEl.innerHTML = `
-            <div class="menu-item-image">
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'">
+            <div class="menu-item-image ${unavailableClass}">
+                <img src="${escapeHTML(item.image)}" alt="${escapeHTML(item.name)}" 
+                    onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'">
+                ${item.available ? "" : "<div class='out-stock-overlay'>OUT OF STOCK</div>"}
             </div>
-            <div class="menu-item-content">
-                <div class="menu-item-name">${item.name}</div>
-                <div class="menu-item-desc">${item.desc}</div>
+            <div class="menu-item-content ${unavailableClass}">
+                <div class="menu-item-name">${escapeHTML(item.name)}</div>
+                <div class="menu-item-desc">${escapeHTML(item.desc)}</div>
                 <div class="menu-item-price">Php ${item.price.toFixed(2)}</div>
+
                 <div class="quantity-controls">
-                    <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                    <button class="qty-btn" ${disabledAttr} onclick="updateQuantity(${item.id}, -1)">−</button>
                     <div class="quantity-display">${item.quantity || 0}</div>
-                    <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    <button class="qty-btn" ${disabledAttr} onclick="updateQuantity(${item.id}, 1)">+</button>
                 </div>
             </div>
         `;
+
         menuGrid.appendChild(menuItemEl);
     });
 }
+
 
 // Update quantity
 function updateQuantity(itemId, change) {
@@ -89,8 +109,8 @@ function updateOrderSummary() {
             total += itemTotal;
             itemsHTML += `
                 <div class="item-row">
-                    <span>${item.quantity}x ${item.name}</span>
-                    <span class="item-row-price">Php ${itemTotal.toFixed(2)}</span>
+                    <span>${escapeHTML(item.quantity)}x ${escapeHTML(item.name)}</span>
+                    <span class="item-row-price">Php ${escapeHTML(itemTotal.toFixed(2))}</span>
                 </div>
             `;
         });
@@ -104,7 +124,7 @@ function updateOrderSummary() {
     }
 
     itemsList.innerHTML = itemsHTML;
-    document.getElementById('totalPrice').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('totalPrice').textContent = `Php ${escapeHTML(total.toFixed(2))}`;
 }
 
 // Search menu
@@ -229,15 +249,15 @@ function showOrderConfirmation() {
     }
 
     let confirmationMessage = `Are you sure you want to place this order?<br><br>`;
-    confirmationMessage += `Customer: ${customerName}<br>`;
-    confirmationMessage += `Order Type: ${orderType.toUpperCase()}`;
+    confirmationMessage += `Customer: ${escapeHTML(customerName)}<br>`;
+    confirmationMessage += `Order Type: ${escapeHTML(orderType.toUpperCase())}`;
 
     if (orderType === 'dine-in' && tableNumber) {
         confirmationMessage += ` (Table #${tableNumber})`;
     }
 
     confirmationMessage += `<br>Total: ${totalPrice}<br>`;
-    confirmationMessage += `Payment: ${currentPaymentMethod.toUpperCase()}`;
+    confirmationMessage += `Payment: ${escapeHTML(currentPaymentMethod.toUpperCase())}`;
 
     Swal.fire({
   title: 'Confirm Order',
@@ -281,13 +301,13 @@ function confirmOrder() {
 // Show cash payment modal
 function showCashPaymentModal(total) {
     console.log('showCashPaymentModal called with total:', total);
-    document.getElementById('cashTotal').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('cashTotal').textContent = `Php ${escapeHTML(total.toFixed(2))}`;
     document.getElementById('cashReceived').value = '';
     document.getElementById('changeAmount').textContent = '';
     
     const modal = document.getElementById('cashPaymentModal');
     modal.classList.add("show");
-    document.getElementById('cashTotal').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('cashTotal').textContent = `Php ${escapeHTML(total.toFixed(2))}`;
     document.getElementById('cashReceived').value = '';
     document.getElementById('changeAmount').textContent = '';
 
@@ -303,7 +323,7 @@ function showCashPaymentModal(total) {
         const received = parseFloat(this.value) || 0;
         const change = received - total;
         if (change >= 0) {
-            document.getElementById('changeAmount').textContent = `Change: Php ${change.toFixed(2)}`;
+            document.getElementById('changeAmount').textContent = `Change: Php ${escapeHTML(change.toFixed(2))}`;
             document.getElementById('changeAmount').style.color = '#0052cc';
         } else {
             document.getElementById('changeAmount').textContent = `Insufficient amount`;
@@ -351,7 +371,7 @@ function closeCashModal() {
 // Show GCash modal
 function showGCashModal(total) {
     console.log('showGCashModal called with total:', total);
-    document.getElementById('gcashTotal').textContent = `Php ${total.toFixed(2)}`;
+    document.getElementById('gcashTotal').textContent = `Php ${escapeHTML(total.toFixed(2))}`;
     const modal = document.getElementById('gcashModal');
     console.log('GCash modal element:', modal);
     modal.classList.add("show");
@@ -417,7 +437,7 @@ async function placeOrder() {
             Swal.fire({
                 icon: 'success',
                 title: 'Order Placed!',
-                html: `Order Number: ${result.orderNumber || result.orderID}<br>Total: Php ${totalPrice.toFixed(2)}<br><br>Order sent to kitchen`,
+                html: `Order Number: ${escapeHTML(result.orderNumber) || escapeHTML(result.orderID)}<br>Total: Php ${escapeHTML(totalPrice.toFixed(2))}<br><br>Order sent to kitchen`,
                 confirmButtonColor: '#0052cc'
             });
             
@@ -606,12 +626,12 @@ function renderOrderHistory() {
         row.dataset.status = order.status;
         
         row.innerHTML = `
-            <td>${order.id}</td>
-            <td>${order.items}</td>
-            <td>${order.amount}</td>
-            <td>${order.method}</td>
-            <td>${order.date}</td>
-            <td><span class="status-badge">${order.status}</span></td>
+            <td>${escapeHTML(order.id)}</td>
+            <td>${escapeHTML(order.items)}</td>
+            <td>${escapeHTML(order.amount)}</td>
+            <td>${escapeHTML(order.method)}</td>
+            <td>${escapeHTML(order.date)}</td>
+            <td><span class="status-badge">${escapeHTML(order.status)}</span></td>
             <td>
                 <button class="btn btn-sm view-history-receipt m-2 btn btn-sm " type="button">
                     <i class="fa-solid fa-eye text-muted"></i>
@@ -977,8 +997,8 @@ function loadOrders() {
 
                 tableBody.innerHTML += `
                     <tr data-order='${JSON.stringify(order).replace(/'/g, "&apos;")}'>
-                        <td><b>${order.order_number}</b></td>
-                        <td class="date-column">${order.date_ordered}</td>
+                        <td><b>${escapeHTML(order.order_number)}</b></td>
+                        <td class="date-column">${escapeHTML(order.date_ordered)}</td>
                         <td>₱${parseFloat(order.subtotal).toFixed(2)}</td>
                         <td>${order.rider_name || 'Unassigned'}</td>
                         <td>
@@ -1016,12 +1036,12 @@ function showReceipt(order) {
     
     receiptSection.style.display = 'block';
     
-    document.getElementById('orderNumber').innerHTML = `Order No: <b>${order.order_number || 'N/A'}</b>`;
-    document.getElementById('orderDate').innerHTML = `<b>${order.date_ordered || 'N/A'}</b>`;
-    document.getElementById('recipient').innerHTML = `Customer Name: <b>${order.recipient_name || 'N/A'}</b>`;
-    document.getElementById('contactNumber').innerHTML = `Contact Number: <b>${order.phone_number || 'N/A'}</b>`;
-    document.getElementById('emailAddress').innerHTML = `Email Address: <b>${order.email || 'N/A'}</b>`;
-    document.getElementById('deliveryAddress').innerHTML = `Delivery Address: <b>${order.delivery_address || 'N/A'}</b>`;
+    document.getElementById('orderNumber').innerHTML = `Order No: <b>${escapeHTML(order.order_number) || 'N/A'}</b>`;
+    document.getElementById('orderDate').innerHTML = `<b>${escapeHTML(order.date_ordered) || 'N/A'}</b>`;
+    document.getElementById('recipient').innerHTML = `Customer Name: <b>${escapeHTML(order.recipient_name) || 'N/A'}</b>`;
+    document.getElementById('contactNumber').innerHTML = `Contact Number: <b>${escapeHTML(order.phone_number) || 'N/A'}</b>`;
+    document.getElementById('emailAddress').innerHTML = `Email Address: <b>${escapeHTML(order.email) || 'N/A'}</b>`;
+    document.getElementById('deliveryAddress').innerHTML = `Delivery Address: <b>${escapeHTML(order.delivery_address) || 'N/A'}</b>`;
     
     const subtotal = parseFloat(order.subtotal) || 0;
     const deliveryFee = parseFloat(order.delivery_fee) || 0;
@@ -1143,12 +1163,12 @@ function showWalkInReceipt(order) {
         
         const orderDateEl = document.getElementById('walkInOrderDate');
         if (orderDateEl) {
-            orderDateEl.innerHTML = `<b>${order.date || 'N/A'}</b>`;
+            orderDateEl.innerHTML = `<b>${escapeHTML(order.date) || 'N/A'}</b>`;
         }
         
         const nameEl = document.getElementById('walkInName');
         if (nameEl) {
-            nameEl.innerHTML = `Walk In Name: <b>${order.customerName || 'Walk-in Customer'}</b>`;
+            nameEl.innerHTML = `Walk In Name: <b>${escapeHTML(order.customerName) || 'Walk-in Customer'}</b>`;
         }
         
         const totalAmount = order.amount || '₱0.00';
@@ -1166,7 +1186,7 @@ function showWalkInReceipt(order) {
         
         const methodEl = document.getElementById('walkInPaymentMethod');
         if (methodEl) {
-            methodEl.innerHTML = `Payment Method: <b>${order.method || 'Cash'}</b>`;
+            methodEl.innerHTML = `Payment Method: <b>${escapeHTML(order.method) || 'Cash'}</b>`;
         }
 
         const itemsContainer = document.getElementById('walkInItemsContainer');
@@ -1201,7 +1221,7 @@ function showDeliveryOverlay(order) {
     overlay.style.display = 'flex';
 
     document.getElementById('deliveryOrderNumber').innerHTML = `Order No: <b>${order.order_number || 'N/A'}</b>`;
-    document.getElementById('deliveryAddressText').innerHTML = `Delivery Address: <b>${order.delivery_address || 'N/A'}</b>`;
+    document.getElementById('deliveryAddressText').innerHTML = `Delivery Address: <b>${escapeHTML(order.delivery_address) || 'N/A'}</b>`;
     
     // Clear the input field
     document.getElementById('deliveryFeeID').value = '';
@@ -1550,7 +1570,7 @@ async function showAssignRiderModal(order) {
     
     // Create options for the select dropdown
     const riderOptions = riders.map(rider => 
-        `<option value="${rider.staff_id}">${rider.staff_name} (ID: ${rider.staff_id})</option>`
+        `<option value="${rider.staff_id}">${escapeHTML(rider.staff_name)} (ID: ${rider.staff_id})</option>`
     ).join('');
     
     Swal.fire({
@@ -1558,7 +1578,7 @@ async function showAssignRiderModal(order) {
         html: `
             <div style="text-align: left;">
                 <p><strong>Order Number:</strong> ${order.order_number}</p>
-                <p><strong>Delivery Address:</strong> ${order.delivery_address || 'N/A'}</p>
+                <p><strong>Delivery Address:</strong> ${escapeHTML(order.delivery_address) || 'N/A'}</p>
                 <hr>
                 <label for="riderSelect" style="display: block; margin-bottom: 8px; font-weight: bold;">
                     Select Rider:

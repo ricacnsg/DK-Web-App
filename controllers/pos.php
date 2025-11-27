@@ -51,6 +51,32 @@ function getMenuItems() {
         
         $menuItems = [];
         while ($row = $result->fetch_assoc()) {
+
+            // Check if this menu item is available based on ingredients
+            $menuItemID = $row['menuItemID'];
+
+            $stmtIng = $conn->prepare("SELECT itemID, quantity FROM menuitemingredients WHERE menuItemID = ?");
+            $stmtIng->bind_param("i", $menuItemID);
+            $stmtIng->execute();
+            $ingredients = $stmtIng->get_result();
+
+            $isAvailable = true; // default
+
+            while ($ing = $ingredients->fetch_assoc()) {
+                $ingredientID = $ing['itemID'];
+                $requiredPerServing = $ing['quantity'];
+
+                $checkStock = $conn->prepare("SELECT quantity FROM item WHERE itemID = ?");
+                $checkStock->bind_param("i", $ingredientID);
+                $checkStock->execute();
+                $stock = $checkStock->get_result()->fetch_assoc()['quantity'] ?? 0;
+
+                if ($stock < $requiredPerServing) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
             // Convert image BLOB to base64
             if (!empty($row['menuItemImage'])) {
                 $imageData = base64_encode($row['menuItemImage']);
@@ -58,7 +84,7 @@ function getMenuItems() {
             } else {
                 $row['menuItemImage'] = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60';
             }
-            
+
             $menuItems[] = [
                 'id' => $row['menuItemID'],
                 'name' => $row['menuItemName'],
@@ -66,8 +92,11 @@ function getMenuItems() {
                 'price' => floatval($row['menuItemPrice']),
                 'category' => $row['menuItemCategory'],
                 'image' => $row['menuItemImage'],
-                'quantity' => 0
+                'quantity' => 0,
+                'available' => $isAvailable
             ];
+
+            $stmtIng->close();
         }
         
         echo json_encode(['success' => true, 'data' => $menuItems]);
@@ -182,7 +211,7 @@ function placeOrder() {
 
             // 3. Deduct quantity from the item table
             $stmt3 = $conn->prepare("UPDATE item SET quantity = quantity - ? WHERE itemID = ?");
-            $stmt3->bind_param("ii", $deductQty, $itemID);
+            $stmt3->bind_param("di", $deductQty, $itemID);
             $stmt3->execute();
             $stmt3->close();
         }

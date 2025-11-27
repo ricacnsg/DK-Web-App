@@ -44,24 +44,24 @@ if (isset($_SESSION['staff_username'])) {
                             <h1 class="fw-bolder title text-center">Run the Business</h1>
                             <h6 class="subtitle text-center mb-4">Sign in to your account</h6>
 
-                            <form id="staffLogin" class="mx-auto" method="POST" action="../controllers/check_credentials.php">
-                                
+                            <form id="staffLogin" class="mx-auto">
+
                                 <div class="mb-3">
                                     <label for="accountUsername" class="form-label fw-bolder">Username</label>
                                     <input id="accountUsername" type="text"
                                         class="rounded-pill border-0 form-control form-control-lg"
-                                        placeholder="Enter your email"
-                                        name="staff_username" required>
+                                        placeholder="Enter your email" name="staff_username" required>
                                 </div>
 
-                                <div class="mb-4 position-relative">
+                                <!-- PASSWORD FIELD -->
+                                <div class="mb-4 position-relative password-wrapper">
                                     <label for="password" class="form-label fw-bolder">Password</label>
                                     <input id="password" type="password"
-                                        class="rounded-pill border-0 form-control form-control-lg"
-                                        placeholder="Enter your password"
-                                        name="staff_password" required>
-                                    <button type="button" class="toggle-password position-absolute" id="togglePassword">
-                                        <i class="fa-solid fa-eye-slash" id='hide'></i>
+                                        class="rounded-pill border-0 form-control form-control-lg password-input"
+                                        placeholder="Enter your password" name="staff_password" required>
+
+                                    <button type="button" class="toggle-password" id="togglePassword">
+                                        <i class="fa-solid fa-eye-slash" id="hide"></i>
                                     </button>
                                 </div>
 
@@ -70,20 +70,23 @@ if (isset($_SESSION['staff_username'])) {
                                 </div>
                             </form>
 
-                            <p class="text-center mt-4 d-md-none text-muted">No account yet? <a href="#" class="text-decoration-none">Learn More.</a></p>
+                            <p class="text-center mt-4 d-md-none text-muted">
+                                No account yet? <a href="#" class="text-decoration-none">Learn More.</a>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- RIGHT -->
             <div class="col-12 col-md-5 right-panel d-flex align-items-center justify-content-center position-relative py-5">
                 <div class="text-center content-on-image px-3">
                     <img src="/assets/image/davens_logo.png" alt="logo" class="logo mb-3">
                     <h1 class="greetings">Welcome<br>to<br>Daven's<br>Kitchenette</h1>
-                    <br>
-                    <br>
-                    <p class="d-none d-md-block mt-3 text-white">No account yet? <a href="#" class="text-decoration-none learnmore">Learn More.</a></p>
+                    <br><br>
+                    <p class="d-none d-md-block mt-3 text-white">
+                        No account yet? <a href="#" class="text-decoration-none learnmore">Learn More.</a>
+                    </p>
                 </div>
             </div>
 

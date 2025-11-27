@@ -2230,3 +2230,26 @@ td {
 .table-wrapper::-webkit-scrollbar-thumb:hover {
     background: #ffed4e;
 }
+
+
+/* style of disable div when item is out of stock */
+.unavailable-item {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.out-stock-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    background: rgba(200, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+.menu-item-image {
+    position: relative;
+}
