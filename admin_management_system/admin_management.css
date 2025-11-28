@@ -1013,6 +1013,61 @@ html, body {
     box-shadow: 0 0 0 3px rgba(6, 41, 112, 0.1);
 }
 
+@media (max-width: 1024px) {
+    .menu-grid,
+    .menu-grid.category-section {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Small tablets: 2 columns */
+@media (max-width: 768px) {
+    .menu-grid,
+    .menu-grid.category-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        padding: 15px;
+    }
+}
+
+/* Mobile: 2 columns with smaller cards */
+@media (max-width: 480px) {
+    .menu-grid,
+    .menu-grid.category-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 10px;
+    }
+    
+    .menu-card {
+        min-height: 200px;
+        padding: 12px;
+    }
+    
+    .menu-image {
+        height: 100px;
+    }
+    
+    .menu-name {
+        font-size: 14px;
+    }
+    
+    .menu-description {
+        font-size: 11px;
+    }
+}
+
+/* Only go to 1 column on very small mobile */
+@media (max-width: 360px) {
+    .menu-grid,
+    .menu-grid.category-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
 /* Ingredients Section Styling */
 .ingredients-list {
     background-color: var(--color-white);
