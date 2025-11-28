@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.createElement('div');
     overlay.className = 'sidebar-overlay';
     document.body.appendChild(overlay);
+    
     // Menu Management elements
     const menuGrid = document.getElementById('menuGrid');
     const addNewItemCard = document.getElementById('addNewItemCard');
@@ -64,15 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let itemToDeleteId = null;
     let currentIngredients = []; 
     let menuItems = [];
-    
+
     // Variable to track the currently active category
     let activeCategory = 'bento'; 
 
     // API base URL
     const API_BASE = '../controllers/menu_management.php';
 
-    // PAGE NAVIGATION LOGIC (Sidebar)
-    navItems.forEach(item => {
+        // PAGE NAVIGATION LOGIC (Sidebar)
+        navItems.forEach(item => {
         item.addEventListener('click', () => {
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
@@ -90,19 +91,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeCategory = initialCategory;
                 loadMenuItems(initialCategory);
             }
+            
+            // Load dashboard data when dashboard is clicked
+            if (item.dataset.page === 'dashboard') {
+                loadDashboardData('today');
+            }
         });
     });
 
     function toggleSidebar() {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    
-    // Prevent body scroll when sidebar is open
-    if (sidebar.classList.contains('active')) {
-        document.body.style.overflow = 'hidden';
-    } else {
-        document.body.style.overflow = '';
-    }
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        
+        // Prevent body scroll when sidebar is open
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
     }
     
     sidebarToggle.addEventListener('click', toggleSidebar);
@@ -150,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formatted = tabName.charAt(0).toUpperCase() + tabName.slice(1) + ' Dashboard';
                 mainHeader.textContent = formatted;
             }
+            
+            loadDashboardData(tabName);
         };
 
         tabButtons.forEach(btn => {
@@ -167,9 +175,392 @@ document.addEventListener('DOMContentLoaded', () => {
         if (printButton) {
             printButton.addEventListener('click', e => {
                 e.stopPropagation();
+                alert('Printing summary... (In a real app, this would trigger print logic)');
             });
         }
     }
+
+// Dashboard data loading functions
+async function loadDashboardData(period = 'today') {
+    try {
+        console.log('Loading dashboard data for period:', period);
+        
+        // Show loading states
+        showLoadingStates();
+        
+        const [statsResponse, weeklyResponse, topItemsResponse] = await Promise.all([
+            fetch(`../controllers/dashboard.php?action=getDashboardStats&period=${period}`),
+            fetch(`../controllers/dashboard.php?action=getWeeklyData`),
+            fetch(`../controllers/dashboard.php?action=getTopItems&period=${period}`)
+        ]);
+        
+        const [statsData, weeklyData, topItemsData] = await Promise.all([
+            statsResponse.json(),
+            weeklyResponse.json(),
+            topItemsResponse.json()
+        ]);
+        
+        console.log('Dashboard responses:', { statsData, weeklyData, topItemsData });
+        
+        if (statsData.success) {
+            updateDashboardMetrics(statsData.data, period);
+        } else {
+            console.error('Failed to load dashboard stats:', statsData.message);
+            setDefaultMetrics();
+        }
+        
+        if (weeklyData.success) {
+            loadWeeklyChart(weeklyData.data);
+        }
+        
+        if (topItemsData.success) {
+            loadTopMenuChart(topItemsData.data);
+        }
+        
+        await loadSystemLogs();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        setDefaultMetrics();
+        showNotification('Error loading dashboard data', 'error');
+    }
+}
+
+function showLoadingStates() {
+    const metrics = ['totalRevenue', 'todayRevenue', 'avgOrderValue'];
+    metrics.forEach(metric => {
+        const element = document.getElementById(metric);
+        if (element) {
+            element.textContent = 'Loading...';
+            element.classList.add('loading');
+        }
+    });
+    
+    const trends = ['revenueChange', 'todayChange', 'avgChange'];
+    trends.forEach(trend => {
+        const element = document.getElementById(trend);
+        if (element) {
+            element.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating...';
+        }
+    });
+}
+
+function updateDashboardMetrics(stats, period) {
+    // Update main metrics
+    document.getElementById('totalRevenue').textContent = `₱${stats.totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('totalRevenue').classList.remove('loading');
+    
+    // Update title based on period - FIXED
+    let periodTitle = '';
+    let chartTitle = '';
+    let chartSubtext = '';
+    
+    switch (period) {
+        case 'today':
+            periodTitle = "Today's Revenue";
+            chartTitle = "Today's Performance";
+            chartSubtext = "Today's orders and revenue";
+            break;
+        case 'weekly':
+            periodTitle = "Weekly Revenue";
+            chartTitle = "Weekly Revenue and Orders";
+            chartSubtext = "Last 7 days performance";
+            break;
+        case 'monthly':
+            periodTitle = "Monthly Revenue";
+            chartTitle = "Monthly Revenue and Orders";
+            chartSubtext = "This month's performance";
+            break;
+    }
+    
+    // Update the period title
+    document.getElementById('periodTitle').textContent = periodTitle;
+    
+    // Update weekly chart titles
+    const weeklyChartTitle = document.querySelector('.charts-container .card.chart-section:first-child h2');
+    const weeklyChartSubtext = document.querySelector('.charts-container .card.chart-section:first-child .metric-subtext');
+    
+    if (weeklyChartTitle) {
+        weeklyChartTitle.textContent = chartTitle;
+    }
+    if (weeklyChartSubtext) {
+        weeklyChartSubtext.textContent = chartSubtext;
+    }
+    
+    // Update Top Menu chart title based on period
+    const topMenuTitle = document.querySelector('.charts-container .card.chart-section:last-child h2');
+    const topMenuSubtext = document.querySelector('.charts-container .card.chart-section:last-child .metric-subtext');
+
+    if (topMenuTitle) {
+        switch (period) {
+            case 'today':
+                topMenuTitle.textContent = "Today's Top Menu";
+                topMenuSubtext.textContent = "Most popular items today";
+                break;
+            case 'weekly':
+                topMenuTitle.textContent = "Weekly Top Menu";
+                topMenuSubtext.textContent = "Most popular items this week";
+                break;
+            case 'monthly':
+                topMenuTitle.textContent = "Monthly Top Menu";
+                topMenuSubtext.textContent = "Most popular items this month";
+                break;
+        }
+    }
+    
+    document.getElementById('todayRevenue').textContent = `₱${stats.totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('todayRevenue').classList.remove('loading');
+    
+    document.getElementById('avgOrderValue').textContent = `₱${stats.avgOrderValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('avgOrderValue').classList.remove('loading');
+    
+    // Update trend indicators
+    updateTrendIndicators(stats);
+}
+
+function updateTrendIndicators(stats) {
+    updateTrendElement('revenueChange', stats.revenueChange, 'revenue');
+    updateTrendElement('todayChange', stats.revenueChange, 'revenue');
+    updateTrendElement('avgChange', stats.avgChange, 'average');
+}
+
+function updateTrendElement(elementId, change, type) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const isPositive = change > 0;  // Changed from >= to > so 0 is not positive
+    const isNeutral = change === 0;
+    const isNegative = change < 0;  // Added negative check
+    
+    let text = '';
+    if (isNeutral) {
+        text = 'No change';
+    } else {
+        const arrow = isPositive ? 'up' : 'down';
+        const changeText = Math.abs(change).toFixed(1);
+        const period = type === 'average' ? 'previous period' : 'yesterday';
+        text = `<i class="fa-solid fa-arrow-${arrow}"></i> ${changeText}% from ${period}`;
+    }
+    
+    // Set colors based on trend - FIXED
+    if (isPositive) {
+        element.className = 'metric-subtext success'; // Green for positive
+    } else if (isNegative) {
+        element.className = 'metric-subtext danger'; // Red for negative
+    } else {
+        element.className = 'metric-subtext'; // Grey for neutral
+    }
+    
+    element.innerHTML = text;
+}
+function setDefaultMetrics() {
+    const metrics = {
+        'totalRevenue': '₱0.00',
+        'todayRevenue': '₱0.00',
+        'avgOrderValue': '₱0.00'
+    };
+    
+    Object.entries(metrics).forEach(([id, value]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+            element.classList.remove('loading');
+        }
+    });
+    
+    const trends = ['revenueChange', 'todayChange', 'avgChange'];
+    trends.forEach(trend => {
+        const element = document.getElementById(trend);
+        if (element) {
+            element.innerHTML = '<i class="fa-solid fa-minus"></i> No data';
+            element.className = 'metric-subtext trend-neutral';
+        }
+    });
+}
+
+async function loadWeeklyChart(data) {
+    try {
+        const ctx = document.getElementById('weeklyRevenueChart');
+        if (!ctx) {
+            console.log('Weekly chart canvas not found');
+            return;
+        }
+        
+        // Destroy existing chart if it exists
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        if (data && data.dates && data.revenues) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Revenue (₱)',
+                        data: data.revenues,
+                        borderColor: '#062970',
+                        backgroundColor: 'rgba(6, 41, 112, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    }, {
+                        label: 'Orders',
+                        data: data.orders,
+                        borderColor: '#f2d067',
+                        backgroundColor: 'rgba(242, 208, 103, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₱' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading weekly chart:', error);
+    }
+}
+
+async function loadTopMenuChart(data) {
+    try {
+        const ctx = document.getElementById('topMenuCanvas');
+        if (!ctx) {
+            console.log('Top menu canvas not found');
+            return;
+        }
+        
+        // Destroy existing chart if it exists
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        if (data && data.items && data.quantities) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.items.map(item => 
+                        item.length > 15 ? item.substring(0, 15) + '...' : item
+                    ),
+                    datasets: [{
+                        label: 'Quantity Sold',
+                        data: data.quantities,
+                        backgroundColor: '#062970',
+                        borderColor: '#051d5c',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Sold: ${context.parsed.y} units`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading top menu chart:', error);
+    }
+}
+
+// Update your existing loadSystemLogs function to use the new CSS classes
+async function loadSystemLogs() {
+    try {
+        const response = await fetch('../controllers/dashboard.php?action=getSystemLogs');
+        const data = await response.json();
+        
+        console.log('System logs data:', data);
+        
+        const container = document.getElementById('systemLogsContainer');
+        if (!container) {
+            console.log('System logs container not found');
+            return;
+        }
+        
+        if (data.success) {
+            if (data.data.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No recent activity</p>';
+                return;
+            }
+            
+            container.innerHTML = data.data.map(log => `
+                <div class="log-entry log-action-${escapeHTML(log.action.toLowerCase())}">
+                    <div class="log-entry-header">
+                        <span>${escapeHTML(log.module)} - ${escapeHTML(log.action)}</span>
+                        <span class="log-entry-time">${escapeHTML(log.time)}</span>
+                    </div>
+                    <div class="log-entry-description">
+                        <strong>${escapeHTML(log.user)}:</strong> ${escapeHTML(log.description)}
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Failed to load logs</p>';
+        }
+    } catch (error) {
+        console.error('Error loading system logs:', error);
+        const container = document.getElementById('systemLogsContainer');
+        if (container) {
+            container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Error loading logs</p>';
+        }
+    }
+}
 
     // MENU MANAGEMENT CORE LOGIC
     const showNotification = (message, type = 'success') => {
@@ -1507,7 +1898,7 @@ function exportData() {
     const visibleRows = document.querySelectorAll('#orderTableBody tr:not([style*="display: none"])');
     
     if (visibleRows.length === 0 || (visibleRows.length === 1 && visibleRows[0].cells.length === 1)) {
-        Swal.fire({
+                Swal.fire({
             position: "center",
             icon: "warning",
             title: 'Error',
