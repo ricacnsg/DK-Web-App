@@ -8,9 +8,10 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
     exit;
 }
 
-require_once '../../database/connect.php'; // must define $conn (mysqli)
+require_once '../../database/connect.php';
 
 try {
+
     $input = json_decode(file_get_contents('php://input'), true);
 
     if (!isset($input['order_number']) || !isset($input['rider_id'])) {
@@ -21,19 +22,20 @@ try {
     $orderNumber = $input['order_number'];
     $riderId = $input['rider_id'];
 
-    // Validate rider exists and role is 'rider'
+    // Verify rider exists
     $verifyQuery = "SELECT staffID FROM staff WHERE staffRole = 'delivery rider' AND staffID = ?";
     $verifyStmt = $conn->prepare($verifyQuery);
     if (!$verifyStmt) throw new Exception($conn->error);
     $verifyStmt->bind_param("i", $riderId);
     $verifyStmt->execute();
     $verifyResult = $verifyStmt->get_result();
+
     if ($verifyResult->num_rows === 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid rider ID']);
         exit;
     }
 
-    // Ensure order exists + is READY
+    // Ensure order exists and is READY
     $orderQuery = "SELECT orderNo, orderStatus FROM orders WHERE orderNo = ? LIMIT 1";
     $orderStmt = $conn->prepare($orderQuery);
     if (!$orderStmt) throw new Exception($conn->error);
@@ -53,16 +55,29 @@ try {
     }
 
     // Assign rider + update status
-    $updateStatusQuery = "UPDATE orders SET riderID = ?, orderStatus = 'In Transit' WHERE orderNo = ?";
+    $updateStatusQuery = "UPDATE orders SET riderID = ?, orderStatus = 'Assigned' WHERE orderNo = ?";
     $updateStmt = $conn->prepare($updateStatusQuery);
     if (!$updateStmt) throw new Exception($conn->error);
     $updateStmt->bind_param("is", $riderId, $orderNumber);
     $updateStmt->execute();
-    $updateStmt->close();
+
+    // Insert into orderstatuslog
+    $staffID = $_SESSION['staff_id'];
+
+    $logQuery = "INSERT INTO updatestatuslogs (orderNo, previousStatus, newStatus, updatedBy, updatedAt) 
+                 VALUES (?, ?, ?, ?, NOW())";
+    $logStmt = $conn->prepare($logQuery);
+    if (!$logStmt) throw new Exception($conn->error);
+
+    $prevStatus = $order['orderStatus']; // 'Ready'
+    $newStatus  = 'Assigned';
+
+    $logStmt->bind_param("sssi", $orderNumber, $prevStatus, $newStatus, $staffID);
+    $logStmt->execute();
 
     echo json_encode(['success' => true, 'message' => 'Rider assigned successfully']);
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Database error: '.$e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
 ?>

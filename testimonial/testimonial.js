@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     cancelButtonText: "Cancel"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = "../online_ordering_system/sign_in/sign_in.php?return=testimonial";
+                        window.location.href = "../../online_ordering_system/sign_in/sign_in.php?return=testimonial";
                     }
                 });
             } else {
@@ -165,7 +165,7 @@ document.getElementById("backButton").addEventListener("click", function() {
     });
   } else {
     // If NOT logged in → normal back button (go to landing page)
-    window.location.href = "../../landing_page/landing.php";
+    window.location.href = "../landing_page/landing.php";
   }
 });
 

@@ -414,3 +414,26 @@ body {
         font-size: 1.1rem;
     }
 }
+
+.btn-transit {
+    background-color: #a7a6ff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+.btn-transit:hover {
+    background-color: #8483c8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px #7876cc;
+}
+
+.badge-transit {
+    background: #3b82f6;
+    color: white;
+}

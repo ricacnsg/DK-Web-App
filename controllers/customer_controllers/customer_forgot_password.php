@@ -160,8 +160,8 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-        $mail->Password = 'anvq dzkd xomc yaas';
+    $mail->Username = ''; // your Gmail
+        $mail->Password = '';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
     
@@ -174,7 +174,7 @@ try {
         )
     );
 
-    $mail->setFrom('tariaobernadette@gmail.com', "Daven's Kitchenette");
+    $mail->setFrom('', "Daven's Kitchenette");
     $mail->addAddress($user['email']);
     
     // Prevent email injection

@@ -71,6 +71,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'delivery
                         
                         <!-- DYNAMIC: Mark order for return -->
                         <button class="btn btn-return" id="btnReturn">Return</button>
+                        <button id="transitBtn" class="btn btn-transit">In Transit</button>
                     </div>
 
                     <!-- Divider Line -->

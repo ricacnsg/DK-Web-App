@@ -71,7 +71,7 @@
                     breaking the bank!
                     </h2>
                     <div class="hero-divider mx-auto mx-md-0"></div>
-                    <a href="#menu" class="btn hero-btn">SEE MENU</a>
+                    <a href="#menu" class="btn hero-btn" onclick="window.location.href='../online_ordering_system/get_order/get_order.php'; return false;">ORDER NOW!</a>
                 </div>
 
                 <!-- Image Column -->
@@ -253,6 +253,7 @@
 <!-- Feedback Section -->
 <div id="feedback" class="testimonial-background">
     <section class="testimonial-section container">
+        <a  onclick="window.location.href='../testimonial/testimonial.php'; return false;" class="testimonial-overlay-btn">Leave a Review</a>
         <h2 class="testimonial-title">Testimonials</h2>
         <div class="testimonial-divider"></div>
         <h3 class="testimonial-subtitle">What they're saying about us</h3>
