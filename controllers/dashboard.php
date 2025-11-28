@@ -27,6 +27,15 @@ switch ($action) {
     case 'getTopItems':
         getTopItems();
         break;
+    case 'getRestockItems':  // ADD THIS LINE
+        getRestockItems();   // ADD THIS LINE
+        break;               // ADD THIS LINE
+    case 'getCustomerTypeData':
+        getCustomerTypeData();
+        break;
+    case 'getTopCustomers':
+        getTopCustomers();
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
 }
@@ -283,5 +292,139 @@ function getSystemLogs() {
     }
 }
 
+function getRestockItems() {
+    global $conn;
+    
+    try {
+        $query = "SELECT 
+                    i.itemID,
+                    i.itemName as item_name,
+                    i.quantity as current_quantity,
+                    i.reorderLevel as reorder_level,
+                    i.unitOfMeasurement as unit,
+                    i.itemCategory as category
+                  FROM item i
+                  WHERE i.quantity <= i.reorderLevel
+                  AND i.reorderLevel > 0
+                  ORDER BY (i.quantity / i.reorderLevel) ASC, i.itemName ASC
+                  LIMIT 10";
+        
+        $result = $conn->query($query);
+        
+        $restockItems = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $restockItems[] = [
+                    'id' => $row['itemID'],
+                    'item_name' => $row['item_name'],
+                    'current_quantity' => floatval($row['current_quantity']),
+                    'reorder_level' => floatval($row['reorder_level']),
+                    'unit' => $row['unit'],
+                    'category' => $row['category']
+                ];
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $restockItems
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Restock items error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+function getCustomerTypeData() {
+    global $conn;
+    
+    try {
+        // Count online customers (orders with customerID)
+        $onlineQuery = "SELECT COUNT(DISTINCT o.customerID) as online_count
+                       FROM orders o 
+                       WHERE o.customerID IS NOT NULL 
+                       AND o.totalPrice IS NOT NULL 
+                       AND o.totalPrice > 0";
+        
+        $onlineResult = $conn->query($onlineQuery);
+        $onlineCount = $onlineResult->fetch_assoc()['online_count'];
+        
+        // Count walk-in customers (orders with walkInName)
+        $walkInQuery = "SELECT COUNT(DISTINCT o.walkInName) as walkin_count
+                       FROM orders o 
+                       WHERE o.walkInName IS NOT NULL 
+                       AND o.walkInName != ''
+                       AND o.totalPrice IS NOT NULL 
+                       AND o.totalPrice > 0";
+        
+        $walkInResult = $conn->query($walkInQuery);
+        $walkInCount = $walkInResult->fetch_assoc()['walkin_count'];
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'onlineCount' => intval($onlineCount),
+                'walkInCount' => intval($walkInCount)
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Customer type data error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+function getTopCustomers() {
+    global $conn;
+    
+    try {
+        $query = "SELECT 
+                    CASE 
+                        WHEN o.customerID IS NOT NULL THEN COALESCE(c.recipientName, 'Online Customer')
+                        WHEN o.walkInName IS NOT NULL AND o.walkInName != '' THEN o.walkInName
+                        ELSE 'Unknown Customer'
+                    END as customer_name,
+                    CASE 
+                        WHEN o.customerID IS NOT NULL THEN 'Online'
+                        ELSE 'Walk-in'
+                    END as customer_type,
+                    COUNT(o.orderNo) as order_count,
+                    COALESCE(SUM(o.totalPrice), 0) as total_spent
+                  FROM orders o
+                  LEFT JOIN customer c ON o.customerID = c.customerID
+                  WHERE o.totalPrice IS NOT NULL 
+                  AND o.totalPrice > 0
+                  GROUP BY customer_name, customer_type
+                  HAVING total_spent > 0
+                  ORDER BY total_spent DESC
+                  LIMIT 5";
+        
+        $result = $conn->query($query);
+        
+        $topCustomers = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $topCustomers[] = [
+                    'customer_name' => $row['customer_name'],
+                    'customer_type' => $row['customer_type'],
+                    'order_count' => intval($row['order_count']),
+                    'total_spent' => floatval($row['total_spent'])
+                ];
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $topCustomers
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Top customers error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
 $conn->close();
 ?>
+

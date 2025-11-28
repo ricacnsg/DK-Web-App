@@ -45,7 +45,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
             <button class="sidebar-toggle" id="sidebarToggle">
                 <i class="fas fa-bars"></i>
             </button>
-            <div id="dashboard" class="page active-page">
+<div id="dashboard" class="page active-page">
     <header class="main-header">
         <h1>Dashboard</h1>
     </header>
@@ -103,39 +103,79 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                 </div>
             </div>
             
-            <!-- Charts Container -->
+            <!-- Top Row: Charts -->
             <div class="charts-container full-width-card">
+                <!-- Today's Performance Chart -->
                 <div class="card chart-section">
                     <div class="card-title-icon-wrapper">
-                        <h2>Weekly Revenue and Orders</h2>
+                        <h2 id="performanceTitle">Today's Performance</h2>
                         <i class="fa-solid fa-chart-line"></i>
                     </div>
-                    <p class="metric-subtext">Last 7 days performance</p>
+                    <p class="metric-subtext" id="performanceSubtext">Today's orders and revenue</p>
                     <div class="chart-placeholder">
                         <canvas id="weeklyRevenueChart"></canvas>
                     </div>
                 </div>
 
+                <!-- Today's Top Menu -->
                 <div class="card chart-section">
                     <div class="card-title-icon-wrapper">
-                        <h2>Top Menu Items</h2>
+                        <h2 id="topMenuTitle">Today's Top Menu</h2>
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <p class="metric-subtext">Most popular items</p>
+                    <p class="metric-subtext" id="topMenuSubtext">Most popular items today</p>
                     <div class="chart-placeholder">
                         <canvas id="topMenuCanvas"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- System Activity Logs -->
-            <div class="card full-width-card system-logs-section">
+            <!-- Middle Row: Restock Needed | Available Space -->
+            <div class="bottom-row-container full-width-card">
+                <!-- Restock Needed -->
+                <div class="card restock-container">
+                    <div class="card-title-icon-wrapper">
+                        <h2>Restock Needed</h2>
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <p class="metric-subtext">Ingredients that need restocking</p>
+                    <div id="restockItemsContainer" class="restock-list">
+                        <p style="text-align: center; color: #999;">Loading restock data...</p>
+                    </div>
+                </div>
+
+<!-- Customer Analytics -->
+<div class="card customer-analytics-container">
+    <div class="card-title-icon-wrapper">
+        <h2>Customer Analytics</h2>
+        <i class="fa-solid fa-users"></i>
+    </div>
+    
+    <!-- Customer Type Pie Chart -->
+    <div class="customer-type-section">
+        <h3 class="analytics-subtitle">Customer Type Distribution</h3>
+        <div class="chart-placeholder">
+            <canvas id="customerTypeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Customers -->
+    <div class="top-customers-section">
+        <h3 class="analytics-subtitle">Top Customers</h3>
+        <div id="topCustomersContainer" class="top-customers-list">
+            <p style="text-align: center; color: #999;">Loading customer data...</p>
+        </div>
+    </div>
+</div>
+
+            <!-- Bottom Row: System Activity Logs (Full Width) -->
+            <div class="card system-logs-full full-width-card">
                 <div class="card-title-icon-wrapper">
                     <h2>System Activity Logs</h2>
                     <i class="fa-solid fa-history"></i>
                 </div>
                 <p class="metric-subtext">Recent admin activities</p>
-                <div id="systemLogsContainer" style="margin-top: 15px;">
+                <div id="systemLogsContainer">
                     <p style="text-align: center; color: #999;">Loading logs...</p>
                 </div>
             </div>

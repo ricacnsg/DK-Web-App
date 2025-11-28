@@ -349,22 +349,27 @@ function printDashboardSummary() {
 }
 
 // Dashboard data loading functions
-// Dashboard data loading functions
 async function loadDashboardData(period = 'today') {
     try {
         // Show loading states
         showLoadingStates();
         
-        const [statsResponse, weeklyResponse, topItemsResponse] = await Promise.all([
+         const [statsResponse, weeklyResponse, topItemsResponse, restockResponse, customerTypeResponse, topCustomersResponse] = await Promise.all([
             fetch(`../controllers/dashboard.php?action=getDashboardStats&period=${period}`),
             fetch(`../controllers/dashboard.php?action=getWeeklyData`),
-            fetch(`../controllers/dashboard.php?action=getTopItems&period=${period}`)
+            fetch(`../controllers/dashboard.php?action=getTopItems&period=${period}`),
+            fetch(`../controllers/dashboard.php?action=getRestockItems`),
+            fetch(`../controllers/dashboard.php?action=getCustomerTypeData`),
+            fetch(`../controllers/dashboard.php?action=getTopCustomers`)
         ]);
         
-        const [statsData, weeklyData, topItemsData] = await Promise.all([
+        const [statsData, weeklyData, topItemsData, restockData, customerTypeData, topCustomersData] = await Promise.all([
             statsResponse.json(),
             weeklyResponse.json(),
-            topItemsResponse.json()
+            topItemsResponse.json(),
+            restockResponse.json(),
+            customerTypeResponse.json(),
+            topCustomersResponse.json()
         ]);
         
         if (statsData.success) {
@@ -379,6 +384,18 @@ async function loadDashboardData(period = 'today') {
         
         if (topItemsData.success) {
             loadTopMenuChart(topItemsData.data);
+        }
+        
+        if (restockData.success) {
+            loadRestockItems();
+        }
+
+        if (customerTypeData.success) {
+            loadCustomerTypeChart(customerTypeData.data);
+        }
+        
+        if (topCustomersData.success) {
+            loadTopCustomers(topCustomersData.data);
         }
         
         await loadSystemLogs();
@@ -616,6 +633,7 @@ async function loadWeeklyChart(data) {
     }
 }
 
+
 async function loadTopMenuChart(data) {
     try {
         const ctx = document.getElementById('topMenuCanvas');
@@ -716,6 +734,174 @@ async function loadSystemLogs() {
         const container = document.getElementById('systemLogsContainer');
         if (container) {
             container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Error loading logs</p>';
+        }
+    }
+}
+
+// Load restock needed items
+async function loadRestockItems() {
+    try {
+        const response = await fetch('../controllers/dashboard.php?action=getRestockItems');
+        const data = await response.json();
+        
+        const container = document.getElementById('restockItemsContainer');
+        if (!container) {
+            return;
+        }
+        
+        if (data.success) {
+            if (data.data.length === 0) {
+                container.innerHTML = '<p class="no-restock">No ingredients need restocking</p>';
+                return;
+            }
+            
+            container.innerHTML = data.data.map(item => {
+                let urgencyClass = 'restock-normal';
+                let urgencyText = 'Low Stock';
+                
+                // Determine urgency based on current quantity vs reorder level
+                const stockRatio = item.current_quantity / item.reorder_level;
+                
+                if (stockRatio <= 0.2) {
+                    urgencyClass = 'restock-warning';
+                    urgencyText = 'Critical Stock';
+                } else if (stockRatio <= 0.5) {
+                    urgencyClass = 'restock-alert';
+                    urgencyText = 'Low Stock';
+                }
+                
+                return `
+                    <div class="restock-item ${urgencyClass}">
+                        <div class="restock-item-header">
+                            <span>${escapeHTML(item.item_name)}</span>
+                            <span class="restock-item-quantity">${urgencyText}</span>
+                        </div>
+                        <div class="restock-item-description">
+                            Current: ${escapeHTML(item.current_quantity)} ${escapeHTML(item.unit)} | 
+                            Reorder at: ${escapeHTML(item.reorder_level)} ${escapeHTML(item.unit)}
+                        </div>
+                        <div class="restock-item-description">
+                            Category: ${escapeHTML(item.category)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            container.innerHTML = '<p class="no-restock">Failed to load restock data</p>';
+        }
+    } catch (error) {
+        const container = document.getElementById('restockItemsContainer');
+        if (container) {
+            container.innerHTML = '<p class="no-restock">Error loading restock data</p>';
+        }
+    }
+}
+
+// Load customer type distribution
+async function loadCustomerTypeChart() {
+    try {
+        const response = await fetch('../controllers/dashboard.php?action=getCustomerTypeData');
+        const data = await response.json();
+        
+        const ctx = document.getElementById('customerTypeChart');
+        if (!ctx) {
+            return;
+        }
+        
+        // Destroy existing chart if it exists
+        const existingChart = Chart.getChart(ctx);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        if (data.success) {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Online Customers', 'Walk-in Customers'],
+                    datasets: [{
+                        data: [data.data.onlineCount, data.data.walkInCount],
+                        backgroundColor: ['#062970', '#f2d067'],
+                        borderColor: ['#051d5c', '#e6c260'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 5,
+                            bottom: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 10,
+                                font: {
+                                    size: 10
+                                },
+                                boxWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading customer type chart:', error);
+    }
+}
+
+// Load top customers
+async function loadTopCustomers() {
+    try {
+        const response = await fetch('../controllers/dashboard.php?action=getTopCustomers');
+        const data = await response.json();
+        
+        const container = document.getElementById('topCustomersContainer');
+        if (!container) {
+            return;
+        }
+        
+        if (data.success) {
+            if (data.data.length === 0) {
+                container.innerHTML = '<p class="no-customers">No customer data available</p>';
+                return;
+            }
+            
+            container.innerHTML = data.data.map(customer => `
+                <div class="customer-item">
+                    <div class="customer-item-header">
+                        <span>${escapeHTML(customer.customer_name)}</span>
+                        <span class="customer-amount">₱${customer.total_spent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div class="customer-type">
+                        ${escapeHTML(customer.customer_type)} • ${customer.order_count} orders
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<p class="no-customers">Failed to load customer data</p>';
+        }
+    } catch (error) {
+        const container = document.getElementById('topCustomersContainer');
+        if (container) {
+            container.innerHTML = '<p class="no-customers">Error loading customer data</p>';
         }
     }
 }
