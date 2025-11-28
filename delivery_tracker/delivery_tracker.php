@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'delivery rider') {
+  header("Location: ../admin_management_system/login.php");
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

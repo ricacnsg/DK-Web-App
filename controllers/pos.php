@@ -240,7 +240,8 @@ function getOrderHistory() {
     try {
         $query = "SELECT 
             o.orderNo,
-            o.walkInName, 
+            o.walkInName,
+            o.orderType,
             o.totalPrice,
             o.orderStatus,
             o.createdAT,
@@ -251,7 +252,7 @@ function getOrderHistory() {
         LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
         LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
         WHERE o.orderStatus != 'Pending'
-        GROUP BY o.orderNo
+        GROUP BY o.orderNo, o.walkInName, o.orderType, o.totalPrice, o.orderStatus, o.createdAT, p.paymentMethod
         ORDER BY o.createdAT DESC
         LIMIT 100";
         
@@ -259,6 +260,8 @@ function getOrderHistory() {
         
         $orders = [];
         while ($row = $result->fetch_assoc()) {
+            $orderType = strtolower(trim($row['orderType']));
+            
             $orders[] = [
                 'id' => $row['orderNo'],
                 'customerName' => $row['walkInName'] ?? 'Walk-in Customer', 
@@ -266,7 +269,8 @@ function getOrderHistory() {
                 'amount' => '₱' . number_format($row['totalPrice'], 2),
                 'method' => ucfirst($row['paymentMethod'] ?? 'Cash'),
                 'date' => date('m-d-Y', strtotime($row['createdAT'])),
-                'status' => ucfirst($row['orderStatus'])
+                'status' => ucfirst($row['orderStatus']), // Always show actual order status
+                'orderType' => $orderType // Send order type separately for receipt logic
             ];
         }
         

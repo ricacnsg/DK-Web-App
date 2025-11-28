@@ -407,7 +407,6 @@ function capitalizeFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// Add custom styles for SweetAlert2
 const style = document.createElement('style');
 style.textContent = `
     .sweetalert-popup {

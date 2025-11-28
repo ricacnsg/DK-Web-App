@@ -12,8 +12,8 @@ try {
                 o.totalPrice AS subtotal,
                 o.deliveryFee AS delivery_fee, 
                 o.orderStatus AS order_status,
-                o.paymentMethod AS payment_method,
-                o.paymentStatus AS payment_status,
+                p.paymentMethod AS payment_method,
+                p.paymentStatus AS payment_status,
                 c.recipientName AS recipient_name,
                 c.email AS email, 
                 c.phoneNumber AS phone_number,
@@ -32,6 +32,7 @@ try {
             LEFT JOIN location l ON o.orderNo = l.orderNo
             LEFT JOIN itemsordered io ON o.orderNo = io.orderNo
             LEFT JOIN menuitem m ON io.menuItemID = m.menuItemID
+            LEFT JOIN payment p ON o.orderNo = p.orderNO 
             WHERE o.orderStatus = 'Ready'";
     
     // Add WHERE clause for specific order if order_id is provided
@@ -40,7 +41,7 @@ try {
     }
     
     $sql .= " GROUP BY o.orderNo, o.createdAT, o.totalPrice, o.deliveryFee, o.orderStatus, 
-                     o.paymentMethod, o.paymentStatus, c.recipientName, c.email, c.phoneNumber, 
+                     p.paymentMethod, p.paymentStatus, c.recipientName, c.email, c.phoneNumber, 
                      l.street, l.barangay, l.municipality, l.locationRemark
             ORDER BY o.createdAT DESC";
     

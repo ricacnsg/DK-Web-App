@@ -164,6 +164,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'cashier'
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
+                                    <th>Order Type</th>
                                     <th>Item Order</th>
                                     <th>Total Amount</th>
                                     <th>Payment Method</th>

@@ -489,17 +489,35 @@ function showNoOrdersState() {
 // ============================================
 async function handleLogout() {
     const result = await Swal.fire({
-        title: 'Logout',
-        text: 'Are you sure you want to logout?',
-        icon: 'question',
+        title: 'Are you sure you want to logout?',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#f2d067',
+        cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, logout',
         cancelButtonText: 'Cancel'
     });
 
     if (result.isConfirmed) {
-        window.location.href = '../logout.php';
+        try {
+            const res = await fetch("../../controllers/logout.php", {
+                method: "POST"
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                console.log("✅ " + data.message);
+                window.location.href = "../admin_management_system/login.php";
+            } else {
+                console.log("⚠️ " + data.message);
+            }
+        } catch (err) {
+            console.error("Error:", err);
+        }
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const logoutBtn = document.getElementById("logoutBtn");
+    logoutBtn.addEventListener("click", handleLogout);
+});
