@@ -460,7 +460,7 @@ html, body {
 
 /* Dashboard Scroll */
 .dashboard-container {
-    height: calc(100vh - 120px);
+    height: calc(100vh - 200px);
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 5px;
