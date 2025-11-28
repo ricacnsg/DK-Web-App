@@ -46,93 +46,102 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                 <i class="fas fa-bars"></i>
             </button>
             <div id="dashboard" class="page active-page">
-                <header class="main-header">
-                    <h1>Dashboard</h1>
-                </header>
+    <header class="main-header">
+        <h1>Dashboard</h1>
+    </header>
 
-                <div class="toolbar">
-                    <div class="tabs">
-                        <button class="tab-btn active" data-tab="today">Today</button>
-                        <button class="tab-btn" data-tab="weekly">Weekly</button>
-                        <button class="tab-btn" data-tab="monthly">Monthly</button>
+    <div class="toolbar">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="today">Today</button>
+            <button class="tab-btn" data-tab="weekly">Weekly</button>
+            <button class="tab-btn" data-tab="monthly">Monthly</button>
+        </div>
+        <button class="print-summary-btn">
+            <i class="fa-solid fa-print"></i> Print Summary
+        </button>
+    </div>
+
+    <div class="dashboard-container">
+        <section class="dashboard-cards">
+            <!-- Metric Cards -->
+            <div class="card revenue-card">
+                <div class="card-title-icon-wrapper">
+                    <h2>Total Revenue</h2>
+                    <i class="fa-solid fa-peso-sign"></i>
+                </div>
+                <div class="card-metric-wrapper">
+                    <p class="metric-value" id="totalRevenue">₱0</p>
+                    <p class="metric-subtext" id="revenueChange">
+                        <i class="fa-solid fa-arrow-up"></i> Calculating...
+                    </p>
+                </div>
+            </div>
+            
+            <div class="card today-revenue-card">
+                <div class="card-title-icon-wrapper">
+                    <h2 id="periodTitle">Today's Revenue</h2>
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="card-metric-wrapper">
+                    <p class="metric-value" id="todayRevenue">₱0</p>
+                    <p class="metric-subtext" id="todayChange">
+                        <i class="fa-solid fa-arrow-up"></i> Calculating...
+                    </p>
+                </div>
+            </div>
+
+            <div class="card avg-order-card">
+                <div class="card-title-icon-wrapper">
+                    <h2>Avg Order Value</h2>
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+                <div class="card-metric-wrapper">
+                    <p class="metric-value" id="avgOrderValue">₱0</p>
+                    <p class="metric-subtext" id="avgChange">
+                        <i class="fa-solid fa-arrow-up"></i> Calculating...
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Charts Container -->
+            <div class="charts-container full-width-card">
+                <div class="card chart-section">
+                    <div class="card-title-icon-wrapper">
+                        <h2>Weekly Revenue and Orders</h2>
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
-                    <button class="print-summary-btn">
-                        <i class="fa-solid fa-print"></i> Print Summary
-                    </button>
+                    <p class="metric-subtext">Last 7 days performance</p>
+                    <div class="chart-placeholder">
+                        <canvas id="weeklyRevenueChart"></canvas>
+                    </div>
                 </div>
 
-                <section class="dashboard-cards">
-                    <div class="card revenue-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Total Revenue</h2>
-                            <i class="fa-solid fa-peso-sign"></i>
-                        </div>
-                        <div class="card-metric-wrapper">
-                            <p class="metric-value">₱25,000</p>
-                            <p class="metric-subtext success">
-                                <i class="fa-solid fa-arrow-up"></i> +12% vs last month
-                            </p>
-                        </div>
+                <div class="card chart-section">
+                    <div class="card-title-icon-wrapper">
+                        <h2>Top Menu Items</h2>
+                        <i class="fa-solid fa-utensils"></i>
                     </div>
-                    
-                    <div class="card today-revenue-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Today's Revenue</h2>
-                            <i class="fa-solid fa-chart-line"></i>
-                        </div>
-                        <div class="card-metric-wrapper">
-                            <p class="metric-value">₱3,250</p>
-                            <p class="metric-subtext success">
-                                <i class="fa-solid fa-arrow-up"></i> +5% vs yesterday
-                            </p>
-                        </div>
+                    <p class="metric-subtext">Most popular items</p>
+                    <div class="chart-placeholder">
+                        <canvas id="topMenuCanvas"></canvas>
                     </div>
-
-                    <div class="card avg-order-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Avg Order Value</h2>
-                            <i class="fa-solid fa-bag-shopping"></i>
-                        </div>
-                        <div class="card-metric-wrapper">
-                            <p class="metric-value">₱185</p>
-                            <p class="metric-subtext danger">
-                                <i class="fa-solid fa-arrow-down"></i> -2% vs last week
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="card active-staff-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Active Staff</h2>
-                            <i class="fa-solid fa-user-group"></i>
-                        </div>
-                        <div class="card-metric-wrapper staff-metric-wrapper">
-                            <p class="metric-value staff-count">8/10</p>
-                            <p class="metric-subtext">
-                                <span class="status-available"><i class="fa-solid fa-circle-check"></i> All shifts covered</span>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="card chart-section full-width-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Weekly Revenue and Orders</h2>
-                        </div>
-                        <p class="metric-subtext">Last 7 days performance</p>
-                        <div class="chart-placeholder line-chart">
-                            </div>
-                    </div>
-
-                    <div class="card chart-section top-menu-card full-width-card">
-                        <div class="card-title-icon-wrapper">
-                            <h2>Top Menu</h2>
-                        </div>
-                        <p class="metric-subtext">Most ordered this week</p>
-                        <div class="chart-placeholder bar-chart">
-                            </div>
-                    </div>
-                </section>
+                </div>
             </div>
+
+            <!-- System Activity Logs -->
+            <div class="card full-width-card system-logs-section">
+                <div class="card-title-icon-wrapper">
+                    <h2>System Activity Logs</h2>
+                    <i class="fa-solid fa-history"></i>
+                </div>
+                <p class="metric-subtext">Recent admin activities</p>
+                <div id="systemLogsContainer" style="margin-top: 15px;">
+                    <p style="text-align: center; color: #999;">Loading logs...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
 
             <div id="menu" class="page">
     <div class="header">
@@ -764,5 +773,6 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
 
     <script src="admin_management.js"></script>
     <script src="/bootstrap5/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>
 </html>
