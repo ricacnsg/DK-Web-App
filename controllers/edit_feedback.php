@@ -17,14 +17,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Get previous feedback for logging
+    $prevStmt = $conn->prepare("SELECT input FROM feedback WHERE feedbackID = ? AND customerID = ?");
+    $prevStmt->bind_param("ii", $feedbackID, $customerID);
+    $prevStmt->execute();
+    $prevStmt->bind_result($previousData);
+    $prevStmt->fetch();
+    $prevStmt->close();
+
+    // Update feedback
     $sql = "UPDATE feedback SET input = ?, updatedAt = NOW() WHERE feedbackID = ? AND customerID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sii", $input, $feedbackID, $customerID);
 
     if ($stmt->execute()) {
         echo "success";
+
+        // Insert log with previousData and newData
+        $action = "Updated feedback";
+        $logStmt = $conn->prepare("INSERT INTO customerlogs (customerID, previousData, newData, action, timestamp) VALUES (?, ?, ?, ?, NOW())");
+        $logStmt->bind_param("isss", $customerID, $previousData, $input, $action);
+        $logStmt->execute();
+        $logStmt->close();
+
     } else {
-        echo "Error updating feedback";
+        echo "Error updating feedback: " . $stmt->error;
     }
 
     $stmt->close();

@@ -23,6 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmt->execute()) {
         echo "success";
+
+        $action = 'Submitted feedback';
+        $logStmt = $conn->prepare("INSERT INTO customerlogs (customerID, previousData, newData, action, timestamp) VALUES (?, NULL, ?, ?, NOW())");
+        $logStmt->bind_param("iss", $customer_id, $feedback, $action);
+        $logStmt->execute();
+        $logStmt->close();
     } else {
         echo "Error: " . $stmt->error;
     }

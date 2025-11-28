@@ -149,6 +149,19 @@ $stmt->bind_param("ssisi", $hashedToken, $tokenExpiry, $newAttemptCount, $curren
 $stmt->execute();
 $stmt->close();
 
+$action = "Requested Password Reset";
+
+$logStmt = $conn->prepare("
+    INSERT INTO customerlogs (customerID, action, previousData, newData, timestamp)
+    VALUES (?, ?, NULL, NULL, NOW())
+");
+
+if ($logStmt) {
+    $logStmt->bind_param("is", $user['customerID'], $action);
+    $logStmt->execute();
+    $logStmt->close();
+}
+
 // Prepare reset link (use token before hashing for the URL)
 $resetLink = htmlspecialchars("http://localhost:3000/online_ordering_system/reset_password/reset_password.php?token=" . urlencode($token), ENT_QUOTES, 'UTF-8');
 
@@ -160,8 +173,8 @@ try {
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = ''; // your Gmail
-        $mail->Password = '';
+    $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
+        $mail->Password = 'gtdl kcxp dvtp kozn';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
     
@@ -174,7 +187,7 @@ try {
         )
     );
 
-    $mail->setFrom('', "Daven's Kitchenette");
+    $mail->setFrom('tariaobernadette@gmail.com', "Daven's Kitchenette");
     $mail->addAddress($user['email']);
     
     // Prevent email injection

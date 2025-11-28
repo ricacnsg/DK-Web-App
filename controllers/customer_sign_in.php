@@ -6,35 +6,6 @@ header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 require_once '../database/connect.php';
 
-// if ($_SERVER["REQUEST_METHOD"] == "POST") {
-//   $user = $_POST["customer_username"];
-//   $pass = $_POST["customer_password"];
-
-//   $stmt = $conn->prepare("SELECT * FROM customer WHERE username=? AND password=?");
-//   $stmt->bind_param("ss", $user, $pass);
-//   $stmt->execute();
-//   $result = $stmt->get_result();
-
-//   if ($result->num_rows > 0) {
-//     $row = $result->fetch_assoc();
-
-//     $_SESSION['customer_id'] = $row['customerID'];
-//     $_SESSION['username'] = $row['username'];
-//     $_SESSION['recipientName'] = $row['recipientName'] ?? '';
-//     $_SESSION['phoneNumber'] = $row['phoneNumber'] ?? '';
-//     $_SESSION['email'] = $row['email'] ?? '';
-//     $_SESSION['isLoggedIn'] = true;
-
-//     echo "success";
-//   } else {
-//     echo "Invalid username or password.";
-//   }
-      
-//   $stmt->close();
-// }
-
-// $conn->close();
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Invalid request method']);
@@ -88,6 +59,22 @@ if (!$user) {
 if ($user['isVerified'] == 0) {
     echo json_encode(['success' => false, 'message' => 'Please verify your email before logging in.']);
     exit;
+}
+
+// Insert sign in log
+$logStmt = $conn->prepare("INSERT INTO customerlogs (customerID, action, timestamp) VALUES (?, 'Sign In', NOW())");
+
+if ($logStmt) {
+    $logStmt->bind_param('i', $user['customerID']);
+    $logStmt->execute();
+    
+    if ($logStmt->error) {
+        error_log("Failed to log sign in: " . $logStmt->error);
+    }
+    
+    $logStmt->close();
+} else {
+    error_log("Failed to prepare log statement: " . $conn->error);
 }
 
 if ($user && password_verify($password, $user['password'])) {

@@ -245,7 +245,7 @@ function addMenuItem() {
 
 function updateMenuItem() {
     global $conn;
-    
+
     ob_start();
 
     try {
@@ -260,11 +260,11 @@ function updateMenuItem() {
 
         if (isset($input['ingredients']) && is_array($input['ingredients'])) {
             foreach ($input['ingredients'] as $ingredient) {
-                if (!is_array($ingredient)) continue; 
-
-                $sanitizedIngredient = [];
-                $sanitizedIngredient['ingredient_id'] = isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0;
-                $sanitizedIngredient['quantity'] = isset($ingredient['quantity']) ? (float)$ingredient['quantity'] : 0.0;
+                if (!is_array($ingredient)) continue;
+                $sanitizedIngredient = [
+                    'ingredient_id' => isset($ingredient['ingredient_id']) ? (int)$ingredient['ingredient_id'] : 0,
+                    'quantity' => isset($ingredient['quantity']) ? (float)$ingredient['quantity'] : 0.0
+                ];
                 $ingredients[] = $sanitizedIngredient;
             }
         }
@@ -275,15 +275,31 @@ function updateMenuItem() {
             exit();
         }
 
+        // Fetch old data
         $resOld = $conn->prepare("SELECT menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemCategory, menuItemImage 
-                                FROM menuitem 
-                                WHERE menuItemID = ?");
+                                  FROM menuitem 
+                                  WHERE menuItemID = ?");
         $resOld->bind_param("i", $id);
         $resOld->execute();
         $result = $resOld->get_result();
         $oldData = $result->fetch_assoc();
         $resOld->close();
 
+        if (!$oldData) {
+            $oldData = [
+                'menuItemID' => $id,
+                'menuItemName' => 'UNKNOWN',
+                'menuItemDescription' => '',
+                'menuItemPrice' => 0,
+                'menuItemCategory' => '',
+                'menuItemImage' => '[NULL]'
+            ];
+        } else {
+            // Replace BLOB image with placeholder for logging
+            $oldData['menuItemImage'] = '[BLOB DATA]';
+        }
+
+        // Update menu item
         if (!empty($imageData) && strpos($imageData, 'data:image') === 0) {
             $base64 = explode(',', $imageData)[1];
             $imageBlob = base64_decode($base64);
@@ -305,17 +321,16 @@ function updateMenuItem() {
         }
         $stmt->close();
 
+        // Update ingredients
         $currentIngredientsDB = [];
         $res = $conn->query("SELECT itemID, quantity FROM menuitemingredients WHERE menuItemID = $id");
         while ($row = $res->fetch_assoc()) {
             $currentIngredientsDB[$row['itemID']] = $row['quantity'];
         }
 
-        $newIngredientIDs = [];
         foreach ($ingredients as $ing) {
             $ingredientID = $ing['ingredient_id'];
             $qty = $ing['quantity'];
-            $newIngredientIDs[] = $ingredientID;
 
             if (isset($currentIngredientsDB[$ingredientID])) {
                 if ($currentIngredientsDB[$ingredientID] != $qty) {
@@ -340,29 +355,31 @@ function updateMenuItem() {
             $stmt2->close();
         }
 
+        // Prepare new data for logging
         $newData = [
             'menuItemID' => $id,
             'menuItemName' => $name,
             'menuItemDescription' => $description,
             'menuItemPrice' => $price,
             'menuItemCategory' => $category,
-            'menuItemImage' => !empty($imageData) ? 'UPDATED' : 'UNCHANGED',
+            'menuItemImage' => !empty($imageData) ? '[UPDATED]' : '[UNCHANGED]',
             'ingredients' => $ingredients
         ];
 
-        $newDataJson = json_encode($newData);
-        $oldDataJson = json_encode($oldData);
+        $oldDataJson = json_encode($oldData) ?: '{}';
+        $newDataJson = json_encode($newData) ?: '{}';
 
+        // Log action
         try {
             logAction($conn, $_SESSION['staff_id'], 'menu management', 'UPDATE', $id, "Update menu item: $name", $oldDataJson, $newDataJson);
         } catch (Exception $e) {
-            // Log failed, but continue
+            // Logging failed but continue
         }
 
         ob_end_clean();
         echo json_encode(['success' => true, 'message' => 'Menu item and ingredients updated successfully']);
         exit();
-        
+
     } catch (Exception $e) {
         ob_end_clean();
         echo json_encode(['success' => false, 'message' => 'Exception: ' . $e->getMessage()]);
@@ -370,9 +387,10 @@ function updateMenuItem() {
     }
 }
 
+
 function deleteMenuItem() {
     global $conn;
-    
+
     ob_start();
 
     try {
@@ -388,11 +406,22 @@ function deleteMenuItem() {
         $stmtOld = $conn->prepare("SELECT * FROM menuitem WHERE menuItemID = ?");
         $stmtOld->bind_param("i", $id); 
         $stmtOld->execute();
-
         $result = $stmtOld->get_result();
         $oldData = $result->fetch_assoc();
-
         $stmtOld->close();
+
+        if (!$oldData) {
+            $oldData = [
+                'menuItemID' => $id,
+                'menuItemName' => 'UNKNOWN',
+                'menuItemDescription' => '',
+                'menuItemPrice' => 0,
+                'menuItemCategory' => '',
+                'menuItemImage' => '[NULL]'
+            ];
+        } else {
+            $oldData['menuItemImage'] = '[BLOB DATA]';
+        }
 
         $stmt = $conn->prepare("DELETE FROM menuitem WHERE menuItemID = ?");
         $stmt->bind_param("i", $id);
@@ -401,9 +430,9 @@ function deleteMenuItem() {
             try {
                 logAction($conn, $_SESSION['staff_id'], 'menu management', 'DELETE', $id, "Deleted menu item: " . $oldData['menuItemName'], json_encode($oldData), null);
             } catch (Exception $e) {
-                // Log failed, but continue
+                // Log failed but continue
             }
-            
+
             $stmt->close();
             ob_end_clean();
             echo json_encode(['success' => true, 'message' => 'Menu item deleted successfully']);
@@ -420,6 +449,7 @@ function deleteMenuItem() {
         exit();
     }
 }
+
 
 function getIngredients() {
     global $conn;

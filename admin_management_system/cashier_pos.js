@@ -626,7 +626,6 @@ function renderOrderHistory() {
         row.dataset.status = order.status;
         row.dataset.orderType = order.orderType;
         
-        // Format order type for display
         let displayOrderType = '';
         if (order.orderType === 'dine in') {
             displayOrderType = 'Dine In';
