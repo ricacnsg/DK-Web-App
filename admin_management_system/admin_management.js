@@ -1891,41 +1891,92 @@ async function populateOrderHistory() {
     }
 }
 
-// Render order history
+// Helper: determine if order is online
+function isOnlineOrder(order) {
+    if (!order) return false;
+
+    // If API returns an explicit order_number, it's almost certainly an online order
+    if (order.order_number && String(order.order_number).trim() !== '') return true;
+
+    // If delivery/customer fields exist -> online
+    const hasRecipient = order.recipient_name && order.recipient_name.trim() !== '';
+    const hasDeliveryAddress = order.delivery_address && order.delivery_address.trim() !== '';
+    const hasPhone = order.phone_number && order.phone_number.trim() !== '';
+
+    if (hasRecipient || hasDeliveryAddress || hasPhone) return true;
+
+    // Payment method heuristics: non-cash usually means online
+    if (order.method) {
+        const method = String(order.method).toLowerCase().trim();
+        if (method !== 'cash' && method !== '') return true; // e.g., 'gcash','card','bank','credit'
+    }
+
+    // If order_type explicitly provided and indicates dine-in/takeout -> treat as walk-in
+    if (order.orderType) {
+        const ot = String(order.orderType).toLowerCase();
+        if (ot.includes('dine') || ot.includes('take') || ot.includes('walk')) return false;
+    }
+
+    // Default: treat as walk-in only when method is cash and no online indicators
+    if (order.method && String(order.method).toLowerCase().trim() === 'cash') return false;
+
+    // Otherwise be conservative: treat as online if any uncertainty (so you don't call showWalkIn for missing online details)
+    return true;
+}
+
+// Render order history (robust dataset attributes)
 function renderOrderHistory(data = orderHistory) {
     const tableBody = document.getElementById('orderTableBody');
-    
     if (!tableBody) {
         console.error('orderTableBody not found!');
         return;
     }
-    
+
     tableBody.innerHTML = '';
-    
-    if (data.length === 0) {
+
+    if (!Array.isArray(data) || data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
         return;
     }
-    
-    data.forEach((order) => {
+
+    data.forEach(order => {
         const row = document.createElement('tr');
-        
-        // Store order data directly on the row element
-        row.dataset.orderId = order.id;
-        row.dataset.customerName = order.customerName;
-        row.dataset.items = order.items;
-        row.dataset.amount = order.amount;
-        row.dataset.method = order.method;
-        row.dataset.date = order.date;
-        row.dataset.status = order.status;
-        
+
+        // Put defensive fallbacks for properties that might be missing
+        const id = order.id ?? order.order_id ?? '';
+        const items = order.items ?? order.items_ordered ?? order.items_order ?? '';
+        const amount = (order.amount ?? order.subtotal ?? order.total ?? 0);
+        const method = order.method ?? order.payment_method ?? '';
+        const date = order.date ?? order.date_ordered ?? '';
+        const status = order.status ?? order.order_status ?? '';
+        const customerName = order.customerName;
+
+
+        // Additional online fields if available
+        const orderNumber = order.order_number ?? '';
+        const recipient = order.recipient_name ?? order.recipient ?? '';
+        const deliveryAddress = order.delivery_address ?? '';
+
+        // Save everything on dataset (strings only)
+        row.dataset.orderId = String(id);
+        row.dataset.customerName = String(customerName);
+        row.dataset.items = String(items);
+        row.dataset.amount = String(amount);
+        row.dataset.method = String(method);
+        row.dataset.date = String(date);
+        row.dataset.status = String(status);
+        row.dataset.orderNumber = String(orderNumber);
+        row.dataset.recipientName = String(recipient);
+        row.dataset.deliveryAddress = String(deliveryAddress);
+        if (order.orderType) row.dataset.orderType = String(order.orderType);
+
         row.innerHTML = `
-            <td>${escapeHTML(order.id)}</td>
-            <td>${escapeHTML(order.items)}</td>
-            <td>${escapeHTML(order.amount)}</td>
-            <td>${escapeHTML(order.method)}</td>
-            <td>${escapeHTML(order.date)}</td>
-            <td><span class="status-badge">${escapeHTML(order.status)}</span></td>
+            <td>${escapeHTML(String(id))}</td>
+            <td>${escapeHTML(String(items))}</td>
+            <td>${escapeHTML(String(amount))}</td>
+            <td>${escapeHTML(String(method))}</td>
+            <td>${escapeHTML(String(date))}</td>
+            <td><span class="status-badge">${escapeHTML(String(status))}</span></td>
             <td>
                 <button class="btn btn-sm view-history-receipt m-2" type="button">
                     <i class="fa-solid fa-eye text-muted"></i>
@@ -2443,32 +2494,40 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Setup event listener for view receipt buttons
     const orderTableBody = document.getElementById("orderTableBody");
-    if (orderTableBody) {
-        orderTableBody.addEventListener("click", function(e) {
-            const viewButton = e.target.closest(".view-history-receipt");
-            
-            if (!viewButton) return;
-            
-            const row = viewButton.closest("tr");
-            if (!row) return;
-            
-            const order = {
-                id: row.dataset.orderId,
-                customerName: row.dataset.customerName,
-                items: row.dataset.items,
-                amount: row.dataset.amount,
-                method: row.dataset.method,
-                date: row.dataset.date,
-                status: row.dataset.status
-            };
+if (orderTableBody) {
+    orderTableBody.addEventListener("click", function(e) {
+        const viewButton = e.target.closest(".view-history-receipt");
+        if (!viewButton) return;
 
-            const isWalkIn = order.status && order.status.toLowerCase() === 'walk in';
-            
-            if (isWalkIn) {
-                showWalkInReceipt(order);
-            } else {
-                fetchAndShowOnlineReceipt(order.id);
-            }
-        });
-    }
+        const row = viewButton.closest("tr");
+        if (!row) return;
+
+        // Rebuild order object from dataset (use the same keys as renderOrderHistory)
+        const order = {
+            id: row.dataset.orderId,
+            items: row.dataset.items,
+            customerName: row.dataset.customerName,
+            amount: row.dataset.amount,
+            method: row.dataset.method,
+            date: row.dataset.date,
+            status: row.dataset.status,
+            order_number: row.dataset.orderNumber,
+            recipient_name: row.dataset.recipientName,
+            delivery_address: row.dataset.deliveryAddress,
+            orderType: row.dataset.orderType
+        };
+
+        // Debugging — uncomment if you need to inspect what fields are present
+        // console.log('View receipt clicked. Order reconstructed:', order);
+
+        // Decide which receipt to show
+        if (isOnlineOrder(order)) {
+            // Online: fetch full details (server side) then show receipt
+            fetchAndShowOnlineReceipt(order.id || order.order_number);
+        } else {
+            // Walk-in: show local walk-in receipt using available dataset
+            showWalkInReceipt(order);
+        }
+    });
+}
 });
