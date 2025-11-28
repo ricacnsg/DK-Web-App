@@ -140,51 +140,218 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // DASHBOARD TAB LOGIC
-    const dashboard = document.getElementById('dashboard');
-    if (dashboard) {
-        const tabButtons = dashboard.querySelectorAll('.tab-btn');
-        const mainHeader = dashboard.querySelector('.main-header h1');
-        const printButton = dashboard.querySelector('.print-summary-btn');
+const dashboard = document.getElementById('dashboard');
+if (dashboard) {
+    const tabButtons = dashboard.querySelectorAll('.tab-btn');
+    const mainHeader = dashboard.querySelector('.main-header h1');
+    const printButton = dashboard.querySelector('.print-summary-btn');
 
-        const switchTab = (tabName) => {
-            tabButtons.forEach(btn => {
-                const isActive = btn.getAttribute('data-tab') === tabName;
-                btn.classList.toggle('active', isActive);
-            });
-
-            if (mainHeader) {
-                const formatted = tabName.charAt(0).toUpperCase() + tabName.slice(1) + ' Dashboard';
-                mainHeader.textContent = formatted;
-            }
-            
-            loadDashboardData(tabName);
-        };
-
+    const switchTab = (tabName) => {
         tabButtons.forEach(btn => {
-            btn.addEventListener('click', e => {
-                e.stopPropagation();
-                const tabName = btn.getAttribute('data-tab');
-                switchTab(tabName);
-            });
+            const isActive = btn.getAttribute('data-tab') === tabName;
+            btn.classList.toggle('active', isActive);
         });
 
-        if (tabButtons.length > 0) {
-            switchTab(tabButtons[0].getAttribute('data-tab'));
+        if (mainHeader) {
+            const formatted = tabName.charAt(0).toUpperCase() + tabName.slice(1) + ' Dashboard';
+            mainHeader.textContent = formatted;
         }
+        
+        loadDashboardData(tabName);
+    };
 
-        if (printButton) {
-            printButton.addEventListener('click', e => {
-                e.stopPropagation();
-                alert('Printing summary... (In a real app, this would trigger print logic)');
-            });
-        }
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            const tabName = btn.getAttribute('data-tab');
+            switchTab(tabName);
+        });
+    });
+
+    if (tabButtons.length > 0) {
+        switchTab(tabButtons[0].getAttribute('data-tab'));
     }
 
+    // FIXED PRINT BUTTON FUNCTIONALITY
+    if (printButton) {
+        printButton.addEventListener('click', e => {
+            e.stopPropagation();
+            printDashboardSummary();
+        });
+    }
+}
+
+// ADD THIS FUNCTION TO YOUR JAVASCRIPT FILE
+function printDashboardSummary() {
+    // Get current tab period
+    const activeTab = document.querySelector('.tab-btn.active');
+    const period = activeTab ? activeTab.getAttribute('data-tab') : 'today';
+    
+    // Get current metrics
+    const totalRevenue = document.getElementById('totalRevenue').textContent;
+    const todayRevenue = document.getElementById('todayRevenue').textContent;
+    const avgOrderValue = document.getElementById('avgOrderValue').textContent;
+    const revenueChange = document.getElementById('revenueChange').textContent;
+    const todayChange = document.getElementById('todayChange').textContent;
+    const avgChange = document.getElementById('avgChange').textContent;
+    
+    // Get period title
+    const periodTitle = document.getElementById('periodTitle').textContent;
+    
+    // Format period for display
+    const periodDisplay = period.charAt(0).toUpperCase() + period.slice(1);
+    
+    // Create print window content
+    const printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Daven's Kitchenette - ${periodDisplay} Summary</title>
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    margin: 40px;
+                    color: #333;
+                }
+                .header { 
+                    text-align: center; 
+                    margin-bottom: 30px;
+                    border-bottom: 2px solid #062970;
+                    padding-bottom: 20px;
+                }
+                .header h1 { 
+                    color: #062970; 
+                    margin: 0;
+                    font-size: 28px;
+                }
+                .print-date { 
+                    text-align: right; 
+                    color: #666;
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                }
+                .metrics-grid { 
+                    display: grid; 
+                    grid-template-columns: repeat(3, 1fr); 
+                    gap: 20px; 
+                    margin-bottom: 30px;
+                }
+                .metric-card { 
+                    border: 1px solid #ddd; 
+                    padding: 20px; 
+                    border-radius: 8px;
+                    text-align: center;
+                    background: #f9f9f9;
+                }
+                .metric-value { 
+                    font-size: 24px; 
+                    font-weight: bold; 
+                    color: #062970;
+                    margin: 10px 0;
+                }
+                .metric-label { 
+                    font-weight: bold; 
+                    color: #555;
+                    font-size: 16px;
+                }
+                .metric-change { 
+                    font-size: 14px; 
+                    color: #666;
+                    margin-top: 5px;
+                }
+                .charts-section { 
+                    margin-top: 30px;
+                }
+                .chart-placeholder {
+                    border: 1px dashed #ccc;
+                    padding: 40px;
+                    text-align: center;
+                    color: #666;
+                    margin: 10px 0;
+                    background: #f5f5f5;
+                }
+                .section-title {
+                    background: #062970;
+                    color: white;
+                    padding: 10px;
+                    margin: 20px 0 10px 0;
+                    font-weight: bold;
+                }
+                .footer {
+                    margin-top: 40px; 
+                    text-align: center; 
+                    color: #666; 
+                    font-size: 12px;
+                    border-top: 1px solid #ddd;
+                    padding-top: 20px;
+                }
+                @media print {
+                    body { margin: 20px; }
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="print-date">Printed: ${new Date().toLocaleString()}</div>
+            
+            <div class="header">
+                <h1>Daven's Kitchenette - ${periodDisplay} Dashboard Summary</h1>
+            </div>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-value">${totalRevenue}</div>
+                    <div class="metric-change">${revenueChange}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">${periodTitle}</div>
+                    <div class="metric-value">${todayRevenue}</div>
+                    <div class="metric-change">${todayChange}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Order Value</div>
+                    <div class="metric-value">${avgOrderValue}</div>
+                    <div class="metric-change">${avgChange}</div>
+                </div>
+            </div>
+            
+            <div class="section-title">Performance Charts</div>
+            
+            <div class="charts-section">
+                <div class="chart-placeholder">
+                    <strong>Revenue and Orders Chart</strong><br>
+                    <small>Visual representation of ${periodDisplay.toLowerCase()} performance</small>
+                </div>
+                
+                <div class="chart-placeholder">
+                    <strong>Top Menu Items</strong><br>
+                    <small>Most popular items for the selected period</small>
+                </div>
+            </div>
+            
+            <div class="footer">
+                Generated by Daven's Kitchenette Management System
+            </div>
+        </body>
+        </html>
+    `;
+    
+    // Open print window
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+}
+
+// Dashboard data loading functions
 // Dashboard data loading functions
 async function loadDashboardData(period = 'today') {
     try {
-        console.log('Loading dashboard data for period:', period);
-        
         // Show loading states
         showLoadingStates();
         
@@ -200,12 +367,9 @@ async function loadDashboardData(period = 'today') {
             topItemsResponse.json()
         ]);
         
-        console.log('Dashboard responses:', { statsData, weeklyData, topItemsData });
-        
         if (statsData.success) {
             updateDashboardMetrics(statsData.data, period);
         } else {
-            console.error('Failed to load dashboard stats:', statsData.message);
             setDefaultMetrics();
         }
         
@@ -220,7 +384,6 @@ async function loadDashboardData(period = 'today') {
         await loadSystemLogs();
         
     } catch (error) {
-        console.error('Error loading dashboard data:', error);
         setDefaultMetrics();
         showNotification('Error loading dashboard data', 'error');
     }
@@ -250,7 +413,7 @@ function updateDashboardMetrics(stats, period) {
     document.getElementById('totalRevenue').textContent = `₱${stats.totalRevenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('totalRevenue').classList.remove('loading');
     
-    // Update title based on period - FIXED
+    // Update title based on period
     let periodTitle = '';
     let chartTitle = '';
     let chartSubtext = '';
@@ -328,9 +491,9 @@ function updateTrendElement(elementId, change, type) {
     const element = document.getElementById(elementId);
     if (!element) return;
     
-    const isPositive = change > 0;  // Changed from >= to > so 0 is not positive
+    const isPositive = change > 0;
     const isNeutral = change === 0;
-    const isNegative = change < 0;  // Added negative check
+    const isNegative = change < 0;
     
     let text = '';
     if (isNeutral) {
@@ -342,17 +505,18 @@ function updateTrendElement(elementId, change, type) {
         text = `<i class="fa-solid fa-arrow-${arrow}"></i> ${changeText}% from ${period}`;
     }
     
-    // Set colors based on trend - FIXED
+    // Set colors based on trend
     if (isPositive) {
-        element.className = 'metric-subtext success'; // Green for positive
+        element.className = 'metric-subtext success';
     } else if (isNegative) {
-        element.className = 'metric-subtext danger'; // Red for negative
+        element.className = 'metric-subtext danger';
     } else {
-        element.className = 'metric-subtext'; // Grey for neutral
+        element.className = 'metric-subtext';
     }
     
     element.innerHTML = text;
 }
+
 function setDefaultMetrics() {
     const metrics = {
         'totalRevenue': '₱0.00',
@@ -382,7 +546,6 @@ async function loadWeeklyChart(data) {
     try {
         const ctx = document.getElementById('weeklyRevenueChart');
         if (!ctx) {
-            console.log('Weekly chart canvas not found');
             return;
         }
         
@@ -449,7 +612,7 @@ async function loadWeeklyChart(data) {
             });
         }
     } catch (error) {
-        console.error('Error loading weekly chart:', error);
+        // Silent fail for chart errors
     }
 }
 
@@ -457,7 +620,6 @@ async function loadTopMenuChart(data) {
     try {
         const ctx = document.getElementById('topMenuCanvas');
         if (!ctx) {
-            console.log('Top menu canvas not found');
             return;
         }
         
@@ -515,21 +677,18 @@ async function loadTopMenuChart(data) {
             });
         }
     } catch (error) {
-        console.error('Error loading top menu chart:', error);
+        // Silent fail for chart errors
     }
 }
 
-// Update your existing loadSystemLogs function to use the new CSS classes
+// Update your existing loadSystemLogs function
 async function loadSystemLogs() {
     try {
         const response = await fetch('../controllers/dashboard.php?action=getSystemLogs');
         const data = await response.json();
         
-        console.log('System logs data:', data);
-        
         const container = document.getElementById('systemLogsContainer');
         if (!container) {
-            console.log('System logs container not found');
             return;
         }
         
@@ -554,7 +713,6 @@ async function loadSystemLogs() {
             container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Failed to load logs</p>';
         }
     } catch (error) {
-        console.error('Error loading system logs:', error);
         const container = document.getElementById('systemLogsContainer');
         if (container) {
             container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Error loading logs</p>';
