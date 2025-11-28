@@ -48,6 +48,10 @@ if ($user && password_verify($password, $user['staffPassword'])) {
     $_SESSION['staff_role'] = $user['staffRole'];
     $_SESSION['staff_username'] = $user['staffUsername'];
 
+    if ($user['staffRole'] === 'delivery rider') {
+        $_SESSION['rider_id'] = $user['staffID']; 
+    }
+
     echo json_encode([
         'success' => true,
         'role' => $user['staffRole'],

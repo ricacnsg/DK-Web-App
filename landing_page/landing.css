@@ -344,6 +344,22 @@ html, body {
   color: #efc858;
   font-size: 1.2rem;
   transition: 0.3s;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(242, 208, 103, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(242, 208, 103, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(242, 208, 103, 0);
+    }
 }
 
 .hero-btn:hover {
@@ -578,6 +594,9 @@ html, body {
     }
 }
 
+/* ========== TESTIMONIAL SECTION - RESPONSIVE ========== */
+/* Copy everything from here down to the end and replace your existing testimonial CSS */
+
 .testimonial-background {
   background-color: #fff7d9;
   padding: 60px 15px;
@@ -585,6 +604,7 @@ html, body {
   overflow: visible;
   min-height: 400px;
 }
+
 .testimonial-section {
   background: white;
   border-radius: 12px;
@@ -593,8 +613,34 @@ html, body {
   width: 90%;
   max-width: 2000px;
   text-align: center;
+  position: relative;
 }
 
+/* Overlay Button */
+.testimonial-overlay-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #04276c;
+  color: #efc858;
+  border: 2px solid #efc858;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.testimonial-overlay-btn:hover {
+  background-color: #efc858;
+  color: #04276c;
+  border-color: #04276c;
+  transform: scale(1.05);
+}
 
 .testimonial-subtitle {
   text-align: left;
@@ -611,34 +657,35 @@ html, body {
   color: #282525;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .testimonial-title::after {
   content: "";
   width: 150px; 
   height: 3px;
-  background-color: rgb(243, 232, 168); /* line color */
+  background-color: rgb(243, 232, 168);
   margin-left: 10px;
   box-shadow: 0 0 8px rgba(239, 200, 88, 0.7);
 }
-
-
 
 .testimonial-container {
   position: relative;
   margin-bottom: 30px;
   min-height: 200px;
+  padding-bottom: 100px;
 }
 
 .testimonial-slide {
   display: none;
 }
+
 .testimonial-slide.active {
   display: block;
 }
 
 .testimonial-box {
-  background: grey;
+  background: #f5f5f5;
   border-radius: 8px;
   padding: 30px;
   color: #333;
@@ -648,6 +695,7 @@ html, body {
   max-width: 1300px;
   text-align: center;
   position: relative;
+  min-height: 150px;
 }
 
 .testimonial-profile {
@@ -674,16 +722,21 @@ html, body {
   text-align: left;
 }
 
-.testimonial-profile h4 {
+.testimonial-profile-info h4 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
   color: #282525;
 }
 
-.testimonial-profile p {
+.testimonial-profile-info p {
   margin: 0;
   font-size: 14px;
+  color: #777;
+}
+
+.testimonial-profile-info small {
+  font-size: 12px;
   color: #777;
 }
 
@@ -724,6 +777,7 @@ html, body {
   justify-content: center;
   margin: 0 15px;
 }
+
 .dot {
   height: 10px;
   width: 10px;
@@ -734,36 +788,169 @@ html, body {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
 .dot.active {
   background-color: #efc858;
 }
 
-/* Responsive */
+/* Loading state for testimonials */
+.testimonial-container .loading-state {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.empty-testimonials {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== RESPONSIVE STYLES ========== */
+
+/* Tablet and Mobile (768px and below) */
 @media (max-width: 768px) {
-  .testimonial-section {
-    padding: 30px 20px;
-    margin: 20px auto;
+  .testimonial-background {
+    padding: 30px 10px;
+    min-height: auto;
   }
+  
+  .testimonial-section {
+    padding: 30px 15px;
+    margin: 20px auto;
+    width: 95%;
+    border-radius: 8px;
+  }
+  
+  /* Move button to center on mobile */
+  .testimonial-overlay-btn {
+    position: static;
+    display: block;
+    margin: 0 auto 20px;
+    width: fit-content;
+  }
+  
   .testimonial-title {
     font-size: 24px;
+    justify-content: center;
+    text-align: center;
   }
+  
+  .testimonial-title::after {
+    display: none;
+  }
+  
   .testimonial-subtitle {
-    font-size: 16px;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
   }
+  
   .testimonial-box {
     padding: 20px 15px;
     font-size: 15px;
+    line-height: 1.6;
+    min-height: 120px;
   }
+  
+  .testimonial-container {
+    padding-bottom: 120px;
+    min-height: 250px;
+  }
+  
+  /* Make profile horizontal on tablet/mobile */
   .testimonial-profile {
     position: static;
+    flex-direction: row;
     justify-content: center;
+    align-items: center;
     margin-top: 20px;
+    gap: 15px;
   }
+  
+  .testimonial-profile img {
+    width: 50px;
+    height: 50px;
+  }
+  
   .testimonial-profile-info {
-    text-align: center;
+    text-align: left;
+  }
+  
+  .testimonial-profile-info h4 {
+    font-size: 16px;
+  }
+  
+  .testimonial-profile-info p {
+    font-size: 13px;
+  }
+  
+  .slider-controls {
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+  }
+  
+  .dots {
+    margin: 10px 15px;
   }
 }
 
+/* Small Mobile (480px and below) */
+@media (max-width: 480px) {
+  .testimonial-section {
+    padding: 20px 10px;
+  }
+  
+  .testimonial-title {
+    font-size: 20px;
+  }
+  
+  .testimonial-subtitle {
+    font-size: 16px;
+  }
+  
+  .testimonial-box {
+    padding: 15px 10px;
+    font-size: 14px;
+  }
+  
+  /* Make profile vertical on very small screens */
+  .testimonial-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .testimonial-profile-info {
+    text-align: center;
+  }
+  
+  .testimonial-profile img {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .dot {
+    width: 8px;
+    height: 8px;
+  }
+}
 
 /* ===== Footer Background ===== */
 .footer {

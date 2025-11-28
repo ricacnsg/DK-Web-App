@@ -136,6 +136,20 @@ try {
     $stmt->execute();
     $stmt->close();
 
+    $previousData = NULL; 
+    $newData = json_encode([
+        'orderNo' => $orderNumber
+    ], JSON_UNESCAPED_UNICODE);
+
+    // Insert into order_logs table
+    $logStmt = $conn->prepare("
+        INSERT INTO customerlogs (customerID, action, previousData, newData, timestamp)
+        VALUES (?, 'Create Order', ?, ?, NOW())
+    ");
+    $logStmt->bind_param("iss", $customerID, $previousData, $newData);
+    $logStmt->execute();
+    $logStmt->close();
+
     $conn->commit();
 
     // Clear session flags after successful order
@@ -153,7 +167,7 @@ try {
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'tariaobernadette@gmail.com'; // your Gmail
-        $mail->Password = 'anvq dzkd xomc yaas';
+        $mail->Password = 'gtdl kcxp dvtp kozn';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->SMTPOptions = [
@@ -198,6 +212,7 @@ try {
         ";
 
         $mail->send();
+        
         error_log("✅ Verification email sent to: $email");
 
     } catch (Exception $e) {

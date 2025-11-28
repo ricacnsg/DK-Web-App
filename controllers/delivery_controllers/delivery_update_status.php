@@ -1,45 +1,31 @@
 <?php
-// Prevent any output before JSON
 ob_start();
-
 session_start();
 
-// Fix the path - adjust this based on your folder structure
-// If delivery_update_status.php is in: controllers/delivery_controllers/
-// And connect.php is in: database/
-// Then use this path:
 require_once '../../database/connect.php';
 
-// Clear any previous output
 ob_clean();
-
-// Set JSON header
 header('Content-Type: application/json');
 
-// Disable error display
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 try {
-    // Get POST data
     $input = file_get_contents('php://input');
-    
-    // Log the raw input for debugging
     error_log('Received input: ' . $input);
-    
+
     $data = json_decode($input, true);
-    
+
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('Invalid JSON input: ' . json_last_error_msg());
     }
-    
+
     $orderNumber = $data['order_number'] ?? null;
-    $newStatus = $data['status'] ?? null;
-    
-    // Log what we received
-    error_log("Order Number: $orderNumber, Status: $newStatus");
-    
-    // Validate input
+    $newStatus   = $data['status'] ?? null;
+
+    // Rider / staff ID
+    $riderID = $_SESSION['rider_id'] ?? $_SESSION['staff_id'] ?? null;
+
     if (!$orderNumber || !$newStatus) {
         echo json_encode([
             'success' => false,
@@ -47,112 +33,128 @@ try {
         ]);
         exit;
     }
-    
-    // Validate status
-    $allowedStatuses = ['Completed', 'Returned', 'Cancelled'];
+
+    if (!$riderID) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Rider ID missing from session'
+        ]);
+        exit;
+    }
+
+    $allowedStatuses = ['In Transit', 'Completed', 'Returned', 'Cancelled'];
     if (!in_array($newStatus, $allowedStatuses)) {
         echo json_encode([
             'success' => false,
-            'message' => 'Invalid status provided. Allowed: ' . implode(', ', $allowedStatuses)
+            'message' => 'Invalid status provided.'
         ]);
         exit;
     }
-    
-    // Check if connection exists
+
     if (!isset($conn) || !$conn) {
         throw new Exception('Database connection failed');
     }
-    
-    // First, check if the order exists and is in Ready status
+
+    // Fetch current status
     $checkSql = "SELECT orderNo, orderStatus FROM orders WHERE orderNo = ?";
     $checkStmt = $conn->prepare($checkSql);
-    
     if (!$checkStmt) {
         throw new Exception('Failed to prepare check statement: ' . $conn->error);
     }
-    
+
     $checkStmt->bind_param("s", $orderNumber);
     $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-    
-    if ($checkResult->num_rows === 0) {
+    $result = $checkStmt->get_result();
+
+    if ($result->num_rows === 0) {
         echo json_encode([
             'success' => false,
-            'message' => "Order #$orderNumber not found in database"
+            'message' => "Order #$orderNumber not found"
         ]);
-        $checkStmt->close();
-        $conn->close();
         exit;
     }
-    
-    $orderData = $checkResult->fetch_assoc();
-    error_log("Order found with status: " . $orderData['orderStatus']);
-    
-    if ($orderData['orderStatus'] !== 'Ready') {
+
+    $order = $result->fetch_assoc();
+    $previousStatus = $order['orderStatus'];
+
+    error_log("Current status of #$orderNumber: $previousStatus");
+
+    // ⚠️ FIXED: Allowed transitions
+    $validTransitions = [
+        'Ready'      => ['In Transit'],
+        'Assigned'   => ['In Transit'],           // ← ADDED THIS
+        'In Transit' => ['Completed', 'Returned']
+    ];
+
+    if (!isset($validTransitions[$previousStatus]) ||
+        !in_array($newStatus, $validTransitions[$previousStatus])) 
+    {
         echo json_encode([
             'success' => false,
-            'message' => "Order #$orderNumber is not in Ready status (current status: {$orderData['orderStatus']})"
+            'message' => "Cannot update order #$orderNumber from '$previousStatus' to '$newStatus'"
         ]);
-        $checkStmt->close();
-        $conn->close();
         exit;
     }
-    
-    $checkStmt->close();
-    
-    // Update order status
-    $sql = "UPDATE orders 
-            SET orderStatus = ?
-            WHERE orderNo = ? 
-            AND orderStatus = 'Ready'";
-    
-    $stmt = $conn->prepare($sql);
-    
-    if (!$stmt) {
-        throw new Exception('Failed to prepare update statement: ' . $conn->error);
+
+    // Update the order status
+    $updateSql = "UPDATE orders SET orderStatus = ? WHERE orderNo = ?";
+    $updateStmt = $conn->prepare($updateSql);
+
+    if (!$updateStmt) {
+        throw new Exception('Failed to prepare update: ' . $conn->error);
     }
-    
-    $stmt->bind_param("ss", $newStatus, $orderNumber);
-    
-    if ($stmt->execute()) {
-        $affectedRows = $stmt->affected_rows;
-        error_log("Affected rows: $affectedRows");
-        
-        if ($affectedRows > 0) {
-            echo json_encode([
-                'success' => true,
-                'message' => "Order #$orderNumber status updated to $newStatus",
-                'order_number' => $orderNumber,
-                'new_status' => $newStatus
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Order not updated. It may have already been processed.'
-            ]);
+
+    $updateStmt->bind_param("ss", $newStatus, $orderNumber);
+    $updateStmt->execute();
+
+    if ($updateStmt->affected_rows > 0) {
+
+        // Insert into update_status_logs
+        $logSql = "INSERT INTO updatestatuslogs 
+                (orderNo, previousStatus, newStatus, updatedBy, updatedAt)
+                VALUES (?, ?, ?, ?, NOW())";
+
+        $logStmt = $conn->prepare($logSql);
+
+        if (!$logStmt) {
+            throw new Exception('Failed to prepare log statement: ' . $conn->error);
         }
+
+        $logStmt->bind_param("ssss",
+            $orderNumber,
+            $previousStatus,
+            $newStatus,
+            $riderID
+        );
+
+        $logStmt->execute();
+
+        if ($logStmt->error) {
+            error_log("Log Insert Error: " . $logStmt->error);
+        }
+
+        // ✅ SEND SUCCESS RESPONSE
+        echo json_encode([
+            'success' => true,
+            'message' => "Order #$orderNumber updated to $newStatus",
+            'previous_status' => $previousStatus,
+            'new_status' => $newStatus
+        ]);
+
     } else {
-        throw new Exception('Failed to execute update: ' . $stmt->error);
+        echo json_encode([
+            'success' => false,
+            'message' => "Order not updated. Possibly same status."
+        ]);
     }
-    
-    $stmt->close();
-    $conn->close();
-    
+
 } catch (Exception $e) {
-    // Log error to PHP error log
     error_log('Delivery update error: ' . $e->getMessage());
-    error_log('Stack trace: ' . $e->getTraceAsString());
-    
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage(),
-        'debug' => [
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ]
+        'message' => $e->getMessage()
     ]);
 }
 
-// Flush output
-ob_end_flush();
+ob_end_flush(); // ← This should stay at the end
 ?>

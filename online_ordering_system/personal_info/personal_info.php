@@ -57,7 +57,7 @@ echo "<!-- Logged in as Customer ID: " . ($_SESSION['customer_id'] ?? 'NOT SET')
                     <input type="text" id="contactno" class="form-control mb-3">
 
                     <label>Email</label>
-                    <input type="email" id="email" class="form-control mb-4">
+                    <input type="email" id="email" class="form-control mb-4 readonly-input" disabled>
 
                     <button class="btn btn-warning w-100 mb-2">Edit Profile</button>
                     <button class="btn btn-secondary w-100">Change Password</button>

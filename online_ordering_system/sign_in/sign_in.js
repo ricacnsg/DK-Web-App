@@ -42,7 +42,7 @@ document.getElementById("customerLogin").addEventListener("submit", async (e) =>
       }).then(() => {
         let redirectURL = "../get_order/get_order.php"; // default
         if (returnPage === "checkout") redirectURL = "../checkout/checkout.php";
-        else if (returnPage === "testimonial") redirectURL = "../../testimonial/testimonial.html";
+        else if (returnPage === "testimonial") redirectURL = "../../testimonial/testimonial.php";
         else if (returnPage === "get_order") redirectURL = "../get_order/get_order.php";
         else if (returnPage === "view_cart") redirectURL = "../view_cart/view_cart.php";
 

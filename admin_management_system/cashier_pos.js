@@ -569,18 +569,18 @@ function switchView(view) {
 
 // Populate order history
 async function populateOrderHistory() {
-    console.log('populateOrderHistory called'); // ADD THIS
+    console.log('populateOrderHistory called'); 
     
     try {
         const response = await fetch('../controllers/pos.php?action=getOrderHistory');
-        console.log('Response received:', response); // ADD THIS
+        console.log('Response received:', response); 
         
         const result = await response.json();
-        console.log('Result:', result); // ADD THIS
+        console.log('Result:', result); 
         
         if (result.success) {
             orderHistory = result.data;
-            console.log('Order history data:', orderHistory); // ADD THIS
+            console.log('Order history data:', orderHistory); 
             renderOrderHistory();
         } else {
             console.error('Failed to load order history:', result.message);
@@ -607,7 +607,7 @@ function renderOrderHistory() {
     console.log('Order history length:', orderHistory.length);
     
     if (orderHistory.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
         return;
     }
     
@@ -624,9 +624,22 @@ function renderOrderHistory() {
         row.dataset.method = order.method;
         row.dataset.date = order.date;
         row.dataset.status = order.status;
+        row.dataset.orderType = order.orderType;
+        
+        let displayOrderType = '';
+        if (order.orderType === 'dine in') {
+            displayOrderType = 'Dine In';
+        } else if (order.orderType === 'takeout' || order.orderType === 'take-out') {
+            displayOrderType = 'Takeout';
+        } else if (order.orderType === 'delivery') {
+            displayOrderType = 'Delivery';
+        } else {
+            displayOrderType = order.orderType.charAt(0).toUpperCase() + order.orderType.slice(1);
+        }
         
         row.innerHTML = `
             <td>${escapeHTML(order.id)}</td>
+            <td><span class="order-type-badge $escapeHTML{(order.orderType.replace(' ', '-'))}">${displayOrderType}</span></td>
             <td>${escapeHTML(order.items)}</td>
             <td>${escapeHTML(order.amount)}</td>
             <td>${escapeHTML(order.method)}</td>
@@ -858,15 +871,17 @@ if (orderTableBody) {
             return;
         }
         
-        console.log("View button clicked!");
+        console.log("✅ View button clicked!");
         
         const row = viewButton.closest("tr");
         console.log("Closest row:", row); 
         
         if (!row) {
-            console.log("No row found");
+            console.log("❌ No row found");
             return;
         }
+        
+        // Reconstruct order data from row dataset
         const order = {
             id: row.dataset.orderId,
             customerName: row.dataset.customerName,
@@ -874,19 +889,28 @@ if (orderTableBody) {
             amount: row.dataset.amount,
             method: row.dataset.method,
             date: row.dataset.date,
-            status: row.dataset.status
+            status: row.dataset.status,
+            orderType: row.dataset.orderType // Get orderType from dataset
         };
         
-        console.log("Reconstructed order data:", order);
-        console.log("Order status:", order.status);
+        console.log("📦 Reconstructed order data:", order);
+        console.log("📊 Order ID:", order.id);
+        console.log("📊 Order status:", order.status);
+        console.log("📊 Order type:", order.orderType);
 
-        const isWalkIn = order.status && order.status.toLowerCase() === 'walk in';
+        // Determine if it's a walk-in order by checking orderType
+        // Walk-in orders include: 'dine in', 'takeout', 'take-out'
+        const isWalkIn = order.orderType && 
+                        (order.orderType.toLowerCase().trim() === 'dine in' || 
+                         order.orderType.toLowerCase().trim() === 'takeout' ||
+                         order.orderType.toLowerCase().trim() === 'take-out');
         
         if (isWalkIn) {
-            console.log("✓ Walk-in order detected - showing walk-in receipt");
+            console.log(`🚶 Walk-in/Takeout order detected (${order.orderType}) - showing walk-in receipt`);
             showWalkInReceipt(order);
         } else {
-            console.log("✓ Online order detected - showing online receipt");
+            console.log(`🌐 Delivery order detected (${order.orderType}) - showing online receipt`);
+            // For delivery orders, fetch full details from server
             fetchAndShowOnlineReceipt(order.id);
         }
     });
@@ -1087,110 +1111,124 @@ function showReceipt(order) {
 
 // This function is used to reuse the showReceipt func for online orders, but instead of being in online orders, this is in orders history
 async function fetchAndShowOnlineReceipt(orderId) {
-    console.log("Fetching online order details for:", orderId);
+    console.log("🔍 Fetching online order details for:", orderId);
     
     try {
         const response = await fetch(`../../controllers/get_online_order.php?order_id=${orderId}`);
         const text = await response.text();
-        console.log("Raw response:", text);
+        console.log("📡 Raw response:", text);
         
         let data;
         try {
             data = JSON.parse(text);
         } catch(e) {
-            console.error("JSON parse error:", e);
+            console.error("❌ JSON parse error:", e);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to load order details'
+                text: 'Failed to load order details - Invalid response format',
+                confirmButtonColor: '#d33'
             });
             return;
         }
         
+        // Check if there's an error in the response
         if (data.error) {
-            console.error("Server error:", data.error);
+            console.error("❌ Server error:", data.error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Failed to load order details: ' + data.error
+                text: 'Failed to load order details: ' + data.error,
+                confirmButtonColor: '#d33'
             });
             return;
         }
         
-        if (data && data.length > 0) {
-            const order = data[0];
-            
-            console.log("Found online order:", order);
-            showReceipt(order);
-        } else {
-            console.error("No data returned - order may not be an online order");
+        // Check if we got data back
+        if (!data || data.length === 0) {
+            console.error("❌ No data returned - order may not be an online order");
             console.log("Order ID searched:", orderId);
             Swal.fire({
-                icon: 'error',
+                icon: 'warning',
                 title: 'Not an Online Order',
-                text: 'This order does not have online order details. It may be a walk-in order that was incorrectly categorized.'
+                text: 'This order does not have online order details. It may be a walk-in order.',
+                confirmButtonColor: '#3085d6'
             });
+            return;
         }
         
+        // Successfully got online order data
+        const order = data[0];
+        console.log("✅ Found online order:", order);
+        showReceipt(order);
+        
     } catch (error) {
-        console.error("Error fetching online order:", error);
+        console.error("❌ Error fetching online order:", error);
         Swal.fire({
             icon: 'error',
-            title: 'Error',
-            text: 'Failed to load order details'
+            title: 'Connection Error',
+            text: 'Failed to connect to server. Please try again.',
+            confirmButtonColor: '#d33'
         });
     }
 }
 
 // Show receipt for walk in customers
 function showWalkInReceipt(order) {
+    console.log("showWalkInReceipt called with order:", order);
     
     const receiptSection = document.getElementById('walkInReceiptSection');
     
     if (!receiptSection) {
+        console.error("walkInReceiptSection element not found!");
         return;
     }
-    receiptSection.style.display = 'block';
     
-    // Check computed style
-    const computedStyle = window.getComputedStyle(receiptSection);
+    // Show the receipt section using the 'show' class
+    receiptSection.classList.add('show');
     
     try {
+        // Populate order number
         const orderNumEl = document.getElementById('walkInOrderNumber');
         if (orderNumEl) {
             orderNumEl.innerHTML = `Order No: <b>${order.id || 'N/A'}</b>`;
         }
         
+        // Populate order date
         const orderDateEl = document.getElementById('walkInOrderDate');
         if (orderDateEl) {
             orderDateEl.innerHTML = `<b>${escapeHTML(order.date) || 'N/A'}</b>`;
         }
         
+        // Populate customer name
         const nameEl = document.getElementById('walkInName');
         if (nameEl) {
             nameEl.innerHTML = `Walk In Name: <b>${escapeHTML(order.customerName) || 'Walk-in Customer'}</b>`;
         }
         
+        // Get total amount
         const totalAmount = order.amount || '₱0.00';
         
+        // Populate subtotal
         const subtotalEl = document.getElementById('walkInSubtotal');
-        console.log("Subtotal element:", subtotalEl);
         if (subtotalEl) {
             subtotalEl.innerHTML = `<b>${totalAmount}</b>`;
         }
         
+        // Populate total
         const totalEl = document.getElementById('walkInTotal');
         if (totalEl) {
             totalEl.innerHTML = `<b>${totalAmount}</b>`;
         }
         
+        // Populate payment method
         const methodEl = document.getElementById('walkInPaymentMethod');
         if (methodEl) {
             methodEl.innerHTML = `Payment Method: <b>${escapeHTML(order.method) || 'Cash'}</b>`;
         }
 
+        // Populate items
         const itemsContainer = document.getElementById('walkInItemsContainer');
-        
         if (itemsContainer) {
             itemsContainer.innerHTML = '';
             
@@ -1207,11 +1245,13 @@ function showWalkInReceipt(order) {
             }
         }
         
+        console.log("✅ Walk-in receipt populated successfully");
+        
     } catch (error) {
+        console.error("❌ Error populating walk-in receipt:", error);
         console.error("Error stack:", error.stack);
     }
 }
-
 
 let currentOrderForDelivery = null;
 
@@ -1295,26 +1335,29 @@ document.getElementById('submitDeliveryFee').addEventListener('click', function(
         });
     });
 });
-
 // Close overlays when clicking outside
 document.getElementById('receiptSection').addEventListener('click', function(e) {
     const receiptCard = document.getElementById('receiptCard');
-    if (!receiptCard.contains(e.target)) {
+    // Check if click is directly on the overlay (not on the card or its children)
+    if (e.target === this) {
+        this.classList.remove('show');
         this.style.display = 'none';
     }
 });
 
 document.getElementById('walkInReceiptSection').addEventListener('click', function(e) {
     const walkInCard = document.getElementById('walkInReceiptCard');
-    if (!walkInCard.contains(e.target)) {
+    // Check if click is directly on the overlay (not on the card or its children)
+    if (e.target === this) {
         console.log("Closing walk-in receipt - clicked outside");
+        this.classList.remove('show');
         this.style.display = 'none';
     }
 });
 
 document.getElementById('setFeeSection').addEventListener('click', function(e) {
-    const feeCard = e.target.closest('.card');
-    if (!feeCard) {
+    // Check if click is directly on the overlay
+    if (e.target === this) {
         this.style.display = 'none';
         currentOrderForDelivery = null;
     }

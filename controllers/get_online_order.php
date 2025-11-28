@@ -15,8 +15,8 @@ try {
                 o.orderNo AS order_number,
                 DATE_FORMAT(o.createdAT, '%M %e, %Y | %h:%i %p') AS date_ordered,
                 o.totalPrice AS subtotal,
-                $deliveryFeeSQL AS delivery_fee, 
-                o.orderStatus AS order_status,
+                COALESCE(o.deliveryFee, 0) AS delivery_fee, 
+                O.orderStatus AS order_status,
                 COALESCE(p.paymentMethod, 'Not specified') AS payment_method,
                 COALESCE(c.recipientName, 'N/A') AS recipient_name,
                 COALESCE(c.email, 'N/A') AS email, 
@@ -51,7 +51,7 @@ try {
         $sql .= " AND o.orderNo = ?";
     }
     
-    $sql .= " GROUP BY o.orderNo, o.createdAT, o.totalPrice, o.orderStatus, 
+    $sql .= " GROUP BY o.orderNo, o.createdAT, o.totalPrice, o.deliveryFee, O.orderStatus, 
                      p.paymentMethod, c.recipientName, c.email, c.phoneNumber, 
                      l.street, l.barangay, l.municipality, l.locationRemark, s.staffFullname
             ORDER BY o.createdAT DESC";

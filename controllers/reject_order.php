@@ -36,6 +36,7 @@ try {
     
     $row = $result->fetch_assoc();
     $orderStatus = strtolower($row['orderStatus']);
+    $previousStatus = $row['orderStatus'];
     $checkStmt->close();
     
     // Check if order can be rejected
@@ -71,6 +72,35 @@ try {
     }
     
     $stmt->close();
+
+    $newStatus = 'Rejected';
+    $staffID = $_SESSION['staff_id'] ?? null; // Get staffID from session
+    
+    if (!$staffID) {
+        $conn->rollback();
+        echo json_encode([
+            'success' => false,
+            'message' => 'Staff ID not found in session. Please login again.'
+        ]);
+        exit;
+    }
+
+    $logStmt = $conn->prepare("INSERT INTO updatestatuslogs (orderNo, previousStatus, newStatus, updatedBy, updatedAt) VALUES (?, ?, ?, ?, NOW())");
+    $logStmt->bind_param("sssi", $orderNumber, $previousStatus, $newStatus, $staffID);
+    
+    if (!$logStmt->execute()) {
+        $conn->rollback();
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to log status change'
+        ]);
+        exit;
+    }
+    
+    $logStmt->close();
+    
+    // Commit transaction
+    $conn->commit();
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,

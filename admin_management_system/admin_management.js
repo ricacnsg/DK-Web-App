@@ -2067,7 +2067,7 @@ async function populateOrderHistory() {
         
         if (result.success) {
             orderHistory = result.data;
-            allOrderHistory = [...result.data]; // Store original
+            allOrderHistory = [...result.data];
             renderOrderHistory(orderHistory);
         } else {
             console.error('Failed to load order history:', result.message);
@@ -2077,41 +2077,81 @@ async function populateOrderHistory() {
     }
 }
 
-// Render order history
+function isOnlineOrder(order) {
+    if (!order) return false;
+
+    if (order.order_number && String(order.order_number).trim() !== '') return true;
+
+    const hasRecipient = order.recipient_name && order.recipient_name.trim() !== '';
+    const hasDeliveryAddress = order.delivery_address && order.delivery_address.trim() !== '';
+    const hasPhone = order.phone_number && order.phone_number.trim() !== '';
+
+    if (hasRecipient || hasDeliveryAddress || hasPhone) return true;
+
+    if (order.method) {
+        const method = String(order.method).toLowerCase().trim();
+        if (method !== 'cash' && method !== '') return true; 
+    }
+
+    if (order.orderType) {
+        const ot = String(order.orderType).toLowerCase();
+        if (ot.includes('dine') || ot.includes('take') || ot.includes('walk')) return false;
+    }
+
+    if (order.method && String(order.method).toLowerCase().trim() === 'cash') return false;
+
+    return true;
+}
+
+
 function renderOrderHistory(data = orderHistory) {
     const tableBody = document.getElementById('orderTableBody');
-    
     if (!tableBody) {
         console.error('orderTableBody not found!');
         return;
     }
-    
+
     tableBody.innerHTML = '';
-    
-    if (data.length === 0) {
+
+    if (!Array.isArray(data) || data.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No orders found</td></tr>';
         return;
     }
-    
-    data.forEach((order) => {
+
+    data.forEach(order => {
         const row = document.createElement('tr');
-        
-        // Store order data directly on the row element
-        row.dataset.orderId = order.id;
-        row.dataset.customerName = order.customerName;
-        row.dataset.items = order.items;
-        row.dataset.amount = order.amount;
-        row.dataset.method = order.method;
-        row.dataset.date = order.date;
-        row.dataset.status = order.status;
-        
+
+        const id = order.id ?? order.order_id ?? '';
+        const items = order.items ?? order.items_ordered ?? order.items_order ?? '';
+        const amount = (order.amount ?? order.subtotal ?? order.total ?? 0);
+        const method = order.method ?? order.payment_method ?? '';
+        const date = order.date ?? order.date_ordered ?? '';
+        const status = order.status ?? order.order_status ?? '';
+        const customerName = order.customerName;
+
+        const orderNumber = order.order_number ?? '';
+        const recipient = order.recipient_name ?? order.recipient ?? '';
+        const deliveryAddress = order.delivery_address ?? '';
+
+        row.dataset.orderId = String(id);
+        row.dataset.customerName = String(customerName);
+        row.dataset.items = String(items);
+        row.dataset.amount = String(amount);
+        row.dataset.method = String(method);
+        row.dataset.date = String(date);
+        row.dataset.status = String(status);
+        row.dataset.orderNumber = String(orderNumber);
+        row.dataset.recipientName = String(recipient);
+        row.dataset.deliveryAddress = String(deliveryAddress);
+        if (order.orderType) row.dataset.orderType = String(order.orderType);
+
         row.innerHTML = `
-            <td>${escapeHTML(order.id)}</td>
-            <td>${escapeHTML(order.items)}</td>
-            <td>${escapeHTML(order.amount)}</td>
-            <td>${escapeHTML(order.method)}</td>
-            <td>${escapeHTML(order.date)}</td>
-            <td><span class="status-badge">${escapeHTML(order.status)}</span></td>
+            <td>${escapeHTML(String(id))}</td>
+            <td>${escapeHTML(String(items))}</td>
+            <td>${escapeHTML(String(amount))}</td>
+            <td>${escapeHTML(String(method))}</td>
+            <td>${escapeHTML(String(date))}</td>
+            <td><span class="status-badge">${escapeHTML(String(status))}</span></td>
             <td>
                 <button class="btn btn-sm view-history-receipt m-2" type="button">
                     <i class="fa-solid fa-eye text-muted"></i>
@@ -2131,7 +2171,6 @@ function updateFilterOptions() {
     
     filterValue.innerHTML = '';
 
-    // Add default "Select" option FIRST
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = filterType.value === '' ? 'Select Value' :
@@ -2149,14 +2188,14 @@ function updateFilterOptions() {
         
         months.forEach((month, index) => {
             const option = document.createElement('option');
-            option.value = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
+            option.value = (index + 1).toString().padStart(2, '0'); 
             option.textContent = month;
             filterValue.appendChild(option);
         });
     } else if (filterType.value === 'day') {
         for (let i = 1; i <= 31; i++) {
             const option = document.createElement('option');
-            option.value = i.toString().padStart(2, '0'); // "01", "02", etc.
+            option.value = i.toString().padStart(2, '0'); 
             option.textContent = i;
             filterValue.appendChild(option);
         }
@@ -2170,7 +2209,6 @@ function updateFilterOptions() {
         }
     }
     
-    // Reset to show all data when filter type changes
     renderOrderHistory(allOrderHistory);
 }
 
@@ -2181,13 +2219,11 @@ function searchOrders() {
     
     const searchValue = searchInput.value.toLowerCase().trim();
     
-    // If search is empty, apply current filter or show all
     if (!searchValue) {
         filterOrders();
         return;
     }
     
-    // Filter from all orders
     const filtered = allOrderHistory.filter(order => {
         const orderId = order.id ? order.id.toString().toLowerCase() : '';
         return orderId.includes(searchValue);
@@ -2216,7 +2252,6 @@ function filterOrders() {
             return false;
         }
         
-        // Parse date parts - assuming format is MM-DD-YYYY or M-D-YYYY
         const month = dateParts[0].padStart(2, '0');
         const day = dateParts[1].padStart(2, '0');
         const year = dateParts[2];
@@ -2255,7 +2290,6 @@ function exportData() {
     
     let csv = 'Order ID,Item Order,Total Amount,Payment Method,Order Date,Status\n';
     
-    // Get currently displayed orders
     const currentData = [];
     visibleRows.forEach(row => {
         if (row.dataset.orderId) {
@@ -2289,18 +2323,15 @@ function printData() {
     const table = document.querySelector('.order-table');
     if (!table) return;
     
-    // Clone the table
     const tableClone = table.cloneNode(true);
-    
-    // Remove hidden rows from clone
+
     const rows = tableClone.querySelectorAll('tbody tr');
     rows.forEach(row => {
         if (row.style.display === 'none') {
             row.remove();
         }
     });
-    
-    // Remove action column
+  
     const headers = tableClone.querySelectorAll('th');
     if (headers.length > 0) {
         headers[headers.length - 1].remove();
@@ -2430,14 +2461,12 @@ function showWalkInReceipt(order) {
         console.error('walkInReceiptSection not found!');
         return;
     }
-    
-    // Hide online receipt if visible
+
     const onlineReceipt = document.getElementById('receiptSection');
     if (onlineReceipt) {
         onlineReceipt.style.display = 'none';
     }
-    
-    // Show walk-in receipt with flex display
+   
     receiptSection.style.display = 'flex';
     
     try {
@@ -2479,14 +2508,12 @@ function showWalkInReceipt(order) {
             itemsContainer.innerHTML = '';
             
             if (order.items && order.items.trim() !== '' && order.items !== 'No items') {
-                // Parse items like "1x coke" or "2x burger, 1x fries"
                 const itemsList = escapeHTML(order.items).split(', ');
                 
                 itemsList.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'details mb-1';
                     
-                    // Try to parse format like "1x coke" or "2x burger"
                     const match = item.match(/(\d+)x\s*(.+)/i);
                     
                     if (match) {
@@ -2494,7 +2521,7 @@ function showWalkInReceipt(order) {
                         const name = match[2];
                         div.innerHTML = `<span><b>${qty} ×</b> ${name}</span>`;
                     } else {
-                        // If format doesn't match, just display as is
+
                         div.innerHTML = `<span>${escapeHTML(item)}</span>`;
                     }
                     
@@ -2518,13 +2545,11 @@ function showReceipt(order) {
         return;
     }
     
-    // Hide walk-in receipt if visible
     const walkInReceipt = document.getElementById('walkInReceiptSection');
     if (walkInReceipt) {
         walkInReceipt.style.display = 'none';
     }
     
-    // Show online receipt with flex display
     receiptSection.style.display = 'flex';
     
     document.getElementById('orderNumber').innerHTML = `Order No: <b>${escapeHTML(order.order_number) || 'N/A'}</b>`;
@@ -2576,37 +2601,30 @@ function showReceipt(order) {
     }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    // Load order history
     populateOrderHistory();
     
-    // Setup event listener for search input
     const searchInput = document.getElementById('searchOrderId');
     if (searchInput) {
         searchInput.addEventListener('keyup', searchOrders);
     }
-    
-    // Setup event listener for filter type
+
     const filterType = document.getElementById('filterType');
     if (filterType) {
         filterType.addEventListener('change', updateFilterOptions);
     }
     
-    // Setup event listener for filter value
     const filterValue = document.getElementById('filterValue');
     if (filterValue) {
         filterValue.addEventListener('change', filterOrders);
     }
     
-    // Setup event listener for export button
     const exportBtn = document.querySelector('.history-btn[onclick="exportData()"]');
     if (exportBtn) {
         exportBtn.removeAttribute('onclick');
         exportBtn.addEventListener('click', exportData);
     }
     
-    // Setup event listener for print button
     const printBtn = document.querySelector('.history-btn[onclick="printData()"]');
     if (printBtn) {
         printBtn.removeAttribute('onclick');
@@ -2627,34 +2645,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Setup event listener for view receipt buttons
     const orderTableBody = document.getElementById("orderTableBody");
-    if (orderTableBody) {
-        orderTableBody.addEventListener("click", function(e) {
-            const viewButton = e.target.closest(".view-history-receipt");
-            
-            if (!viewButton) return;
-            
-            const row = viewButton.closest("tr");
-            if (!row) return;
-            
-            const order = {
-                id: row.dataset.orderId,
-                customerName: row.dataset.customerName,
-                items: row.dataset.items,
-                amount: row.dataset.amount,
-                method: row.dataset.method,
-                date: row.dataset.date,
-                status: row.dataset.status
-            };
+if (orderTableBody) {
+    orderTableBody.addEventListener("click", function(e) {
+        const viewButton = e.target.closest(".view-history-receipt");
+        if (!viewButton) return;
 
-            const isWalkIn = order.status && order.status.toLowerCase() === 'walk in';
-            
-            if (isWalkIn) {
-                showWalkInReceipt(order);
-            } else {
-                fetchAndShowOnlineReceipt(order.id);
-            }
-        });
-    }
+        const row = viewButton.closest("tr");
+        if (!row) return;
+
+
+        const order = {
+            id: row.dataset.orderId,
+            items: row.dataset.items,
+            customerName: row.dataset.customerName,
+            amount: row.dataset.amount,
+            method: row.dataset.method,
+            date: row.dataset.date,
+            status: row.dataset.status,
+            order_number: row.dataset.orderNumber,
+            recipient_name: row.dataset.recipientName,
+            delivery_address: row.dataset.deliveryAddress,
+            orderType: row.dataset.orderType
+        };
+
+        if (isOnlineOrder(order)) {
+            fetchAndShowOnlineReceipt(order.id || order.order_number);
+        } else {
+            showWalkInReceipt(order);
+        }
+    });
+}
 });

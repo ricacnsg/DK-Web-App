@@ -22,10 +22,10 @@ try {
     }
     
     $locationID = $data['locationID'] ?? null;
-    $street = $data['street'] ?? '';
-    $barangay = $data['barangay'] ?? '';
-    $municipality = $data['municipality'] ?? '';
-    $locationRemark = $data['locationRemark'] ?? '';
+    $street = trim($data['street'] ?? '');
+    $barangay = trim($data['barangay'] ?? '');
+    $municipality = trim($data['municipality'] ?? '');
+    $locationRemark = trim($data['locationRemark'] ?? '');
     
     if (!$locationID) {
         echo json_encode(['success' => false, 'message' => 'Missing location ID']);
@@ -36,29 +36,28 @@ try {
         echo json_encode(['success' => false, 'message' => 'All fields are required']);
         exit();
     }
+
+    // --- Fetch previous data ---
+    $prevStmt = $conn->prepare("SELECT street, barangay, municipality, locationRemark FROM location WHERE locationID = ? AND customerID = ? LIMIT 1");
+    if (!$prevStmt) throw new Exception("Prepare failed: " . $conn->error);
     
-    // Simple ownership check
-    $checkSql = "SELECT locationID FROM location WHERE locationID = ? AND customerID = ? LIMIT 1";
-    $checkStmt = $conn->prepare($checkSql);
+    $prevStmt->bind_param("ii", $locationID, $customerID);
+    $prevStmt->execute();
+    $prevResult = $prevStmt->get_result();
     
-    if (!$checkStmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
-    }
-    
-    $checkStmt->bind_param("ii", $locationID, $customerID);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-    
-    if ($checkResult->num_rows === 0) {
+    if ($prevResult->num_rows === 0) {
         echo json_encode(['success' => false, 'message' => 'Address not found or unauthorized']);
-        $checkStmt->close();
+        $prevStmt->close();
         $conn->close();
         exit();
     }
     
-    $checkStmt->close();
+    $previousRow = $prevResult->fetch_assoc();
+    $prevStmt->close();
     
-    // Update the address
+    $previousData = json_encode($previousRow, JSON_UNESCAPED_UNICODE);
+
+    // --- Update the address ---
     $updateSql = "UPDATE location 
                   SET street = ?, 
                       barangay = ?, 
@@ -68,31 +67,33 @@ try {
                   AND customerID = ?";
     
     $updateStmt = $conn->prepare($updateSql);
-    
-    if (!$updateStmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
-    }
+    if (!$updateStmt) throw new Exception("Prepare failed: " . $conn->error);
     
     $updateStmt->bind_param("ssssii", $street, $barangay, $municipality, $locationRemark, $locationID, $customerID);
-    
-    if (!$updateStmt->execute()) {
-        throw new Exception("Execute failed: " . $updateStmt->error);
-    }
-    
-    if ($updateStmt->affected_rows > 0 || $updateStmt->affected_rows === 0) {
-        // affected_rows = 0 means no changes (data was the same)
-        echo json_encode([
-            'success' => true,
-            'message' => 'Address updated successfully'
-        ]);
-    } else {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Address not found'
-        ]);
-    }
-    
+    $updateStmt->execute();
     $updateStmt->close();
+
+    // --- New data for logging ---
+    $newData = json_encode([
+        'street' => $street,
+        'barangay' => $barangay,
+        'municipality' => $municipality,
+        'locationRemark' => $locationRemark
+    ], JSON_UNESCAPED_UNICODE);
+
+    // --- Insert log ---
+    $logStmt = $conn->prepare("INSERT INTO customerlogs (customerID, action, previousData, newData, timestamp) VALUES (?, 'Update Address', ?, ?, NOW())");
+    if ($logStmt) {
+        $logStmt->bind_param("iss", $customerID, $previousData, $newData);
+        $logStmt->execute();
+        $logStmt->close();
+    }
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Address updated successfully'
+    ]);
+
     $conn->close();
     
 } catch (Exception $e) {
@@ -103,6 +104,5 @@ try {
         'error' => $e->getMessage()
     ]);
 }
-
 exit();
 ?>

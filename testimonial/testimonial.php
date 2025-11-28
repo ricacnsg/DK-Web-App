@@ -1,12 +1,6 @@
 <?php
 session_start();
 
-// Redirect to login if not logged in
-if (!isset($_SESSION['customer_id'])) {
-    // Save return destination
-    header("Location: ../landing_page/landing.html");
-    exit;
-}
 ?>
 
 <!DOCTYPE html>

@@ -39,11 +39,16 @@ function loadCustomerProfile() {
             document.getElementById("contactno").value = data.contact_number || '';
             document.getElementById("email").value = data.email || '';
             
-            // Make fields readonly initially
+            // Make fields readonly initially with styling
             document.getElementById("username").setAttribute('readonly', true);
             document.getElementById("name").setAttribute('readonly', true);
             document.getElementById("contactno").setAttribute('readonly', true);
             document.getElementById("email").setAttribute('readonly', true);
+            
+            document.getElementById("username").style.backgroundColor = '#f5f5f5';
+            document.getElementById("name").style.backgroundColor = '#f5f5f5';
+            document.getElementById("contactno").style.backgroundColor = '#f5f5f5';
+            document.getElementById("email").style.backgroundColor = '#f5f5f5';
         })
         .catch(error => {
             console.error("Fetch error:", error);
@@ -63,7 +68,7 @@ function enableEditProfile() {
     const isEditMode = !nameField.hasAttribute('readonly');
     
     if (isEditMode) {
-        // Save changes (with password prompt)
+        // Save changes
         saveProfileChanges();
     } else {
         // Prompt for password before enabling edit mode
@@ -85,7 +90,6 @@ function enableEditProfile() {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Show loading
                 Swal.fire({
                     title: 'Verifying...',
                     text: 'Please wait',
@@ -108,20 +112,20 @@ function enableEditProfile() {
                     Swal.close();
                     
                     if (data.success) {
-                        // Enable editing (except username)
+                        // Enable editing (except username and email)
                         nameField.removeAttribute('readonly');
                         contactField.removeAttribute('readonly');
-                        emailField.removeAttribute('readonly');
                         
                         nameField.style.backgroundColor = '#fff';
                         contactField.style.backgroundColor = '#fff';
-                        emailField.style.backgroundColor = '#fff';
                         
                         // Change button text
                         const editBtn = document.querySelector('.btn-warning');
-                        editBtn.textContent = 'Save Changes';
-                        editBtn.classList.remove('btn-warning');
-                        editBtn.classList.add('btn-success');
+                        if (editBtn) {
+                            editBtn.textContent = 'Save Changes';
+                            editBtn.classList.remove('btn-warning');
+                            editBtn.classList.add('btn-success');
+                        }
                         
                         Swal.fire({
                             title: 'Verified!',
@@ -155,12 +159,21 @@ function enableEditProfile() {
 function saveProfileChanges() {
     const name = document.getElementById("name").value.trim();
     const contactno = document.getElementById("contactno").value.trim();
-    const email = document.getElementById("email").value.trim();
     
-    if (!name || !contactno || !email) {
+    if (!name || !contactno) {
         Swal.fire({
             title: "Validation Error",
             text: "Please fill in all fields",
+            icon: "warning"
+        });
+        return;
+    }
+    
+    // Validate Philippine phone number
+    if (!validatePhilippineNumber(contactno)) {
+        Swal.fire({
+            title: "Invalid Phone Number",
+            text: "Please enter a valid Philippine phone number (e.g., 09XX-XXX-XXXX or +639XX-XXX-XXXX)",
             icon: "warning"
         });
         return;
@@ -182,8 +195,7 @@ function saveProfileChanges() {
         },
         body: JSON.stringify({
             name: name,
-            contactno: contactno,
-            email: email
+            contactno: contactno
         })
     })
     .then(response => response.json())
@@ -200,7 +212,9 @@ function saveProfileChanges() {
             // Make fields readonly again
             document.getElementById("name").setAttribute('readonly', true);
             document.getElementById("contactno").setAttribute('readonly', true);
-            document.getElementById("email").setAttribute('readonly', true);
+            
+            document.getElementById("name").style.backgroundColor = '#f5f5f5';
+            document.getElementById("contactno").style.backgroundColor = '#f5f5f5';
             
             // Change button back
             const editBtn = document.querySelector('.btn-success');
@@ -227,6 +241,21 @@ function saveProfileChanges() {
             icon: "error"
         });
     });
+}
+
+// Philippine phone number validation function
+function validatePhilippineNumber(number) {
+    const cleaned = number.replace(/[\s\-\(\)]/g, '');
+    
+    const patterns = [
+        /^09\d{9}$/,        // 09XXXXXXXXX
+        /^\+639\d{9}$/,     // +639XXXXXXXXX
+        /^639\d{9}$/,       // 639XXXXXXXXX
+        /^02\d{7,8}$/,      // Manila landline
+        /^0\d{2}\d{7}$/     // Provincial landline
+    ];
+    
+    return patterns.some(pattern => pattern.test(cleaned));
 }
 
 // ============================
@@ -1008,3 +1037,36 @@ document.getElementById('logoutBtn').addEventListener('click', function(e) {
     });
 });
 
+
+
+// ============================
+// Initialize on page load
+// ============================
+document.addEventListener('DOMContentLoaded', () => {
+    loadCustomerProfile();
+    loadCustomerAddresses();
+    loadOrders();
+    
+    const editForm = document.getElementById('editAddressForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveAddressChanges();
+        });
+    }
+});
+
+// Attach Edit Profile button event - MOVED OUTSIDE DOMContentLoaded
+setTimeout(() => {
+    const editProfileBtn = document.querySelector('.btn-warning');
+    if (editProfileBtn && editProfileBtn.textContent.includes('Edit')) {
+        editProfileBtn.addEventListener('click', enableEditProfile);
+        console.log('Edit Profile button listener attached');
+    }
+    
+    const changePasswordBtn = document.querySelector('.btn-secondary');
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', changePassword);
+        console.log('Change Password button listener attached');
+    }
+}, 500);

@@ -15,6 +15,10 @@ if (isset($_SESSION['staff_username'])) {
             header("Location: kitchen_staff/kitchen_staff.php");
             exit;
         }
+        else if($_SESSION['staff_role'] == 'delivery rider'){
+            header("Location: ../delivery_tracker/delivery_tracker.php");
+            exit;
+        }
     }
 }
 ?>

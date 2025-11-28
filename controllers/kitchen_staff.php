@@ -160,7 +160,7 @@ function updateOrderStatus($conn) {
         return;
     }
     
-    $orderNo = isset($data['orderNo']) ? $data['orderNo'] : ''; // Changed from orderID
+    $orderNo = isset($data['orderNo']) ? $data['orderNo'] : '';
     $newStatus = isset($data['status']) ? $data['status'] : '';
     
     if (!$orderNo || !$newStatus) {
@@ -171,12 +171,24 @@ function updateOrderStatus($conn) {
         return;
     }
     
+    // Get staffID from session
+    $staffID = $_SESSION['staff_id'] ?? null;
+    
+    if (!$staffID) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Staff ID not found in session. Please login again.'
+        ]);
+        return;
+    }
+    
     // Convert status to proper case for database
     $statusMap = array(
         'pending' => 'Pending',
         'reviewed' => 'Reviewed',
         'preparing' => 'Preparing',
         'ready' => 'Ready',
+        'in_transit' => 'In Transit',
         'completed' => 'Completed'
     );
     
@@ -187,32 +199,84 @@ function updateOrderStatus($conn) {
         return;
     }
     
-    // Update order - using orderNo instead of orderID
-    $stmt = $conn->prepare("UPDATE orders SET orderStatus = ? WHERE orderNo = ?");
-    
-    if (!$stmt) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Prepare failed: ' . $conn->error
-        ]);
-        return;
-    }
-    
-    $stmt->bind_param("ss", $dbStatus, $orderNo);
-    
-    if ($stmt->execute()) {
+    try {
+        // Start transaction
+        $conn->begin_transaction();
+        
+        // Get current status before updating
+        $checkStmt = $conn->prepare("SELECT orderStatus FROM orders WHERE orderNo = ?");
+        $checkStmt->bind_param("s", $orderNo);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            $conn->rollback();
+            echo json_encode([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+            return;
+        }
+        
+        $row = $result->fetch_assoc();
+        $previousStatus = $row['orderStatus'];
+        $checkStmt->close();
+        
+        // Update order status
+        $stmt = $conn->prepare("UPDATE orders SET orderStatus = ? WHERE orderNo = ?");
+        
+        if (!$stmt) {
+            $conn->rollback();
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Prepare failed: ' . $conn->error
+            ]);
+            return;
+        }
+        
+        $stmt->bind_param("ss", $dbStatus, $orderNo);
+        
+        if (!$stmt->execute()) {
+            $conn->rollback();
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Update failed: ' . $stmt->error
+            ]);
+            return;
+        }
+        
+        $stmt->close();
+        
+        // Insert into updatestatuslogs
+        $logStmt = $conn->prepare("INSERT INTO updatestatuslogs (orderNo, previousStatus, newStatus, updatedBy, updatedAt) VALUES (?, ?, ?, ?, NOW())");
+        $logStmt->bind_param("sssi", $orderNo, $previousStatus, $dbStatus, $staffID);
+        
+        if (!$logStmt->execute()) {
+            $conn->rollback();
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to log status change: ' . $logStmt->error
+            ]);
+            return;
+        }
+        
+        $logStmt->close();
+        
+        // Commit transaction
+        $conn->commit();
+        
         echo json_encode([
             'success' => true, 
-            'message' => 'Status updated'
+            'message' => 'Status updated and logged successfully'
         ]);
-    } else {
+        
+    } catch (Exception $e) {
+        $conn->rollback();
         echo json_encode([
             'success' => false, 
-            'message' => 'Update failed: ' . $stmt->error
+            'message' => 'Database error: ' . $e->getMessage()
         ]);
     }
-    
-    $stmt->close();
 }
 
 function getOrderStats($conn) {
@@ -221,13 +285,14 @@ function getOrderStats($conn) {
         return;
     }
     
+    // Count all active orders matching what getActiveOrders shows
     $query = "SELECT 
         COUNT(*) as total_orders,
-        SUM(CASE WHEN orderStatus = 'Pending' THEN 1 ELSE 0 END) as pending_orders,
+        SUM(CASE WHEN orderStatus = 'Reviewed' THEN 1 ELSE 0 END) as reviewed_orders,
         SUM(CASE WHEN orderStatus = 'Preparing' THEN 1 ELSE 0 END) as preparing_orders,
         SUM(CASE WHEN orderStatus = 'Ready' THEN 1 ELSE 0 END) as ready_orders
     FROM orders 
-    WHERE orderStatus IN ('Pending', 'Preparing', 'Ready')";
+    WHERE orderStatus IN ('Reviewed', 'Preparing', 'Ready')";
     
     $result = $conn->query($query);
     
@@ -245,7 +310,7 @@ function getOrderStats($conn) {
         'success' => true,
         'data' => array(
             'total' => (int)$stats['total_orders'],
-            'pending' => (int)$stats['pending_orders'], // Changed keys to lowercase
+            'reviewed' => (int)$stats['reviewed_orders'],
             'preparing' => (int)$stats['preparing_orders'],
             'ready' => (int)$stats['ready_orders']
         )

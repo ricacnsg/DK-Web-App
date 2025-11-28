@@ -198,11 +198,11 @@ function getActionButton(status, orderNo, orderType) {
 
     // If status = ready
     if (status === 'ready') {
-
         if (orderType === 'delivery') {
-            return `<button class="action-btn btn-in-transit" data-order-no="${orderNo}">
-                <span>In Transit</span>
-            </button>`;
+            // For delivery orders, show disabled button or just text
+            return `<div class="status-message" style="text-align: center; padding: 12px; background: #374151; border-radius: 8px; color: #9ca3af;">
+                <span>⏳ Waiting for rider assignment</span>
+            </div>`;
         }
 
         // Dine-in / Takeout → normal complete
@@ -212,22 +212,20 @@ function getActionButton(status, orderNo, orderType) {
         </button>`;
     }
 
-    // Delivery second stage: in_transit → complete delivery
+    // Delivery second stage: in_transit → show status message only
     if (status === 'in_transit') {
-        return `<button class="action-btn btn-complete-delivery" data-order-no="${orderNo}">
-            <span>✓</span>
-            <span>Complete Delivery</span>
-        </button>`;
+        return `<div class="status-message" style="text-align: center; padding: 12px; background: #374151; border-radius: 8px; color: #9ca3af;">
+            <span>🚚 Order is being delivered</span>
+        </div>`;
     }
 
     return '';
 }
 
-
 function attachButtonListeners() {
     document.querySelectorAll('.action-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            const orderNo = this.getAttribute('data-order-no'); // Changed from data-order-id
+            const orderNo = this.getAttribute('data-order-no');
             const card = this.closest('.order-card');
             const orderNumber = card.querySelector('.order-number').textContent;
             
@@ -249,23 +247,14 @@ function attachButtonListeners() {
                     'ready',
                     orderNo
                 );
-            } else if (this.classList.contains('btn-in-transit')) {
+            } 
+            // Only allow complete for dine-in/takeout (non-delivery orders)
+            else if (this.classList.contains('btn-complete')) {
                 showConfirmDialog(
-                    'Mark as In Transit',
-                    `Is ${orderNumber} now being delivered?`,
-                    'info',
-                    'Yes, Mark In Transit',
-                    'in_transit',
-                    orderNo
-                );
-            }
-
-            else if (this.classList.contains('btn-complete-delivery')) {
-                showConfirmDialog(
-                    'Complete Delivery',
-                    `Has ${orderNumber} been delivered successfully?`,
+                    'Complete Order',
+                    `Has ${orderNumber} been completed?`,
                     'success',
-                    'Yes, Complete Delivery',
+                    'Yes, Complete Order',
                     'completed',
                     orderNo
                 );
@@ -304,7 +293,7 @@ async function updateOrderStatus(orderNo, newStatus) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                orderNo: orderNo, // Changed from orderID
+                orderNo: orderNo,
                 status: newStatus
             })
         });
@@ -321,7 +310,6 @@ async function updateOrderStatus(orderNo, newStatus) {
             showSuccess(`Order status updated successfully!`);
             
             if (newStatus === 'completed') {
-                // Remove the order card with animation
                 const card = document.querySelector(`[data-order-id="${orderNo}"]`);
                 if (card) {
                     card.style.opacity = '0';
@@ -407,7 +395,6 @@ function capitalizeFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// Add custom styles for SweetAlert2
 const style = document.createElement('style');
 style.textContent = `
     .sweetalert-popup {

@@ -178,6 +178,24 @@ try {
     echo json_encode(['success' => false, 'message' => 'Failed to reset password. Please try again.']);
 }
 
+$action = "Reset Password";
+$previousData = "Old password hash changed";
+$newData = "New password hash saved";
+
+$logStmt = $conn->prepare("
+    INSERT INTO customerlogs (customerID, action, previousData, newData, timestamp)
+    VALUES (?, ?, ?, ?, NOW())
+");
+
+if ($logStmt) {
+    $logStmt->bind_param("isss", $user['customerID'], $action, $previousData, $newData);
+    $logStmt->execute();
+    $logStmt->close();
+    logReset("Customer log inserted for password reset");
+} else {
+    logReset("Failed to insert password reset log: " . $conn->error);
+}
+
 $conn->close();
 logReset("=== Password Reset Attempt Ended ===\n");
 ?>

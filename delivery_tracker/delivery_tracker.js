@@ -31,17 +31,17 @@ async function loadOrdersFromBackend() {
             throw new Error(data.error);
         }
         
-        // Filter only "Ready" status orders for delivery
-        ordersData = data.filter(order => order.order_status === 'Ready');
+        // Filter only "Assigned" status orders for delivery
+        ordersData = data.filter(order => order.order_status === 'Assigned');
         
         // Transform backend data to match frontend structure
-        ordersData = ordersData.map(order => ({
+        ordersData = data.map(order => ({
             id: order.order_number,
             customer: order.recipient_name,
             address: order.delivery_address,
             email: order.email,
             phone: order.phone_number,
-            status: 'not_complete', // Default status for ready orders
+            status: order.order_status, // USE REAL STATUS FROM BACKEND
             dateOrdered: order.date_ordered,
             subtotal: parseFloat(order.subtotal),
             deliveryFee: parseFloat(order.delivery_fee),
@@ -128,18 +128,27 @@ function createOrderRow(order) {
     const statusBadge = document.createElement('span');
     statusBadge.className = 'badge';
 
+    // ✅ FIXED: Match exact backend status values
     switch(order.status) {
-        case 'completed':
+        case 'Completed':
             statusBadge.classList.add('badge-completed');
             statusBadge.textContent = 'Completed';
             break;
-        case 'return':
+        case 'Returned':
             statusBadge.classList.add('badge-return');
-            statusBadge.textContent = 'Return';
+            statusBadge.textContent = 'Returned';
+            break;
+        case 'In Transit':
+            statusBadge.classList.add('badge-transit');
+            statusBadge.textContent = 'In Transit';
+            break;
+        case 'Assigned':
+            statusBadge.classList.add('badge-assigned');
+            statusBadge.textContent = 'Assigned';
             break;
         default:
             statusBadge.classList.add('badge-not-complete');
-            statusBadge.textContent = 'Not Complete';
+            statusBadge.textContent = order.status; // Show actual status
     }
 
     orderRow.appendChild(orderInfo);
@@ -157,8 +166,8 @@ function createOrderRow(order) {
 // LOAD CURRENT ORDER (DEFAULT TO FIRST)
 // ============================================
 function loadCurrentOrder() {
-    const firstNotComplete = ordersData.find(order => order.status === 'not_complete');
-    const orderToDisplay = firstNotComplete || ordersData[0];
+    const firstAssigned = ordersData.find(order => order.status === 'Assigned');
+    const orderToDisplay = firstAssigned || ordersData[0];
     
     if (orderToDisplay) {
         displayCurrentOrder(orderToDisplay);
@@ -271,6 +280,12 @@ function createSummaryRow(label, amount, isBold = false) {
 // SETUP EVENT LISTENERS
 // ============================================
 function setupEventListeners() {
+    document.getElementById('transitBtn').addEventListener('click', function() {
+        if (currentOrderId) {
+            markOrderAsTransit(currentOrderId);
+        }
+    });
+
     document.getElementById('btnCompleted').addEventListener('click', function() {
         if (currentOrderId) {
             markOrderAsCompleted(currentOrderId);
@@ -286,6 +301,85 @@ function setupEventListeners() {
     document.querySelector('.btn-logout').addEventListener('click', function() {
         handleLogout();
     });
+}
+
+// ============================================
+// MARK ORDER AS IN TRANSIT
+// ============================================
+async function markOrderAsTransit(orderId) {
+    // Confirmation popup
+    const result = await Swal.fire({
+        title: 'Mark as In Transit?',
+        text: `Start delivery for Order #${orderId}?`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, mark as in transit',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) {
+        return;
+    }
+
+    // Show loading screen
+    Swal.fire({
+        title: 'Processing...',
+        text: 'Updating order status',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => Swal.showLoading()
+    });
+
+    try {
+        // Send request to backend
+        const response = await fetch('../controllers/delivery_controllers/delivery_update_status.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_number: orderId,
+                status: 'In Transit'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // ✅ FIXED: Use backend response status
+            const order = ordersData.find(o => o.id === orderId);
+            if (order) {
+                order.status = data.new_status; // Use status from backend
+            }
+
+            displayOrders();
+            loadCurrentOrder();
+
+            // Success popup
+            await Swal.fire({
+                title: 'Delivery Started!',
+                text: `Order #${orderId} is now in transit.`,
+                icon: 'success',
+                confirmButtonColor: '#3b82f6',
+                timer: 2000
+            });
+
+        } else {
+            throw new Error(data.message || 'Failed to update order');
+        }
+
+    } catch (error) {
+        console.error('Error updating order:', error);
+
+        Swal.fire({
+            title: 'Error!',
+            text: error.message || 'Failed to mark order as in transit. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#ef4444'
+        });
+    }
 }
 
 // ============================================
@@ -335,9 +429,11 @@ async function markOrderAsCompleted(orderId) {
         const data = await response.json();
         
         if (data.success) {
-            // Update local data
+            // ✅ FIXED: Use backend response status
             const order = ordersData.find(o => o.id === orderId);
-            if (order) order.status = 'completed';
+            if (order) {
+                order.status = data.new_status; // Use status from backend
+            }
             
             displayOrders();
             loadCurrentOrder();
@@ -414,9 +510,11 @@ async function markOrderAsReturn(orderId) {
         const data = await response.json();
         
         if (data.success) {
-            // Update local data
+            // ✅ FIXED: Use backend response status
             const order = ordersData.find(o => o.id === orderId);
-            if (order) order.status = 'return';
+            if (order) {
+                order.status = data.new_status; // Use status from backend
+            }
             
             displayOrders();
             loadCurrentOrder();
@@ -489,17 +587,30 @@ function showNoOrdersState() {
 // ============================================
 async function handleLogout() {
     const result = await Swal.fire({
-        title: 'Logout',
-        text: 'Are you sure you want to logout?',
-        icon: 'question',
+        title: 'Are you sure you want to logout?',
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
+        confirmButtonColor: '#f2d067',
+        cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, logout',
         cancelButtonText: 'Cancel'
     });
 
     if (result.isConfirmed) {
-        window.location.href = '../logout.php';
+        try {
+            const res = await fetch("../../controllers/logout.php", {
+                method: "POST"
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                console.log("✅ " + data.message);
+                window.location.href = "../admin_management_system/login.php";
+            } else {
+                console.log("⚠️ " + data.message);
+            }
+        } catch (err) {
+            console.error("Error:", err);
+        }
     }
 }
