@@ -495,13 +495,13 @@ function updateDashboardMetrics(stats, period) {
     document.getElementById('avgOrderValue').classList.remove('loading');
     
     // Update trend indicators
-    updateTrendIndicators(stats);
+    updateTrendIndicators(stats, period);
 }
 
-function updateTrendIndicators(stats) {
-    updateTrendElement('revenueChange', stats.revenueChange, 'revenue');
-    updateTrendElement('todayChange', stats.revenueChange, 'revenue');
-    updateTrendElement('avgChange', stats.avgChange, 'average');
+function updateTrendIndicators(stats, period) {
+    updateTrendElement('revenueChange', stats.revenueChange, period);
+    updateTrendElement('todayChange', stats.revenueChange, period);
+    updateTrendElement('avgChange', stats.avgChange, period);
 }
 
 function updateTrendElement(elementId, change, type) {
@@ -512,14 +512,32 @@ function updateTrendElement(elementId, change, type) {
     const isNeutral = change === 0;
     const isNegative = change < 0;
     
+    // Get current period for comparison text
+    const activeTab = document.querySelector('.tab-btn.active');
+    const period = activeTab ? activeTab.getAttribute('data-tab') : 'today';
+    
+    let comparisonText = '';
+    switch(period) {
+        case 'today':
+            comparisonText = 'yesterday';
+            break;
+        case 'weekly':
+            comparisonText = 'last week';
+            break;
+        case 'monthly':
+            comparisonText = 'last month';
+            break;
+        default:
+            comparisonText = 'previous period';
+    }
+    
     let text = '';
     if (isNeutral) {
         text = 'No change';
     } else {
         const arrow = isPositive ? 'up' : 'down';
         const changeText = Math.abs(change).toFixed(1);
-        const period = type === 'average' ? 'previous period' : 'yesterday';
-        text = `<i class="fa-solid fa-arrow-${arrow}"></i> ${changeText}% from ${period}`;
+        text = `<i class="fa-solid fa-arrow-${arrow}"></i> ${changeText}% from ${comparisonText}`;
     }
     
     // Set colors based on trend

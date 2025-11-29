@@ -126,7 +126,7 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
                     <p class="metric-subtext" id="topMenuSubtext">Most popular items today</p>
                     <div class="chart-placeholder">
                         <canvas id="topMenuCanvas"></canvas>
-                    </div>
+                    </divgit>
                 </div>
             </div>
 
@@ -250,10 +250,10 @@ if (!isset($_SESSION['staff_username']) || $_SESSION['staff_role'] !== 'admin') 
         <div class="filter-dropdown">
             <label for="menuSorter">Sort By:</label>
             <select id="menuSorter" class="filter-select">
-                <option value="name_asc">Name (Z-A)</option>
-                <option value="name_desc">Name (A-Z)</option>
-                <option value="price_asc">Price (High to Low)</option>
-                <option value="price_desc">Price (Low to High)</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+                <option value="price_asc">Price (Low to High)</option>
+                <option value="price_desc">Price (High to Low)</option>
             </select>
         </div>
     </div>
