@@ -181,7 +181,6 @@ if (dashboard) {
     }
 }
 
-// ADD THIS FUNCTION TO YOUR JAVASCRIPT FILE
 function printDashboardSummary() {
     // Get current tab period
     const activeTab = document.querySelector('.tab-btn.active');
@@ -189,163 +188,413 @@ function printDashboardSummary() {
     
     // Get current metrics
     const totalRevenue = document.getElementById('totalRevenue').textContent;
-    const todayRevenue = document.getElementById('todayRevenue').textContent;
+    const periodRevenue = document.getElementById('todayRevenue').textContent;
     const avgOrderValue = document.getElementById('avgOrderValue').textContent;
-    const revenueChange = document.getElementById('revenueChange').textContent;
-    const todayChange = document.getElementById('todayChange').textContent;
-    const avgChange = document.getElementById('avgChange').textContent;
+    const revenueChange = document.getElementById('revenueChange').innerHTML;
+    const periodChange = document.getElementById('todayChange').innerHTML;
+    const avgChange = document.getElementById('avgChange').innerHTML;
+
+    // Get period-specific information
+    let periodDisplay = '';
+    let comparisonPeriod = '';
+    let reportTitle = '';
     
-    // Get period title
-    const periodTitle = document.getElementById('periodTitle').textContent;
+    switch (period) {
+        case 'today':
+            periodDisplay = "Today";
+            comparisonPeriod = "yesterday";
+            reportTitle = "Daily Business Summary";
+            break;
+        case 'weekly':
+            periodDisplay = "This Week";
+            comparisonPeriod = "last week";
+            reportTitle = "Weekly Business Summary";
+            break;
+        case 'monthly':
+            periodDisplay = "This Month";
+            comparisonPeriod = "last month";
+            reportTitle = "Monthly Business Summary";
+            break;
+    }
+
+    // Get current date
+    const currentDate = new Date();
+    const formattedDate = currentDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+
+    // Get key insights data
+    const restockItems = document.getElementById('restockItemsContainer');
+    const topCustomers = document.getElementById('topCustomersContainer');
     
-    // Format period for display
-    const periodDisplay = period.charAt(0).toUpperCase() + period.slice(1);
+    // Count restock items
+    const restockCount = restockItems ? restockItems.querySelectorAll('.restock-item').length : 0;
     
-    // Create print window content
+    // Get top customer info
+    let topCustomerName = 'N/A';
+    let topCustomerAmount = '₱0';
+    if (topCustomers && topCustomers.querySelector('.customer-item')) {
+        const firstCustomer = topCustomers.querySelector('.customer-item');
+        const nameElement = firstCustomer.querySelector('.customer-item-header span:first-child');
+        const amountElement = firstCustomer.querySelector('.customer-amount');
+        if (nameElement) topCustomerName = nameElement.textContent;
+        if (amountElement) topCustomerAmount = amountElement.textContent;
+    }
+
+    // Extract trend values (remove HTML tags and get percentage)
+    const getTrendValue = (html) => {
+        const cleanText = html.replace(/<[^>]*>/g, '');
+        const match = cleanText.match(/([\d.]+)%/);
+        return match ? match[1] : '0';
+    };
+
+    const revenueTrend = getTrendValue(revenueChange);
+    const avgTrend = getTrendValue(avgChange);
+
+    // Determine trend direction and sentiment
+    const getTrendSentiment = (trend) => {
+        const value = parseFloat(trend);
+        if (value > 0) return { icon: '📈', class: 'positive', text: 'increase' };
+        if (value < 0) return { icon: '📉', class: 'negative', text: 'decrease' };
+        return { icon: '➡️', class: 'neutral', text: 'no change' };
+    };
+
+    const revenueSentiment = getTrendSentiment(revenueTrend);
+    const avgSentiment = getTrendSentiment(avgTrend);
+
+    // Create summary-style print content
     const printContent = `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Daven's Kitchenette - ${periodDisplay} Summary</title>
+            <title>Daven's Kitchenette - ${reportTitle}</title>
             <style>
                 body { 
-                    font-family: Arial, sans-serif; 
-                    margin: 40px;
+                    font-family: 'Segoe UI', Arial, sans-serif; 
+                    margin: 20px;
                     color: #333;
+                    line-height: 1.4;
                 }
                 .header { 
                     text-align: center; 
                     margin-bottom: 30px;
-                    border-bottom: 2px solid #062970;
                     padding-bottom: 20px;
+                    border-bottom: 3px solid #062970;
                 }
                 .header h1 { 
                     color: #062970; 
-                    margin: 0;
-                    font-size: 28px;
+                    margin: 0 0 10px 0;
+                    font-size: 24px;
                 }
-                .print-date { 
-                    text-align: right; 
+                .report-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 5px;
+                    font-size: 14px;
                     color: #666;
+                }
+                .period-badge {
+                    background: #062970;
+                    color: white;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                /* Executive Summary */
+                .executive-summary {
+                    background: #f8f9fa;
+                    padding: 20px;
+                    border-radius: 8px;
+                    margin-bottom: 25px;
+                    border-left: 4px solid #062970;
+                }
+                .summary-title {
+                    color: #062970;
+                    font-size: 18px;
+                    margin-bottom: 15px;
+                    font-weight: bold;
+                }
+                .summary-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 15px;
+                    margin-bottom: 20px;
+                }
+                .summary-card {
+                    text-align: center;
+                    padding: 15px;
+                    background: white;
+                    border-radius: 6px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .summary-value {
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: #062970;
+                    margin: 8px 0;
+                }
+                .summary-label {
+                    font-size: 12px;
+                    color: #666;
+                    margin-bottom: 5px;
+                }
+                .summary-trend {
+                    font-size: 11px;
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    display: inline-block;
+                }
+                .summary-trend.positive {
+                    background: #d4edda;
+                    color: #155724;
+                }
+                .summary-trend.negative {
+                    background: #f8d7da;
+                    color: #721c24;
+                }
+                .summary-trend.neutral {
+                    background: #e2e3e5;
+                    color: #383d41;
+                }
+                
+                /* Key Insights */
+                .insights-section {
+                    margin-bottom: 25px;
+                }
+                .insights-title {
+                    color: #062970;
+                    font-size: 16px;
+                    margin-bottom: 15px;
+                    font-weight: bold;
+                    border-bottom: 2px solid #f0f0f0;
+                    padding-bottom: 8px;
+                }
+                .insights-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                }
+                .insight-card {
+                    padding: 15px;
+                    background: white;
+                    border-radius: 6px;
+                    border: 1px solid #e0e0e0;
+                }
+                .insight-header {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 10px;
+                }
+                .insight-icon {
+                    font-size: 20px;
+                    margin-right: 10px;
+                }
+                .insight-title {
+                    font-weight: bold;
+                    color: #333;
+                    font-size: 14px;
+                }
+                .insight-content {
+                    font-size: 13px;
+                    color: #666;
+                }
+                .insight-value {
+                    font-weight: bold;
+                    color: #062970;
+                    margin: 5px 0;
+                }
+                .insight-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    font-size: 12px;
+                }
+                .insight-list li {
+                    padding: 3px 0;
+                    border-bottom: 1px solid #f5f5f5;
+                }
+                .insight-list li:last-child {
+                    border-bottom: none;
+                }
+                
+                /* Performance Highlights */
+                .highlights {
+                    background: #fff9e6;
+                    padding: 15px;
+                    border-radius: 6px;
+                    border-left: 4px solid #f2d067;
+                    margin-bottom: 20px;
+                }
+                .highlights-title {
+                    color: #856404;
+                    font-weight: bold;
                     margin-bottom: 10px;
                     font-size: 14px;
                 }
-                .metrics-grid { 
-                    display: grid; 
-                    grid-template-columns: repeat(3, 1fr); 
-                    gap: 20px; 
-                    margin-bottom: 30px;
+                .highlight-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                    font-size: 13px;
                 }
-                .metric-card { 
-                    border: 1px solid #ddd; 
-                    padding: 20px; 
-                    border-radius: 8px;
-                    text-align: center;
-                    background: #f9f9f9;
-                }
-                .metric-value { 
-                    font-size: 24px; 
-                    font-weight: bold; 
-                    color: #062970;
-                    margin: 10px 0;
-                }
-                .metric-label { 
-                    font-weight: bold; 
-                    color: #555;
-                    font-size: 16px;
-                }
-                .metric-change { 
-                    font-size: 14px; 
-                    color: #666;
-                    margin-top: 5px;
-                }
-                .charts-section { 
-                    margin-top: 30px;
-                }
-                .chart-placeholder {
-                    border: 1px dashed #ccc;
-                    padding: 40px;
-                    text-align: center;
-                    color: #666;
-                    margin: 10px 0;
-                    background: #f5f5f5;
-                }
-                .section-title {
-                    background: #062970;
-                    color: white;
-                    padding: 10px;
-                    margin: 20px 0 10px 0;
+                .highlight-bullet {
+                    color: #f2d067;
+                    margin-right: 8px;
                     font-weight: bold;
                 }
+                
+                /* Footer */
                 .footer {
-                    margin-top: 40px; 
-                    text-align: center; 
-                    color: #666; 
-                    font-size: 12px;
+                    margin-top: 30px;
+                    text-align: center;
+                    color: #666;
+                    font-size: 11px;
                     border-top: 1px solid #ddd;
-                    padding-top: 20px;
+                    padding-top: 15px;
                 }
+                .footer-note {
+                    font-style: italic;
+                    margin-top: 5px;
+                }
+                
                 @media print {
-                    body { margin: 20px; }
+                    body { margin: 15px; }
                     .no-print { display: none; }
+                }
+                @page {
+                    margin: 1cm;
+                    size: letter;
                 }
             </style>
         </head>
         <body>
-            <div class="print-date">Printed: ${new Date().toLocaleString()}</div>
-            
             <div class="header">
-                <h1>Daven's Kitchenette - ${periodDisplay} Dashboard Summary</h1>
-            </div>
-            
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Total Revenue</div>
-                    <div class="metric-value">${totalRevenue}</div>
-                    <div class="metric-change">${revenueChange}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">${periodTitle}</div>
-                    <div class="metric-value">${todayRevenue}</div>
-                    <div class="metric-change">${todayChange}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Avg Order Value</div>
-                    <div class="metric-value">${avgOrderValue}</div>
-                    <div class="metric-change">${avgChange}</div>
+                <h1>Daven's Kitchenette</h1>
+                <div class="report-info">
+                    <span><strong>${reportTitle}</strong></span>
+                    <span class="period-badge">${periodDisplay}</span>
+                    <span>${formattedDate}</span>
                 </div>
             </div>
             
-            <div class="section-title">Performance Charts</div>
-            
-            <div class="charts-section">
-                <div class="chart-placeholder">
-                    <strong>Revenue and Orders Chart</strong><br>
-                    <small>Visual representation of ${periodDisplay.toLowerCase()} performance</small>
-                </div>
-                
-                <div class="chart-placeholder">
-                    <strong>Top Menu Items</strong><br>
-                    <small>Most popular items for the selected period</small>
+            <!-- Executive Summary -->
+            <div class="executive-summary">
+                <div class="summary-title">📊 Executive Summary</div>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Total Revenue</div>
+                        <div class="summary-value">${totalRevenue}</div>
+                        <div class="summary-trend ${revenueSentiment.class}">
+                            ${revenueSentiment.icon} ${revenueTrend}% vs ${comparisonPeriod}
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Period Revenue</div>
+                        <div class="summary-value">${periodRevenue}</div>
+                        <div class="summary-trend ${revenueSentiment.class}">
+                            ${revenueSentiment.icon} ${revenueTrend}% vs ${comparisonPeriod}
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Avg Order Value</div>
+                        <div class="summary-value">${avgOrderValue}</div>
+                        <div class="summary-trend ${avgSentiment.class}">
+                            ${avgSentiment.icon} ${avgTrend}% vs ${comparisonPeriod}
+                        </div>
+                    </div>
                 </div>
             </div>
             
+            <!-- Key Insights -->
+            <div class="insights-section">
+                <div class="insights-title">💡 Key Business Insights</div>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <div class="insight-icon">📦</div>
+                            <div class="insight-title">Inventory Status</div>
+                        </div>
+                        <div class="insight-content">
+                            <div class="insight-value">${restockCount} items need restocking</div>
+                            ${restockCount > 0 ? 
+                                '<div class="insight-note">Monitor inventory levels to avoid stockouts</div>' :
+                                '<div class="insight-note">Inventory levels are healthy</div>'
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            <div class="insight-icon">👥</div>
+                            <div class="insight-title">Customer Spotlight</div>
+                        </div>
+                        <div class="insight-content">
+                            <div class="insight-value">${topCustomerName}</div>
+                            <div class="insight-note">Top customer with ${topCustomerAmount} in spending</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Highlights -->
+            <div class="highlights">
+                <div class="highlights-title">🚀 Performance Highlights</div>
+                <div class="highlight-item">
+                    <span class="highlight-bullet">•</span>
+                    <span>Revenue shows <strong>${revenueSentiment.text}</strong> compared to ${comparisonPeriod}</span>
+                </div>
+                <div class="highlight-item">
+                    <span class="highlight-bullet">•</span>
+                    <span>Average order value is <strong>${avgSentiment.text}</strong> by ${avgTrend}%</span>
+                </div>
+                ${restockCount > 0 ? `
+                <div class="highlight-item">
+                    <span class="highlight-bullet">•</span>
+                    <span><strong>Attention needed:</strong> ${restockCount} inventory items require restocking</span>
+                </div>
+                ` : `
+                <div class="highlight-item">
+                    <span class="highlight-bullet">•</span>
+                    <span><strong>Excellent:</strong> All inventory items are sufficiently stocked</span>
+                </div>
+                `}
+                <div class="highlight-item">
+                    <span class="highlight-bullet">•</span>
+                    <span>Business performance tracking for ${periodDisplay.toLowerCase()} period</span>
+                </div>
+            </div>
+            
+            <!-- Footer -->
             <div class="footer">
-                Generated by Daven's Kitchenette Management System
+                <div>Generated by Daven's Kitchenette Management System</div>
+                <div class="footer-note">This summary provides an overview of key business metrics and performance indicators</div>
             </div>
+            
+            <script>
+                // Auto-print and close
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                        setTimeout(function() {
+                            window.close();
+                        }, 1000);
+                    }, 500);
+                };
+            </script>
         </body>
         </html>
     `;
     
     // Open print window
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    const printWindow = window.open('', '_blank', 'width=900,height=700');
     printWindow.document.write(printContent);
     printWindow.document.close();
-    
-    // Wait for content to load then print
-    setTimeout(() => {
-        printWindow.print();
-    }, 250);
 }
 
 // Dashboard data loading functions
